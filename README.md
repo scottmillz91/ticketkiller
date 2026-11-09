@@ -266,6 +266,12 @@ a second letter.
 
 ### Setting it up
 
+**Full walkthrough: [docs/STRIPE-SETUP.md](docs/STRIPE-SETUP.md)** — includes a
+troubleshooting table, the test card, and the list of ways a live deployment
+goes wrong.
+
+The short version:
+
 1. **Stripe.** Create an account, then copy the secret key from Developers → API keys.
    Use `sk_test_…` first; live keys only once a real payment has worked end to end.
 2. **Netlify.** Add the repo as a new site. `netlify.toml` points it at
@@ -292,6 +298,16 @@ a second letter.
 ### Test card
 
 `4242 4242 4242 4242`, any future expiry, any CVC.
+
+### Checking a deployment
+
+```bash
+npm run check:stripe -- https://your-site.netlify.app
+```
+
+Checks the config, then calls all three endpoints and names what is wrong. Run it
+before trying a real payment; it catches the mistakes that otherwise only appear
+as a silent failure in someone's browser.
 
 ### What the tests cover
 

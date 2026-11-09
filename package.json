@@ -4,7 +4,8 @@
   "description": "TicketKiller UK — draft a formal appeal against a UK private parking charge. Static site, no build step.",
   "scripts": {
     "test": "node tools/smoke-test.js",
-    "serve": "python3 -m http.server 8000"
+    "serve": "python3 -m http.server 8000",
+    "check:stripe": "node tools/check-stripe-setup.js"
   },
   "repository": {
     "type": "git",
