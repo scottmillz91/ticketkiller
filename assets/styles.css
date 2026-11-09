@@ -309,23 +309,31 @@ h1, h2, h3 { text-wrap: balance; }
   gap: 6px 0;
 }
 .hero-proof li {
-  display: inline-flex;
-  align-items: center;
+  /* block, not flex: an inline-flex item wraps its children onto anonymous
+     flex lines, where the text node "First letter " loses its trailing space.
+     That is what produced "First letterfree". The <b> stays inline here. */
+  display: block;
   white-space: nowrap;
 }
 .hero-proof li + li::before {
-  content: "·";
-  margin: 0 12px;
+  /* The separator is rendered by the PREVIOUS item, not the next one. A
+     ::before on the wrapped item paints at the start of the new line, which
+     is how a dot ended up stranded at the beginning of line two. */
+  content: " · ";
   color: rgba(255,255,255,0.3);
+}
+/* The three phrases need 1122px on one line, and the container is capped at
+   1120px, so the dots can only ever appear on a wide desktop. Between 600px
+   and that point the separator painted on line two and before each wrapped
+   item, which read as stray characters. */
+@media (max-width: 1151px) {
+  .hero-proof { gap: 4px 0; }
+  .hero-proof li + li::before { content: none; }
 }
 .hero-proof b { color: var(--gold); font-weight: 700; }
 /* Below the point where all three phrases fit on one line, the separators
    are dropped rather than left to wrap. A bullet that lands at the start of
    line two reads as a stray character. */
-@media (max-width: 599px) {
-  .hero-proof { gap: 4px 16px; }
-  .hero-proof li + li::before { content: none; }
-}
 /* The headline has a fixed 16ch measure, which on a phone is wider than the
    screen until roughly 400px. Sized on 9.5vw it outgrew that box between 320
    and 396px and broke into three ragged lines ("Got a Parking / Ticket? Fight
