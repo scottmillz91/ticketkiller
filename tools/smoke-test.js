@@ -34,7 +34,10 @@ const configuredConfig = () => {
     .replace(/legalName:\s*"[^"]*"/, 'legalName: "Alex Driver"')
     .replace(/address:\s*"[^"]*"/, 'address: "1 Test Street, London, AB1 2CD"')
     .replace(/email:\s*"TODO[^"]*"/g, 'email: "payments@example-driver.co.uk"')
-    .replace(/email:\s*""/g, 'email: "payments@example-driver.co.uk"');
+    .replace(/email:\s*""/g, 'email: "payments@example-driver.co.uk"')
+    /* The suite must not depend on whose details are in the repo: assert
+       against the fixture's own identity, not the seller's real name. */
+    .replace(/tradingName:\s*"[^"]*"/, 'tradingName: "Test Parking Letters"');
 };
 const localServer = requestInterceptor((request) => {
   const rel = new URL(request.url).pathname.replace(/^\//, "") || "index.html";
@@ -271,13 +274,44 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
   check("no TODO placeholder is visible in the page", () => {
     assert(!/TODO/.test(document.documentElement.textContent), "a TODO stub is rendered");
   });
-  check("shipped config keeps selling off until details are filled", () => {
-    /* The file in the repo still has TODO placeholders, so a deploy that
-       forgets to fill them in cannot take money. */
-    const shipped = fs.readFileSync(path.join(root, "assets", "config.js"), "utf8");
-    assert(/legalName:\s*"TODO/.test(shipped), "legalName is not a placeholder");
-    assert(/address:\s*"TODO/.test(shipped), "address is not a placeholder");
-    assert(/email:\s*"TODO/.test(shipped), "email is not a placeholder");
+  await checkAsync("unfilled seller details keep selling off", async () => {
+    /* Not a text check on config.js: this builds a second page from a config
+       whose seller details are stubs and proves the gate actually closes —
+       no pay button visible, and the visitor is told why. */
+    const stub = fs.readFileSync(path.join(root, "assets", "config.js"), "utf8")
+      .replace(/(legalName:\s*)"[^"]*"/, '$1"TODO: your full name or company name"')
+      .replace(/(address:\s*)"[^"]*"/, '$1"TODO: your postal or service address"')
+      .replace(/(email:\s*)"[^"]*"/g, '$1"TODO: you@yourdomain.co.uk"');
+    const stubDom = new JSDOM(html, {
+      url: "http://localhost/",
+      runScripts: "dangerously",
+      pretendToBeVisual: true,
+      virtualConsole: new VirtualConsole(),
+      resources: {
+        interceptors: [requestInterceptor((request) => {
+          const rel = new URL(request.url).pathname.replace(/^\//, "") || "index.html";
+          if (rel === "assets/config.js") {
+            return new Response(stub, { status: 200, headers: { "Content-Type": "text/javascript" } });
+          }
+          const full = path.join(root, rel);
+          if (!fs.existsSync(full)) return new Response("not found", { status: 404 });
+          return new Response(fs.readFileSync(full), { status: 200, headers: { "Content-Type": MIME[path.extname(full)] || "application/octet-stream" } });
+        })]
+      },
+      beforeParse(window) {
+        window.scrollTo = () => {};
+        Object.defineProperty(window, "crypto", { value: webcrypto, configurable: true });
+        window.fetch = async () => ({ ok: false, status: 404, json: async () => ({}) });
+      }
+    });
+    for (let i = 0; i < 120 && stubDom.window.document.documentElement.getAttribute("data-tk-ready") !== "1"; i++) await sleep(25);
+    const d = stubDom.window.document;
+    assert(d.documentElement.getAttribute("data-tk-ready") === "1", "stub-config page never booted");
+    assert(d.documentElement.getAttribute("data-tk-selling") === "0", "selling is on with stub details");
+    const visible = [...d.querySelectorAll("[data-stripe-pay]")].filter((b) => !b.hidden);
+    assert(visible.length === 0, `${visible.length} pay button(s) still visible with stub details`);
+    assert(/Payments are switched off/i.test(d.body.textContent), "the visitor is not told why payments are off");
+    stubDom.window.close();
   });
   check("a forged success URL cannot unlock a letter", () => {
     /* The page is loaded with ?stripe=success&… in no test, which is the
@@ -399,9 +433,24 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(!/YOUR FULL LEGAL NAME|YOUR POSTAL ADDRESS/.test(html), "placeholder text still visible");
     assert(!/\[YOUR/.test(html), "bracketed placeholder still visible");
   });
+  check("a limited company publishes its registered number", () => {
+    /* Consumer law requires a company to state where it is registered and
+       its number wherever it identifies itself. config had the field but
+       nothing ever printed it. */
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    assert(/data-biz-company/.test(src), "company number is never rendered");
+    assert(/hasCompany/.test(src), "no flag for registered-company details");
+    const cfg = fs.readFileSync(path.join(root, "assets", "config.js"), "utf8");
+    assert(/companyNumber:/.test(cfg), "no companyNumber field");
+    assert(/jurisdiction:/.test(cfg), "no jurisdiction field");
+  });
   check("privacy page names the seller without placeholders", () => {
+    /* Identity, not branding: the controller line must name the trader and
+       the postal address. The brand name is not evidence of either. */
     const t = $("page-privacy").textContent;
-    assert(t.includes("TicketKiller UK"), "no trading name on privacy page");
+    assert(/data controller is/i.test(t), "the controller is not named");
+    assert(/Alex Driver/.test(t), "the registered trader is not named");
+    assert(/trading as/i.test(t), "the trading name is not tied to the trader");
     assert(!/TODO/.test(document.documentElement.textContent), "a TODO placeholder is visible");
     assert(!/\[YOUR/.test(t), "bracketed placeholder on privacy page");
   });

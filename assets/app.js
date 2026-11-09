@@ -91,6 +91,12 @@
       get hasOperator() {
         return this.hasLegalName && this.hasAddress && this.hasEmail;
       },
+      /* Registered-company details, kept separate from hasOperator so a
+         sole trader is never prompted for a company number. */
+      get hasCompany() {
+        const b = CFG.business || {};
+        return this.hasLegalName && filled(b.companyNumber);
+      },
       // Money may only move when we can identify the seller AND the payment
       // state can be confirmed by the server. client-only payment is a bug,
       // not a shortcut: the return URL proves nothing.
@@ -1688,12 +1694,19 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
 
     $$("[data-biz-name]").forEach((el) => { el.textContent = name; });
 
-    // Full sentences, composed so nothing renders as "address is ."
+    /* Full sentences, composed so nothing renders as "address is .".
+       The controller is the legal person, which is not the brand: for a sole
+       trader it is the individual, and naming only the brand would not
+       satisfy the transparency obligation. */
     const controller = $("controllerLine");
     if (controller) {
-      controller.textContent = READY.hasAddress
-        ? `The data controller is ${name}, of ${b.address}. Contact: ${READY.contactEmail}.`
-        : `${name} is the data controller.${READY.hasEmail ? ` Contact: ${READY.contactEmail}.` : ""}`;
+      const who = READY.hasLegalName ? b.legalName : name;
+      const tradeName_ = (b.businessName || "").trim() || b.tradingName || "";
+      const alsoTrades = READY.hasLegalName && tradeName_ && tradeName_ !== b.legalName
+        ? ` (trading as ${tradeName_})` : "";
+      const addr = READY.hasAddress ? `, of ${b.address}` : "";
+      const mail = READY.hasEmail ? ` Contact: ${READY.contactEmail}.` : "";
+      controller.textContent = `The data controller is ${who}${alsoTrades}${addr}.${mail}`;
     }
     const termsContact = $("termsContactLine");
     if (termsContact) {
@@ -1701,10 +1714,52 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
       termsContact.textContent = READY.hasEmail ? `Email ${READY.contactEmail}, or use the ` : "Use the ";
       if (btn) { termsContact.appendChild(btn); termsContact.append(" to reach us."); }
     }
+    /* A limited company must state its registered name, jurisdiction and
+       number wherever it identifies itself. Composed once and reused. */
+    const companyNo = (b.companyNumber || "").trim();
+    const jurisdiction = (b.jurisdiction || "").trim();
+    const companyLine = READY.hasCompany
+      ? `${b.legalName}, registered in ${jurisdiction || "England and Wales"}${companyNo ? `, company number ${companyNo}` : ""}`
+      : "";
+
     const footerLegal = $("footerLegal");
     if (footerLegal) {
-      footerLegal.textContent = READY.hasLegalName && b.legalName !== name ? ` · ${b.legalName}` : "";
+      footerLegal.textContent = companyLine
+        ? ` · ${companyLine}`
+        : (READY.hasLegalName && b.legalName !== name ? ` · ${b.legalName}` : "");
     }
+
+    /* Terms page. Built from what is actually known and hidden entirely
+       rather than rendered half-written. */
+    const termsCompany = $("termsCompanyLine");
+    if (termsCompany) {
+      /* Built from what is actually known, and hidden entirely rather than
+         rendered half-written. No pronouns: the operator may be a person or
+         a company, and "it"/"they" is wrong for one of them. */
+      const parts = [];
+      if (READY.hasLegalName) {
+        let s1 = `${b.legalName} is the operator of this service`;
+        if (READY.hasCompany) {
+          const bits = [`registered in ${jurisdiction || "England and Wales"}`];
+          if (companyNo) bits.push(`company number ${companyNo}`);
+          s1 += `, ${bits.join(", ")}`;
+        } else {
+          /* A sole trader is a person. Without this the page would imply the
+             product brand is the legal entity. */
+          const tradeName = (b.businessName || "").trim() || name;
+          if (tradeName && tradeName !== b.legalName) s1 += `, trading as ${tradeName}`;
+        }
+        parts.push(s1);
+      }
+      if (READY.hasAddress) {
+        parts.push(`${READY.hasCompany ? "Registered address" : "Postal address"}: ${b.address}`);
+      }
+      if (READY.hasEmail) parts.push(`Contact: ${READY.contactEmail}`);
+      termsCompany.textContent = parts.length ? `${parts.join(". ")}.` : "";
+      termsCompany.hidden = !parts.length;
+    }
+
+    $$("[data-biz-company]").forEach((el) => { el.textContent = companyLine; });
 
     // Only fill spans that have a real value, and drop rows left empty.
     $$("[data-biz-legal]").forEach((el) => { el.textContent = READY.hasLegalName ? b.legalName : name; });
