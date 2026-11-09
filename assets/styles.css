@@ -766,6 +766,62 @@ h1, h2, h3 { text-wrap: balance; }
    rules above, so this must not also apply text-decoration. */
 .stat-src { color: var(--sky); font-size: 11px; }
 
+/* --- Details form progress ---
+   Answers "how much more of this is there?" before the visitor starts
+   rather than after they abandon. */
+.form-progress {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.form-progress-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.form-progress-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.form-progress-pct {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--blue-2);
+  font-variant-numeric: tabular-nums;
+}
+.form-progress-bar {
+  height: 8px;
+  border-radius: 99px;
+  background: #e2e9f3;
+  overflow: hidden;
+  margin: 9px 0 8px;
+}
+.form-progress-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--blue), var(--sky));
+  transition: width .25s ease;
+}
+.form-progress-bar.is-complete i {
+  background: linear-gradient(90deg, #0b8f63, #34c48f);
+}
+.form-progress-hint {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .form-progress-bar i { transition: none; }
+}
+
 /* --- Deadline tracker --- */
 .deadline-card {
   background: #fff;

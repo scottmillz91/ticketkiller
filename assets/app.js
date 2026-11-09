@@ -359,7 +359,7 @@
     contact: ["Contact — TicketKiller UK", "Questions about a letter, a payment or your data."]
   };
 
-  function setPageMeta(page) {
+  function setPageMeta(page, opts = {}) {
     const entry = PAGE_TITLES[page];
     if (entry) {
       document.title = entry[0];
@@ -367,6 +367,47 @@
       if (md) md.setAttribute("content", entry[1]);
       const ogt = document.querySelector('meta[property="og:title"]');
       if (ogt) ogt.setAttribute("content", entry[0]);
+    }
+
+    /* Operator guides are the pages people arrive on from a search, so each
+       gets its own preview card and a canonical that matches what is in the
+       address bar. Left alone, every page shared one card and every page
+       claimed to be the home page. */
+    const guide = page === "guide" ? (opts.guide || opts.hash || "") : "";
+    const slug = guide && GUIDE_SLUGS.includes(guide) ? guide : "";
+    const base = "https://scottmillz91.github.io/ticketkiller/";
+
+    const setMeta = (sel, attr, value) => {
+      const el = document.querySelector(sel);
+      if (el && value) el.setAttribute(attr, value);
+    };
+
+    if (slug) {
+      const g = GUIDES.find((x) => x.slug === slug);
+      const title = `How to appeal a ${g.operator} parking charge — TicketKiller UK`;
+      const desc = `The appeal route, the deadline that applies to ${g.operator}, and the grounds that most often decide these cases. First appeal free.`;
+      const url = `${base}#guide/${slug}`;
+      if (entry) {
+        document.title = title;
+        setMeta('meta[name="description"]', "content", desc);
+        setMeta('meta[property="og:title"]', "content", title);
+        setMeta('meta[property="og:description"]', "content", desc);
+        setMeta('meta[name="twitter:title"]', "content", title);
+        setMeta('meta[name="twitter:description"]', "content", desc);
+      }
+      setMeta('link[rel="canonical"]', "href", url);
+      setMeta('meta[property="og:url"]', "content", url);
+      const img = `${base}assets/og/guide-${slug}.jpg`;
+      setMeta('meta[property="og:image"]', "content", img);
+      setMeta('meta[name="twitter:image"]', "content", img);
+    } else {
+      /* Back to the site default, so a guide card never leaks onto another
+         page after client-side navigation. */
+      setMeta('link[rel="canonical"]', "href", base);
+      setMeta('meta[property="og:url"]', "content", base);
+      const img = `${base}assets/og-image.jpg`;
+      setMeta('meta[property="og:image"]', "content", img);
+      setMeta('meta[name="twitter:image"]', "content", img);
     }
   }
 
@@ -377,14 +418,14 @@
       name = "auth";
     }
     $$(".page").forEach((p) => p.classList.toggle("active", p.dataset.page === name));
-    setPageMeta(name);
+    setPageMeta(name, opts);
     document.body.classList.remove("nav-open");
     const nav = $("mobileNav");
     if (nav) nav.setAttribute("hidden", "");
     const mb = $("menuBtn");
     if (mb) { mb.setAttribute("aria-expanded", "false"); mb.setAttribute("aria-label", "Open menu"); }
 
-    if (name === "details") { syncPaywall(); renderDeadlines(); renderOperatorIntel(); }
+    if (name === "details") { syncPaywall(); renderDeadlines(); renderOperatorIntel(); updateFormProgress(); }
     if (name === "evidence") renderEvidence();
     if (name === "history") renderHistory();
     if (name === "operators") renderOperatorGrid();
@@ -1082,6 +1123,8 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
   /* ---------------------------------------------------------
      SEO landing pages
      --------------------------------------------------------- */
+  /* Guide slugs, derived once from GUIDES below. Declared with the data so
+     it cannot fall out of step with it. */
   const GUIDES = [
     { slug: "parkingeye", operator: "ParkingEye Ltd", place: "a retail or motorway services car park", basis: "ANPR cameras" },
     { slug: "euro-car-parks", operator: "Euro Car Parks", place: "a retail or town-centre car park", basis: "ANPR cameras or a windscreen ticket" },
@@ -1091,6 +1134,7 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     { slug: "excel", operator: "Excel Parking", place: "an urban retail car park", basis: "an attendant-issued ticket or ANPR" },
     { slug: "apcoa", operator: "APCOA Parking", place: "a railway station or airport", basis: "ANPR cameras or barrier records" }
   ];
+  const GUIDE_SLUGS = GUIDES.map((g) => g.slug);
 
   function renderGuide(slug) {
     const g = GUIDES.find((x) => x.slug === slug);
@@ -1601,6 +1645,62 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     else showPage("home", { instant });
   }
 
+  /* ---------------------------------------------------------
+     Form progress
+     ---------------------------------------------------------
+     The details form is a dozen fields copied off a paper ticket, and the
+     commonest way to lose someone is that they cannot tell how close they
+     are to finishing. This counts the *required* fields, so the number can
+     never drift from what the submit handler validates.
+     --------------------------------------------------------- */
+  const REQUIRED_FIELDS = ["fOperator", "fRef", "fDate", "fAmount", "fVrm", "fName"];
+
+  function updateFormProgress() {
+    const label = $("formProgressLabel");
+    const pctEl = $("formProgressPct");
+    const bar = $("formProgressBar");
+    const hint = $("formProgressHint");
+    if (!label || !bar) return;
+
+    /* On first paint the required count is stated before anything is filled,
+       so read it from the same list rather than from a hard-coded string. */
+    if (!updateFormProgress.initialised) {
+      updateFormProgress.initialised = true;
+      label.textContent = `${REQUIRED_FIELDS.length} required fields — 0 done`;
+    }
+
+    const done = REQUIRED_FIELDS.filter((id) => val(id)).length;
+    const total = REQUIRED_FIELDS.length;
+    const pct = Math.round((done / total) * 100);
+
+    label.textContent = done === total
+      ? "All required fields done"
+      : `${total - done} required field${total - done === 1 ? "" : "s"} left`;
+    if (pctEl) pctEl.textContent = `${pct}%`;
+    bar.setAttribute("aria-valuenow", String(pct));
+    const fill = bar.querySelector("i");
+    if (fill) fill.style.width = `${pct}%`;
+    bar.classList.toggle("is-complete", done === total);
+
+    if (hint) {
+      if (done === total) {
+        hint.textContent = "Ready — generate the letter and check the deadline it shows.";
+      } else if (!val("fOperator")) {
+        hint.textContent = "Start with the operator and the notice number — both are on the front of the PCN.";
+      } else if (!val("fRef")) {
+        hint.textContent = "The PCN reference is usually at the top right of the notice.";
+      } else if (!val("fDate")) {
+        hint.textContent = "Use the date printed on the notice, not the date you received it.";
+      } else if (!val("fAmount")) {
+        hint.textContent = "The amount demanded is on the notice. Use the full charge, not the reduced rate.";
+      } else if (!val("fVrm")) {
+        hint.textContent = "The registration on the notice, as printed.";
+      } else {
+        hint.textContent = "Your name goes on the letter as the registered keeper.";
+      }
+    }
+  }
+
   function bindDetails() {
     const form = $("ticketForm");
     if (!form) return;
@@ -1610,6 +1710,7 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
       if (!el) return;
       el.addEventListener("input", () => {
         saveDraft();
+        updateFormProgress();
         if (id === "fOperator") renderOperatorIntel();
         if (["fDate", "fAppealDays", "fDiscountDays", "fTicketType", "fNtkDate"].includes(id)) renderDeadlines();
         if ($("page-results").classList.contains("active")) {

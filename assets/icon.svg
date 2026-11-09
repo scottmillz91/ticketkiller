@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="TicketKiller">
+  <rect width="512" height="512" rx="112" fill="#1B6BFF"/>
+  <g fill="#FFFFFF">
+    <rect x="128" y="176" width="256" height="32" rx="16"/>
+    <rect x="128" y="240" width="160" height="32" rx="16"/>
+    <rect x="128" y="304" width="256" height="32" rx="16"/>
+  </g>
+  <path d="M112 128 L400 384" stroke="#E8B931" stroke-width="38" stroke-linecap="round"/>
+</svg>

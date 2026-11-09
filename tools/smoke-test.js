@@ -271,6 +271,46 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(paid ? shown === btns.length : shown === 0,
       `${shown} of ${btns.length} pay buttons visible while selling=${paid ? "on" : "off"}`);
   });
+  check("details form reports how much is left to fill", () => {
+    /* The form is a dozen fields copied off a paper ticket; the commonest
+       way to lose someone is that they cannot tell how close they are to
+       finishing. The count must come from the same list the submit handler
+       validates, or it will drift. */
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    const consts = /const REQUIRED_FIELDS = \[([^\]]+)\]/.exec(src);
+    assert(consts, "no single source of truth for required fields");
+    const ids = consts[1].match(/"f[A-Za-z]+"/g).map((x) => x.replace(/"/g, ""));
+    assert(ids.length >= 5, `only ${ids.length} required fields counted`);
+    const submitCheck = src.slice(src.indexOf('form.addEventListener("submit"'), src.indexOf("consumeGenerate();"));
+    ids.forEach((id) => assert(submitCheck.includes(`"${id}"`), `${id} is counted but not validated on submit`));
+    assert(/aria-valuenow/.test(src), "the progress bar is not exposed to assistive tech");
+  });
+  check("icons and manifest are real files, not a data URI", () => {
+    /* A data-URI favicon cannot be cached, is dropped by older Safari, and is
+       ignored by home-screen implementations. */
+    assert(!/rel="icon" href="data:/.test(html), "favicon is still a data URI");
+    ["assets/favicon.ico", "assets/icon-192.png", "assets/icon-512.png",
+     "assets/apple-touch-icon.png", "assets/icon-maskable-512.png",
+     "manifest.webmanifest"].forEach((f) => {
+      assert(fs.existsSync(path.join(root, f)), `${f} is referenced but missing`);
+    });
+    const mf = JSON.parse(fs.readFileSync(path.join(root, "manifest.webmanifest"), "utf8"));
+    assert(mf.name && mf.short_name, "manifest lacks a name");
+    assert(mf.start_url && mf.display === "standalone", "manifest is not installable");
+    assert(mf.icons.some((i) => i.purpose === "maskable"), "no maskable icon for Android");
+    mf.icons.forEach((i) => assert(fs.existsSync(path.join(root, i.src)), `${i.src} missing`));
+  });
+  check("each operator guide gets its own preview card", () => {
+    /* Guides are the pages people arrive on from a search. Sharing one card
+       made every result look identical. */
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    assert(/setPageMeta\(name, opts\)/.test(src), "the guide is not passed to the metadata");
+    assert(/assets\/og\/guide-\$\{slug\}\.jpg/.test(src), "no per-guide image is chosen");
+    assert(/rel="canonical"/.test(src), "the canonical URL is never updated");
+    ["parkingeye", "euro-car-parks", "ukpc", "ncp", "smart-parking", "excel", "apcoa"]
+      .forEach((slug) => assert(fs.existsSync(path.join(root, `assets/og/guide-${slug}.jpg`)),
+        `missing preview card for ${slug}`));
+  });
   check("a paused seller publishes no address and takes no money", () => {
     /* Selling is paused by leaving business.address empty. Two things must
        both hold: no street address reaches the browser, and no pay control

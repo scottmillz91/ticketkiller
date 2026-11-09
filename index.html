@@ -24,7 +24,16 @@
   <meta name="twitter:description" content="Legal grounds, a formal appeal letter and a deadline tracker for UK private parking charges. First appeal free." />
   <meta name="twitter:image" content="https://scottmillz91.github.io/ticketkiller/assets/og-image.jpg" />
 
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231B6BFF'/%3E%3Cpath d='M8 11h16v2H8zm0 4h10v2H8zm0 4h16v2H8z' fill='white'/%3E%3Cpath d='M7 8l18 16' stroke='%23E8B931' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <!-- Real icon files rather than a data URI: a data URI cannot be cached,
+       is ignored by some bookmark and home-screen implementations, and is
+       dropped entirely by older Safari. -->
+  <link rel="icon" href="assets/favicon.ico" sizes="any" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-title" content="TicketKiller" />
+  <meta name="application-name" content="TicketKiller" />
   <link rel="preload" href="assets/fonts/figtree-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="assets/styles.css" />
 
@@ -276,6 +285,15 @@
         </div>
 
         <form id="ticketForm" class="facts-card" novalidate>
+          <div class="form-progress" id="formProgress">
+            <div class="form-progress-row">
+              <span class="form-progress-label" id="formProgressLabel">0 of 6 required fields</span>
+              <span class="form-progress-pct" id="formProgressPct">0%</span>
+            </div>
+            <div class="form-progress-bar" role="progressbar" aria-labelledby="formProgressLabel"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="formProgressBar"><i></i></div>
+            <p class="form-progress-hint" id="formProgressHint">Start with the operator and the notice number — both are on the front of the PCN.</p>
+          </div>
           <div class="facts-grid">
             <label>Operator
               <input id="fOperator" list="operatorList" autocomplete="organization" placeholder="e.g. ParkingEye, UKPC, NCP" required />
