@@ -1382,32 +1382,57 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
      Business identity and readiness
      --------------------------------------------------------- */
   function renderBusiness() {
-    const name = (CFG.business && CFG.business.tradingName) || "TicketKiller UK";
+    const b = CFG.business || {};
+    const name = b.tradingName || "TicketKiller UK";
+
     $$("[data-biz-name]").forEach((el) => { el.textContent = name; });
-    $$("[data-biz-legal]").forEach((el) => {
-      el.textContent = READY.hasLegalName ? CFG.business.legalName : name;
-    });
-    $$("[data-biz-address]").forEach((el) => {
-      el.textContent = READY.hasAddress ? CFG.business.address : "";
-    });
-    $$("[data-biz-email], [data-contact-email]").forEach((el) => {
-      el.textContent = READY.hasEmail ? READY.contactEmail : "";
-    });
-    $$("[data-contact-time]").forEach((el) => {
-      el.textContent = (CFG.contact && CFG.contact.responseTime) || "within 2 working days";
+
+    // Full sentences, composed so nothing renders as "address is ."
+    const controller = $("controllerLine");
+    if (controller) {
+      controller.textContent = READY.hasAddress
+        ? `The data controller is ${name}, of ${b.address}. Contact: ${READY.contactEmail}.`
+        : `${name} is the data controller.${READY.hasEmail ? ` Contact: ${READY.contactEmail}.` : ""}`;
+    }
+    const termsContact = $("termsContactLine");
+    if (termsContact) {
+      const btn = termsContact.querySelector("button");
+      termsContact.textContent = READY.hasEmail ? `Email ${READY.contactEmail}, or use the ` : "Use the ";
+      if (btn) { termsContact.appendChild(btn); termsContact.append(" to reach us."); }
+    }
+    const footerLegal = $("footerLegal");
+    if (footerLegal) {
+      footerLegal.textContent = READY.hasLegalName && b.legalName !== name ? ` · ${b.legalName}` : "";
+    }
+
+    // Only fill spans that have a real value, and drop rows left empty.
+    $$("[data-biz-legal]").forEach((el) => { el.textContent = READY.hasLegalName ? b.legalName : name; });
+    $$("[data-biz-address]").forEach((el) => { el.textContent = READY.hasAddress ? b.address : ""; });
+    $$("[data-biz-email], [data-contact-email]").forEach((el) => { el.textContent = READY.hasEmail ? READY.contactEmail : ""; });
+    $$("[data-contact-time]").forEach((el) => { el.textContent = (CFG.contact && CFG.contact.responseTime) || "within 2 working days"; });
+
+    $$("[data-row]").forEach((row) => {
+      const span = row.querySelector("span");
+      const empty = !span || !span.textContent.trim();
+      row.hidden = empty;
     });
 
-    // Hide empty contact rows rather than printing a label with nothing after it.
-    $$("[data-biz-address], [data-biz-email], [data-biz-legal]").forEach((el) => {
-      if (!el.textContent.trim()) el.hidden = true;
-    });
-
-    // The banner is for the operator, not the public. Only show it to a local
-    // visitor on a dev host; never on the deployed site.
+    // Setup guidance for the operator only. Injected locally so the text
+    // never ships in the deployed HTML.
     const isLocal = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/.test(location.hostname) || location.protocol === "file:";
-    $$("[data-setup-warning]").forEach((el) => {
-      el.hidden = !isLocal || READY.hasOperator;
-    });
+    if (isLocal && !READY.hasOperator) {
+      const msg = document.createElement("div");
+      msg.className = "legal-warning";
+      msg.innerHTML = "<strong>Setup needed.</strong> Fill in <code>business.legalName</code>, " +
+        "<code>address</code> and <code>email</code> in <code>assets/config.js</code>. " +
+        "Until then payments stay switched off. This notice only appears locally.";
+      ["page-privacy", "page-terms"].forEach((id) => {
+        const page = $(id);
+        if (!page) return;
+        const title = page.querySelector("h1");
+        if (title && title.parentNode) title.parentNode.insertBefore(msg.cloneNode(true), title.nextSibling);
+      });
+    }
   }
 
   function applyReadiness() {
