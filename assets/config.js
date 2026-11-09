@@ -65,10 +65,10 @@ window.TK_CONFIG = {
   payments: {
     provider: "stripe",
     enabled: true,
-    // Where the Netlify functions live. Set this after the first deploy,
-    // e.g. "https://ticketkiller-payments.netlify.app". Empty means
-    // "same origin", which is only correct when the site itself is on
-    // Netlify rather than GitHub Pages.
+    // Where the Netlify functions live. Keep the absolute URL: the site is
+    // published to more than one host (GitHub Pages and the Netlify deploy),
+    // and an empty value means "same origin", which only works on Netlify.
+    // The functions accept calls from any address listed in their SITE_URL.
     apiBase: "https://rococo-malasada-aa1a7f.netlify.app",
     // Kept in sync with PRICE_PENCE in netlify/functions/checkout.js.
     // The server is authoritative; this is only for display.

@@ -40,32 +40,48 @@ function rateLimited(ip) {
   return list.length > MAX_PER_WINDOW;
 }
 
-const json = (statusCode, body) => ({
+const { resolve: resolveSite } = require("../lib/site");
+
+const json = (statusCode, body, requestOrigin) => ({
   statusCode,
   headers: {
     "Content-Type": "application/json",
     "Cache-Control": "no-store",
-    /* The site is served from GitHub Pages, so the browser will make a
-       cross-origin request to this function. Allow just that origin. */
-    "Access-Control-Allow-Origin": process.env.SITE_URL || "*",
+    /* The site is served from GitHub Pages, so the browser makes a
+       cross-origin request. Only the configured origin is allowed. */
+    "Access-Control-Allow-Origin": resolveSite(requestOrigin).allow || "*",
     "Vary": "Origin"
   },
   body: JSON.stringify(body)
 });
 
 exports.handler = async (event) => {
+  const requestOrigin = (event.headers && (event.headers.origin || event.headers.Origin)) || "";
+  const site = resolveSite(requestOrigin);
+
   if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 204, headers: { "Access-Control-Allow-Origin": process.env.SITE_URL || "*", "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Allow-Methods": "POST, OPTIONS" }, body: "" };
+    return {
+      statusCode: 204,
+      headers: {
+        "Access-Control-Allow-Origin": site.allow || "*",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Vary": "Origin"
+      },
+      body: ""
+    };
   }
-  if (event.httpMethod !== "POST") return json(405, { error: "Use POST" });
+  if (event.httpMethod !== "POST") return json(405, { error: "Use POST" }, requestOrigin);
 
   const secret = process.env.STRIPE_SECRET_KEY;
-  const site = process.env.SITE_URL;
-  if (!secret) return json(500, { error: "Payments are not configured on the server." });
-  if (!site) return json(500, { error: "SITE_URL is not configured on the server." });
+  if (!secret) return json(500, { error: "Payments are not configured on the server." }, requestOrigin);
+  if (!site.base) return json(500, { error: "SITE_URL is not configured on the server." }, requestOrigin);
+  /* A payment must be able to return the visitor to the site. Without this
+     a checkout is created that nobody can be sent back from. */
+  const returnBase = site.base;
 
   const ip = (event.headers["x-nf-client-connection-ip"] || event.headers["client-ip"] || "unknown");
-  if (rateLimited(ip)) return json(429, { error: "Too many attempts. Wait a minute and try again." });
+  if (rateLimited(ip)) return json(429, { error: "Too many attempts. Wait a minute and try again." }, requestOrigin);
 
   let payload = {};
   try { payload = JSON.parse(event.body || "{}"); } catch { /* fall through to the check below */ }
@@ -74,7 +90,7 @@ exports.handler = async (event) => {
      account here, not a Stripe customer, so it is validated lightly and
      carried through as metadata. */
   const email = typeof payload.email === "string" ? payload.email.trim().slice(0, 200) : "";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(400, { error: "A valid email is required." });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(400, { error: "A valid email is required." }, requestOrigin);
 
   try {
     const stripe = Stripe(secret);
@@ -92,8 +108,8 @@ exports.handler = async (event) => {
          Both success_url params and client-side state can be forged. */
       metadata: { tk_email: email },
       customer_email: email,
-      success_url: `${site}/?stripe=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${site}/?stripe=cancel`,
+      success_url: `${returnBase}/?stripe=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${returnBase}/?stripe=cancel`,
       /* One letter per payment, and the letter is not shipped by email,
          so no shipping address is wanted. */
       billing_address_collection: "auto"
@@ -102,11 +118,11 @@ exports.handler = async (event) => {
       idempotencyKey: `tk-${email}-${Date.now()}`
     });
 
-    return json(200, { url: session.url });
+    return json(200, { url: session.url }, requestOrigin);
   } catch (err) {
     /* Log the real reason server-side; never return Stripe's message to a
        client, since it can echo key fragments. */
     console.error("stripe checkout failed:", err && err.message);
-    return json(502, { error: "Could not start checkout. Please try again." });
+    return json(502, { error: "Could not start checkout. Please try again." }, requestOrigin);
   }
 };

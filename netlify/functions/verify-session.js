@@ -32,20 +32,23 @@ function rateLimited(ip) {
   return list.length > MAX_PER_WINDOW;
 }
 
-const json = (statusCode, body) => ({
+const { resolve: resolveSite } = require("../lib/site");
+
+const json = (statusCode, body, requestOrigin) => ({
   statusCode,
   headers: {
     "Content-Type": "application/json",
     "Cache-Control": "no-store",
-    "Access-Control-Allow-Origin": process.env.SITE_URL || "*",
+    "Access-Control-Allow-Origin": resolveSite(requestOrigin).allow || "*",
     "Vary": "Origin"
   },
   body: JSON.stringify(body)
 });
 
 exports.handler = async (event) => {
+  const requestOrigin = (event.headers && (event.headers.origin || event.headers.Origin)) || "";
   if (event.httpMethod === "OPTIONS") {
-    const origin = process.env.SITE_URL || "*";
+    const origin = resolveSite(requestOrigin).allow || "*";
     return {
       statusCode: 204,
       headers: {
@@ -56,13 +59,13 @@ exports.handler = async (event) => {
       body: ""
     };
   }
-  if (event.httpMethod !== "POST") return json(405, { error: "Use POST" });
+  if (event.httpMethod !== "POST") return json(405, { error: "Use POST" }, requestOrigin);
 
   const secret = process.env.STRIPE_SECRET_KEY;
-  if (!secret) return json(500, { error: "Payments are not configured on the server." });
+  if (!secret) return json(500, { error: "Payments are not configured on the server." }, requestOrigin);
 
   const ip = event.headers["x-nf-client-connection-ip"] || event.headers["client-ip"] || "unknown";
-  if (rateLimited(ip)) return json(429, { error: "Too many attempts. Wait a minute." });
+  if (rateLimited(ip)) return json(429, { error: "Too many attempts. Wait a minute." }, requestOrigin);
 
   let payload = {};
   try { payload = JSON.parse(event.body || "{}"); } catch { /* checked below */ }
@@ -70,7 +73,7 @@ exports.handler = async (event) => {
   const id = typeof payload.session_id === "string" ? payload.session_id.trim() : "";
   /* Stripe session ids look like cs_test_… / cs_live_… . Reject anything
      that could not be one before it reaches the API. */
-  if (!/^cs_(test|live)_[A-Za-z0-9]{10,200}$/.test(id)) return json(400, { error: "Invalid session id." });
+  if (!/^cs_(test|live)_[A-Za-z0-9]{10,200}$/.test(id)) return json(400, { error: "Invalid session id." }, requestOrigin);
 
   try {
     const stripe = Stripe(secret);
@@ -80,7 +83,7 @@ exports.handler = async (event) => {
        can exist, and be complete, without money having moved. */
     const paid = session.payment_status === "paid" || session.payment_status === "no_payment_required";
     if (!paid || session.status !== "complete") {
-      return json(200, { paid: false, status: session.payment_status });
+      return json(200, { paid: false, status: session.payment_status }, requestOrigin);
     }
 
     return json(200, {
@@ -89,11 +92,11 @@ exports.handler = async (event) => {
       amount: session.amount_total,
       currency: session.currency,
       livemode: session.livemode
-    });
+    }, requestOrigin);
   } catch (err) {
     /* A bad id, a deleted session and a Stripe outage are not the same
        thing, but none of them is a payment. */
     console.error("verify-session failed:", err && err.message);
-    return json(200, { paid: false, error: "Could not verify this payment." });
+    return json(200, { paid: false, error: "Could not verify this payment." }, requestOrigin);
   }
 };
