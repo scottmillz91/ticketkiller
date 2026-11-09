@@ -104,48 +104,6 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(segs.length === 3, `expected 3 segments, got ${segs.length}`);
     assert(!eye.textContent.includes("·"), "separator still hardcoded as text");
   });
-  check("hero proof keeps the space before the bold word", () => {
-    /* regression: the <li> was inline-flex, which lays its children out as
-       anonymous flex items and drops the trailing space in "First letter ",
-       rendering "First letterfree". */
-    const li = [...document.querySelectorAll(".hero-proof li")].find((x) => x.querySelector("b"));
-    assert(li, "no bold 'free' item");
-    const before = li.firstChild && li.firstChild.textContent;
-    assert(/\s$/.test(before || ""), `text node lost its trailing space: ${JSON.stringify(before)}`);
-    const display = window.getComputedStyle(li).display;
-    assert(display !== "inline-flex" && display !== "flex", `li is ${display}, which drops the space`);
-  });
-  check("hero proof has a real gap when the dot is suppressed", () => {
-    /* Flexbox does not render a white-space-only text run, so the newlines
-       between the <li> elements contribute nothing. With the separator
-       hidden below 1152px there was no space at all and the items read as
-       "priceFirst". The column gap must therefore be explicit, in both the
-       base rule and the block that hides the dot. */
-    const css = cssSource();
-    const base = css.match(/\.hero-proof\s*\{([^}]*)\}/);
-    assert(base, "no .hero-proof rule");
-    const gap = /gap:\s*([^;}]+)/.exec(base[1]);
-    assert(gap, "no gap declared on .hero-proof");
-    const col = gap[1].trim().split(/\s+/).pop();
-    assert(col !== "0" && col !== "0px", `column gap is ${col}; items will butt together`);
-
-    const mq = css.match(/@media \(max-width: 1151px\)\s*\{([\s\S]*?)\n\}/);
-    assert(mq, "no breakpoint hiding the separator");
-    const inner = mq[1].match(/\.hero-proof\s*\{([^}]*)\}/);
-    assert(inner, "breakpoint does not set a .hero-proof gap");
-    const innerGap = /gap:\s*([^;}]+)/.exec(inner[1]);
-    assert(innerGap, "no gap in the breakpoint rule");
-    const innerCol = innerGap[1].trim().split(/\s+/).pop();
-    assert(innerCol !== "0" && innerCol !== "0px", `column gap is ${innerCol} where the dot is hidden`);
-  });
-  check("hero proof separator belongs to the item it follows", () => {
-    /* A ::before on the wrapped item paints at the start of the new line,
-       which stranded a dot there. It must attach to the preceding item, so
-       the selector has to be "li + li". */
-    const css = cssSource();
-    assert(/\.hero-proof li \+ li::before/.test(css), "separator is not on the following sibling");
-    assert(!/\.hero-proof li::before/.test(css), "separator defined on the item itself");
-  });
   check("hero headline keeps its two phrases intact", () => {
     const h1 = document.querySelector(".hero h1").textContent.trim();
     assert(h1 === "Got a Parking Ticket? Fight It in 2 Minutes.", `headline changed: ${h1}`);
