@@ -93,6 +93,28 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     const n = $("operatorList").querySelectorAll("option").length;
     assert(n > 5, `only ${n} operators`);
   });
+  check("hero eyebrow is split into segments", () => {
+    const eye = document.querySelector(".hero .eyebrow");
+    assert(eye, "no hero eyebrow");
+    const segs = [...eye.children].map((s) => s.textContent.trim());
+    assert(segs.length === 3, `expected 3 segments, got ${segs.length}`);
+    assert(!eye.textContent.includes("·"), "separator still hardcoded as text");
+  });
+  check("hero headline keeps its two phrases intact", () => {
+    const h1 = document.querySelector(".hero h1").textContent.trim();
+    assert(h1 === "Got a Parking Ticket? Fight It in 2 Minutes.", `headline changed: ${h1}`);
+  });
+  check("eyebrow tracking stays legible for small caps", () => {
+    /* 0.12em at 12px was wide; anything above 0.11em is the old value. */
+    const css = [...document.styleSheets].flatMap((sh) => {
+      try { return [...sh.cssRules]; } catch { return []; }
+    }).map((r) => r.cssText).join("\n");
+    const m = css.match(/\.eyebrow\s*\{([^}]*)\}/);
+    assert(m, "no .eyebrow rule");
+    const tr = /letter-spacing:\s*([\d.]+)em/.exec(m[1]);
+    assert(tr, "no letter-spacing on .eyebrow");
+    assert(Number(tr[1]) <= 0.11, `tracking is ${tr[1]}em`);
+  });
   check("sample preview renders with real content", () => {
     const t = $("sampleLetter").textContent;
     assert(t.includes("ParkingEye"), "no operator in sample");

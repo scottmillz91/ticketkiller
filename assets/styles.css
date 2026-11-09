@@ -227,16 +227,47 @@ body.nav-open::before {
   pointer-events: none;
 }
 .hero-inner { position: relative; }
+/* Small caps labels. Tracking is 0.12em, which is at the wide end for 12px
+   text; a tenth is enough to stop the capitals closing up. */
 .eyebrow {
   display: inline-block;
   font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
   text-transform: uppercase;
   color: var(--sky);
   margin: 0 0 14px;
 }
-.eyebrow.dark { color: var(--blue); }
+/* --blue on --paper is 4.22:1, below the 4.5:1 needed at this size. The
+   darker blue clears it at 6.24:1 and is the same hue. */
+.eyebrow.dark { color: var(--blue-2); }
+
+/* The home eyebrow is three facts joined by dots. On a narrow screen an
+   inline string breaks mid-phrase and can leave a separator stranded at the
+   end of a line, so the segments are laid out individually with the dots
+   generated between them. */
+.eyebrow-split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 0;
+  max-width: 100%;
+}
+.eyebrow-split > span { white-space: nowrap; }
+.eyebrow-split > span + span::before {
+  content: "·";
+  margin: 0 7px;
+  opacity: .55;
+}
+@media (max-width: 639px) {
+  .eyebrow-split > span + span::before { content: none; }
+  .eyebrow-split { gap: 2px 12px; }
+}
+
+/* Headings break by phrase rather than by whatever fits. */
+h1, h2, h3 { text-wrap: balance; }
+.lede { text-wrap: pretty; }
 .hero h1 {
   font-size: clamp(2.15rem, 8vw, 4.4rem);
   font-weight: 800;
@@ -295,7 +326,21 @@ body.nav-open::before {
   .hero-proof { gap: 4px 16px; }
   .hero-proof li + li::before { content: none; }
 }
-@media (max-width: 899px) { .hero h1 { font-size: clamp(2rem, 9.5vw, 2.6rem); } .lede { margin-bottom: 24px; } }
+/* The headline has a fixed 16ch measure, which on a phone is wider than the
+   screen until roughly 400px. Sized on 9.5vw it outgrew that box between 320
+   and 396px and broke into three ragged lines ("Got a Parking / Ticket? Fight
+   It in 2 / Minutes."). "Got a Parking Ticket?" measures 9.68em in Bricolage
+   at 800 weight, so the size is capped against the actual gutter width
+   instead of the viewport: 100vw - 32px, divided by that 9.68em. */
+@media (max-width: 899px) {
+  .hero h1 { font-size: clamp(1.75rem, calc((100vw - 32px) / 9.68), 2.6rem); }
+  .lede { margin-bottom: 24px; }
+}
+/* Below 640px the widest line cannot fit even at the smallest sensible size,
+   so the measure is lifted and the wrap is pinned to the two phrases. */
+@media (max-width: 639px) {
+  .hero h1 { max-width: none; }
+}
 
 .btn {
   border: 0;
