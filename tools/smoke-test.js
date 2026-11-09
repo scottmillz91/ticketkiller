@@ -413,6 +413,39 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(hero.indexOf('id="qcDate"') > 0, "the quick check is not in the hero");
     assert(hero.indexOf('id="qcDate"') < hero.indexOf("Three steps"), "the quick check sits below the fold");
   });
+  check("bordered cards that stack never sit flush against each other", () => {
+    /* The quick-check card and the trust row below it are both bordered
+       panels. The quick check had `margin: 26px 0 0` and the trust row has
+       `margin: 0`, so on a phone the two borders met with no gap and read as
+       one box overlapping the other. Any two stacked bordered panels need a
+       vertical gap between them. */
+    const css = cssSource();
+    const rule = (sel) => {
+      const i = css.indexOf(sel + " {");
+      assert(i > 0, `no rule for ${sel}`);
+      return css.slice(i, css.indexOf("}", i));
+    };
+    const bottom = (sel) => {
+      const m = /margin:\s*([^;]+);/.exec(rule(sel));
+      if (!m) return null;
+      const parts = m[1].trim().split(/\s+/);
+      if (parts.length === 1) return parts[0];
+      if (parts.length === 2) return parts[0];
+      if (parts.length === 3) return parts[2];
+      return parts[2];
+    };
+    /* The pair that visibly collided. */
+    const qcBottom = bottom(".quick-check");
+    const trTop = bottom(".trust-row");
+    const zero = (v) => v === "0" || v === "0px";
+    assert(!(zero(qcBottom) && zero(trTop)),
+      `the quick check (bottom ${qcBottom}) and the trust row (top ${trTop}) touch, so their borders collide`);
+    /* And generally: a bordered panel must not end with no space below it. */
+    ["\.quick-check", "\.held-credit", "\.deadline-card"].forEach((sel) => {
+      const b = bottom(sel);
+      if (b != null) assert(!zero(b), `${sel} has no bottom margin, so the next bordered card will touch it`);
+    });
+  });
   check("the quick check is built from the hero's own palette", () => {
     /* First version put a white input on the dark hero: the only bright block
        on the screen, reading as a component from a different page. Contrast is

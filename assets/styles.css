@@ -776,7 +776,10 @@ h1, h2, h3 { text-wrap: balance; }
    than borrowing the white form cards. A white input here was the only bright
    block on the screen and read as a different component altogether. */
 .quick-check {
-  margin: 26px 0 0;
+  /* Bottom margin matters as much as the top one here: the trust row that
+     follows is itself a bordered card with margin 0, so a zero here left the
+     two borders sitting flush against each other and they read as overlapping. */
+  margin: 6px 0 24px;
   padding: 16px 18px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.06);
