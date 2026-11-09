@@ -2,9 +2,9 @@
 
 **Got a parking ticket? Fight it in two minutes.**
 
-A single-page web app that helps UK motorists challenge private parking charges (PCNs). You enter the details from your notice, it builds a set of legal grounds for appeal, and it writes you a formal appeal letter you can copy or download as a PDF.
+A web app that helps UK motorists challenge private parking charges (PCNs). Enter the details from your notice and it gives you the legal grounds that actually apply to your case, drafts a formal appeal letter, drafts the POPLA / IAS escalation if you get rejected, and tracks your deadline.
 
-The whole site is **one self-contained HTML file** — no build step, no framework, no package manager, no backend.
+Static site — no framework, no build step, no backend.
 
 ---
 
@@ -12,12 +12,17 @@ The whole site is **one self-contained HTML file** — no build step, no framewo
 
 - [What it does](#what-it-does)
 - [Run it locally](#run-it-locally)
-- [How the app works](#how-the-app-works)
+- [Before you take real money](#before-you-take-real-money)
 - [Project structure](#project-structure)
+- [Configuration](#configuration)
 - [How the appeal letter is generated](#how-the-appeal-letter-is-generated)
-- [Pricing and payments](#pricing-and-payments)
+- [Deadline tracker](#deadline-tracker)
+- [Operator intelligence](#operator-intelligence)
+- [Payments](#payments)
 - [Data and privacy](#data-and-privacy)
-- [Customising the site](#customising-the-site)
+- [Editing content](#editing-content)
+- [SEO and sharing](#seo-and-sharing)
+- [Testing](#testing)
 - [Deploying](#deploying)
 - [Known limitations](#known-limitations)
 - [Disclaimer](#disclaimer)
@@ -28,63 +33,62 @@ The whole site is **one self-contained HTML file** — no build step, no framewo
 
 | Feature | Detail |
 | --- | --- |
-| Landing page | Hero, three-step explainer, trust figures, calls to action |
-| Accounts | Sign up / log in, stored entirely in the browser |
-| Ticket capture | A form for operator, PCN reference, date, location, contravention, amount, vehicle reg and keeper name |
-| Legal grounds | Five pre-written appeal arguments tagged to UK parking law |
-| Appeal letter | Auto-generated formal letter that updates live as you edit the form |
-| Export | Copy to clipboard, or download as PDF (falls back to printing) |
-| Appeal history | Every letter you generate, saved per account and re-openable |
+| Landing page | Hero with sourced statistics, three-step explainer, and a real sample letter generated live |
+| Deadline tracker | Counts down the operator appeal window and the reduced-payment window; tests the POFA Notice to Keeper timing |
+| Ticket capture | Operator, PCN reference, date, location, contravention, amount, VRM, keeper name and address |
+| Legal grounds | Eight drafting grounds tagged to POFA 2012, the BPA/IPC code, landowner authority and *Beavis*, each toggleable |
+| Appeal letter | Recomputed live as you edit; declares keeper status, declines to name the driver, demands the evidence pack |
+| Escalation letter | POPLA / IAS escalation with the verification code, generated for you after a rejection |
+| Evidence request | A UK GDPR Article 15 request for the ANPR stills, signage, site plan and landowner contract |
+| Appeal history | Every letter saved per account, with a countdown and won / lost / escalated status |
+| Operator intelligence | Per-operator notes on what usually decides appeals, and the correct appeal route |
+| Appeal guides | Seven per-operator pages designed as search landing pages |
+| Legal pages | Privacy notice, terms, refund policy and contact page |
+| Data page | Every statistic quoted, with its source and what it does *not* prove |
+| Export | Copy to clipboard and PDF download (jsPDF, vendored locally) |
 | Pricing | First appeal free, £4.99 per extra appeal via PayPal |
-| FAQ | Six questions covering deadlines, POPLA/IAS escalation, keeper liability and more |
 
-Target audience: **private** parking charges from operators such as ParkingEye, UKPC, Euro Car Parks and NCP. Council PCNs follow a different statutory process and are out of scope (the FAQ says so).
+Target audience: **private** parking charges from operators such as ParkingEye, UKPC, Euro Car Parks and NCP. Council PCNs follow a different statutory process and are out of scope — the FAQ says so.
 
 ---
 
 ## Run it locally
 
-There is nothing to install. Serve the folder over HTTP:
+Nothing to install. Serve the folder over HTTP:
 
 ```bash
-# Python 3 (already on macOS and most Linux boxes)
+npm run serve          # python3 -m http.server 8000
+# or
 python3 -m http.server 8000
-
-# or Node
+# or
 npx serve .
 ```
 
 Then open <http://localhost:8000>.
 
-Serving over `http://localhost` rather than opening the file directly matters: the login flow hashes passwords with `crypto.subtle`, which browsers only expose in secure contexts. For the same reason, any deployed copy must be served over **HTTPS**.
+Serve it rather than double-clicking `index.html`: the app fetches `assets/data/*.json`, which `file://` blocks, and the login hashing uses `crypto.subtle`, which browsers only expose in a secure context. For the same reason any deployed copy must be served over **HTTPS**.
 
 ---
 
-## How the app works
+## Before you take real money
 
-`index.html` contains every screen as a `<section class="page">`. The script at the bottom of the file shows one section at a time by toggling an `.active` class — there is no router and no URL per screen.
+Two things in this repo are deliberately incomplete, because only you can supply them.
 
-```
-Home ──▶ Enter ticket details ──▶ Generate ──▶ Results (grounds + letter)
-          │                                        │
-          │ (not logged in)                        ├─▶ Copy letter
-          ▼                                        └─▶ Download PDF
-        Sign up / Log in ──▶ Details
-                │
-                └──▶ My appeals (reopen a saved letter)
+**1. Your business details.** Open `assets/config.js`. The `business` block contains placeholders:
 
-Pricing ──▶ PayPal ──▶ back to site with ?paypal=success ──▶ credit added
+```js
+tradingName: "TicketKiller UK",
+legalName:  "[YOUR FULL LEGAL NAME]",   // ← required in UK
+address:    "[YOUR POSTAL ADDRESS]",    // ← required in UK
+email:      "support@example.com",
 ```
 
-Screens are identified by `data-page` and navigated with `data-nav` buttons:
+These fill the legal pages, the footer and the contact block automatically. Until you replace them, the privacy notice and terms display a visible warning banner telling visitors they are placeholders. **A UK business selling digital services must publish who it is and a contact address.** Distance-selling rules also require a geographic address and an email before payment.
 
-`home` · `auth` · `history` · `details` · `results` · `pricing` · `faq`
+Also update these to your real domain, or social previews and canonical links will point at `example.com`:
+`index.html` → `<link rel="canonical">`, `og:url`, `og:image`, `twitter:image`.
 
-Guard rails in the script:
-
-- Reaching `details` or `history` while logged out bounces you to `auth`, then returns you to where you were headed (`afterLogin`).
-- Generating a letter requires an account. The first letter is free per account; after that the paywall pane appears and the generate button is disabled until a credit is bought.
-- Clicking the auth button while logged in logs you out rather than opening a page.
+**2. Payment verification.** Read [Payments](#payments). As shipped, the paywall is not enforced.
 
 ---
 
@@ -92,67 +96,132 @@ Guard rails in the script:
 
 ```
 ticketkiller/
-├── index.html   # The entire application — styles, markup and JavaScript
-└── README.md    # This file
+├── index.html                  # Markup for every page + SEO metadata
+├── assets/
+│   ├── config.js               # ← everything you'll want to change
+│   ├── app.js                  # All application logic (one IIFE)
+│   ├── styles.css              # Design tokens, components, all CSS
+│   ├── data/
+│   │   ├── grounds.json        # Legal grounds + escalation grounds
+│   │   └── operators.json      # Operator reference data
+│   ├── fonts/                  # Self-hosted Figtree + Bricolage Grotesque (OFL)
+│   ├── vendor/jspdf.umd.min.js # jsPDF 2.5.1, vendored (no CDN)
+│   └── og-image.jpg            # 1200×630 social preview card
+├── tools/smoke-test.js         # jsdom test suite (38 checks)
+└── package.json                # Only for the test dependency; no build
 ```
 
-Inside `index.html`:
+Pages are `<section class="page">` blocks toggled with an `.active` class. The router reads `location.hash`, so `#details`, `#guide/parkingeye` and `#refunds` are all linkable and shareable.
 
-| Region | What's there |
+Navigation ids: `home` · `auth` · `history` · `details` · `evidence` · `results` · `pricing` · `faq` · `operators` · `guide` · `stats` · `privacy` · `terms` · `refunds` · `contact`
+
+---
+
+## Configuration
+
+Everything lives in `assets/config.js`:
+
+| Block | What it controls |
 | --- | --- |
-| `<head>` → `<style>` | All CSS. Design tokens as custom properties on `:root` |
-| `<body>` → `<header>` | Sticky top bar, desktop nav, mobile hamburger menu |
-| `<main id="app">` | The seven page sections, in order |
-| `<footer>` | Legal disclaimers |
-| `<script src="…jspdf…">` | jsPDF 2.5.1 from cdnjs — the only external dependency |
-| Inline `<script>` | App logic, wrapped in an IIFE |
+| `business` | Legal name, trading name, address, contact email — feeds the legal pages and footer |
+| `pricing` | The displayed price and currency symbol |
+| `paypal` | Business email, item name, and the `enabled` kill switch |
+| `contact` | Contact email and the response time quoted to users |
+| `analytics` | Off by default; plausible-style event POSTing |
+| `deadlines` | All the countdown windows (appeal, discount, POPLA, POFA 14 / 28 / 56 days) |
+| `features` | Turn individual features off without deleting them |
+| `version` | Reported with the `session_start` analytics event |
 
-The only external request the page makes is the jsPDF bundle from `cdnjs.cloudflare.com`. Everything else — styles, icons, the favicon (an inline SVG data URI) — is embedded.
+`features` is the safe way to hide something you're not ready for:
+
+```js
+features: {
+  deadlineTracker: true,
+  evidenceRequest: true,
+  escalation: true,
+  operatorIntel: true,
+  sampleLetter: true,
+  seoLandingPages: true
+}
+```
+
+**Currency and pricing gotcha.** The price is written in three kinds of place in `index.html`, but the *displayed* amount now comes from `[data-price]` spans filled from config. If you change the price you must still update:
+
+1. `pricing.extraLetterLabel` in `assets/config.js` — drives the visible text
+2. the `name="amount"` hidden input in **both** PayPal forms in `index.html` (`value="4.99"`)
+3. the literal `<p class="price"><span>£</span>4.99</p>` on the pricing card
+
+The hidden input is what PayPal actually charges; the config only changes what people see. Mismatched, and you display one price while charging another.
 
 ---
 
 ## How the appeal letter is generated
 
-Two pieces of code do the work, and both live near the top of the inline script.
+Three layers, all in `assets/data/grounds.json` and `assets/app.js`.
 
-**1. The grounds — the `GROUNDS` array.** Five objects, each with a `tag`, `title` and `body`:
+**The grounds** — eight drafting templates, each with a `tag`, `title`, `body` and a `when` hint shown in the UI:
 
-1. **POFA 2012 Schedule 4** — keeper liability may not have been established (Notice to Keeper timing, prescribed wording)
-2. **BPA / IPC Code of Practice** — signage unlikely to have formed a clear contract
-3. **Grace period** — the mandatory consideration period doesn't appear to have been applied
-4. **ANPR evidence** — camera timestamps show presence, not necessarily parking
-5. **Landowner authority** — no proof the operator was entitled to issue charges
+| Ground | Tag | What it argues |
+| --- | --- | --- |
+| `pofa-timing` | POFA 2012 Sch 4 para 9 | Notice to Keeper outside 14 days, no windscreen ticket |
+| `pofa-window` | POFA 2012 Sch 4 para 8 | After a windscreen ticket, notice outside 28–56 days (too early is as defective as too late) |
+| `pofa-content` | POFA 2012 Sch 4 para 9(2) | Prescribed statements missing or paraphrased |
+| `signage` | BPA / IPC Code | Signs not prominent or legible, so no contract formed |
+| `grace` | BPA / IPC Code | No consideration period, no 10-minute grace period |
+| `anpr` | POFA 2012 "period of parking" | A camera crossing is not proof of parking |
+| `authority` | Landowner authority | No evidence they may issue charges in their own name |
+| `beavis` | *ParkingEye v Beavis* [2015] UKSC 67 | Not a genuine, proportionate attempt to manage the site |
 
-These render as cards under "Grounds for appeal" and are also woven into the letter body.
+Users can exclude any ground; the letter recomputes immediately. The `escalation` array provides four separate grounds for the POPLA / IAS stage — procedural, evidence, POFA, proportionality.
 
-**2. The template — `letterFromForm()`.** A template literal that interpolates the form fields and the grounds into a letter addressed to the operator's appeals team. It:
+**The letter** — `buildLetter()` in `app.js`. It:
 
-- States the keeper is disputing in full and declining to identify the driver
-- Demands a POPLA code (BPA operators) or an IAS code (IPC operators) with any rejection
-- Asks for the ANPR evidence pack, signage photographs, landowner authority and timestamps to the second
-- Requests no debt-recovery fees be added while the appeal is outstanding
-- Ends with a non-legal-advice disclaimer
+- appeals as the registered keeper and declines to identify the driver
+- names the correct route from operator data: **POPLA** for BPA operators, **IAS** for IPC
+- adds a timing paragraph only when you've supplied a Notice to Keeper date
+- demands the ANPR pack, signage photographs, site plan, landowner contract and second-accurate timestamps
+- asks that debt-recovery fees not be added while the appeal is live
+- includes a UK GDPR data-subject hook and a non-legal-advice footer
 
-The letter re-renders on every keystroke while the results page is visible, so edits are reflected instantly. Saving copies the letter text, plus the ticket fields, into the account's history — so a saved letter is a snapshot and stays as written even if the template later changes.
+Saved appeals store the rendered letter text, so an old letter is a snapshot — it does not change if you later edit `grounds.json`.
 
-**PDF export** uses jsPDF: Times 11pt, A4, 54pt margins, automatic page breaks. The filename is derived from the PCN reference. If the CDN bundle failed to load, the button falls back to `window.print()` so the user still gets something.
+**PDF export** — jsPDF, A4, Times 11pt, 56pt margins, page breaks every ~48 lines. If the vendored script fails to load, it falls back to `window.print()` rather than doing nothing.
 
 ---
 
-## Pricing and payments
+## Deadline tracker
 
-- **First appeal:** free, tracked per account with a `freeUsed` flag.
-- **Every appeal after that:** £4.99, tracked with a `credits` counter.
+All windows come from `config.deadlines` and are counted in whole days from the date on the notice:
 
-Payment uses a standard PayPal **`_xclick`** form, so there is no API key, SDK or server involved. The amount, currency and business email are hidden inputs in the form markup:
+| Window | Default | Basis |
+| --- | --- | --- |
+| Operator appeal | 28 days | Most operators; 14 and 21 are offered as options because the letter governs |
+| Reduced payment | 14 days | The usual discount period |
+| POPLA / IAS escalation | 28 days | From the operator's rejection |
+| POFA Notice to Keeper (no windscreen ticket) | 14 days | Sch 4 para 9 |
+| POFA Notice to Keeper (windscreen ticket) | 28–56 days | Sch 4 para 8 |
 
-```html
-<input type="hidden" name="amount" value="4.99" />
-<input type="hidden" name="currency_code" value="GBP" />
-<input type="hidden" name="business" value="…" />
-```
+If the user supplies a Notice to Keeper date, the tracker computes the gap and states plainly whether keeper liability looks established. It also repeats the caveat that the letter always beats the tracker, because operators do quote different periods.
 
-Before submitting, the script records a pending payment in `localStorage` (email + random nonce) and sets three fields:
+The tracker appears on the details page, as a pill on the results page, and as a per-appeal countdown in history. Status bands: green over 7 days, amber 4–7, red 0–3, grey once passed.
+
+---
+
+## Operator intelligence
+
+`assets/data/operators.json` holds ten operators with `name`, `aliases`, `tradeBody` (BPA or IPC), `siteType` and a `themes` array describing what usually decides appeals against them. It powers three things:
+
+1. an autocomplete `datalist` on the operator field
+2. a live intel card on the details page that reacts as you type
+3. the operator reference page and the per-operator guide pages
+
+The file notes in `_note` that trade-body membership changes. The rejection letter always states the route, which is why the app never hard-codes POPLA for every operator.
+
+---
+
+## Payments
+
+PayPal **`_xclick`** — no SDK, no API key, no server. Before submitting, the app records a pending payment in `localStorage` (email + random nonce) and fills three hidden fields at runtime:
 
 | Field | Value |
 | --- | --- |
@@ -160,94 +229,117 @@ Before submitting, the script records a pending payment in `localStorage` (email
 | `cancel_return` | current URL + `?paypal=cancel` |
 | `custom` | `email\|nonce` |
 
-On return, the app reads `?paypal=success` and grants a credit to the pending email. `?paypal=cancel` just clears the pending record.
+On return, `?paypal=success` grants a credit to the pending email.
 
-> ⚠️ **The price lives in two places** — the details page paywall form *and* the pricing page card — plus the amount is written into button text ("Pay £4.99", "Pay £4.99 to generate another"). Change all of them together.
+### ⚠️ The paywall is not enforced
+
+The app trusts the query string. Anyone can append `?paypal=success` to the URL and unlock a free letter. This is not fixable in the browser — the page has no way to know whether PayPal actually received money.
+
+`config.paypal.verifyReturns: false` records the intended fix, not a fix. To take real money you need one of:
+
+1. **PayPal IPN** — a small server endpoint that receives PayPal's POST, verifies it back to PayPal, checks the amount and the `custom` field, and marks the account paid. Then the browser only *displayed* the result; the server *decided* it.
+2. **PayPal Webhooks + a tiny API** — same idea, modern interface.
+3. **A checkout with server-side capture** — Stripe or PayPal Orders, where the session is created and confirmed server-side.
+
+Until one of those exists, treat the paid tier as a demo. `config.paypal.enabled = false` hides every pay button and makes letters unlimited, which is the honest setting while testing.
 
 ---
 
 ## Data and privacy
 
-There is no server, no database and no analytics. Nothing typed into the site leaves the browser except the payment redirect to PayPal.
+No server, no database, no analytics by default. Nothing typed into the site is transmitted anywhere except the redirect to PayPal.
 
-Everything persists in `localStorage` under three keys:
+`localStorage` keys:
 
 | Key | Contents |
 | --- | --- |
-| `tk_users_v1` | Map of email → `{ name, pass, freeUsed, credits, appeals[] }` |
-| `tk_session` | Email of the currently logged-in user |
-| `tk_pending_pay` | `{ email, nonce }` for an in-flight PayPal payment |
+| `tk_users_v1` | Map of email → `{ name, pass, freeUsed, credits, appeals[], address, postcode }` |
+| `tk_session` | Email of the logged-in user |
+| `tk_pending_pay` | `{ email, nonce, started }` for an in-flight payment |
+| `tk_state_v1` | Draft ticket details, so a reload doesn't lose your typing |
+| `tk_events` | Analytics event log, capped at 200 entries |
 
-Passwords are hashed with SHA-256 before storage, but note the honest caveat: the salt is a fixed string in the source (`"tk|"`), there's no key stretching, and the hash sits in `localStorage` on the user's own device. It stops a shoulder-surfer reading a password; it is not meaningful security. Any real deployment with user accounts needs a backend.
+Being straight about the password hashing: SHA-256 with a fixed salt (`"tk|"`), no key stretching, stored on the user's own device. It stops someone reading a password over a shoulder. It is not meaningful security, and it is not a reason to skip a backend if accounts ever matter.
 
-Appeal history stores the full letter text, so a user's PCN details — including their name and vehicle registration — sit in plain text in their browser profile until they clear site data.
+If `crypto.subtle` is unavailable (insecure context), the app falls back to a clearly-marked `plainfallback:` prefix rather than silently storing a password. In that state, tell people not to reuse a real password.
+
+Appeal history stores full letter text, so a user's name, address, VRM and PCN sit in plain text in their browser profile until they clear site data.
 
 ---
 
-## Customising the site
+## Editing content
 
-**Brand colours and typography.** All theming is CSS custom properties at the top of the `<style>` block:
+**Legal grounds** → `assets/data/grounds.json`. Each ground needs `id`, `tag`, `title`, `body`, `when`. Add or remove freely; the card list, count and letter all derive from the array.
 
-```css
-:root {
-  --navy: #071018;   /* page chrome, hero background */
-  --blue: #1b6bff;   /* primary action colour */
-  --gold: #e8b931;   /* accent, skip link, logo stroke */
-  --paper: #f3f6fb;  /* page background */
-  --line: #dce5f0;   /* borders and dividers */
-  --radius: 18px;    /* corner rounding, cards and buttons */
-}
+**Operators** → `assets/data/operators.json`. Add an object with a unique `id` and it appears in the autocomplete, the intel card and the operator grid.
+
+**SEO guides** → the `GUIDES` array near the bottom of `app.js`. Each entry needs `slug`, `operator`, `place` and `basis`. Add a slug and it gets a page at `#guide/<slug>` plus an entry on the index.
+
+**Statistics** → the `STATS` array in `app.js` and the trust row in `index.html`. Every figure must carry a source link; the data page exists specifically so unsourced numbers are conspicuous.
+
+**Colours and type** → the `:root` block at the top of `assets/styles.css`.
+
+**Fees, quotes, response times** → `assets/config.js`.
+
+Note that a real font is now loaded (Figtree for body, Bricolage Grotesque for headings) from `assets/fonts/`. The old build referenced these fonts but never loaded them, so it rendered in the system font. Both are SIL Open Font Licensed, with licence files alongside.
+
+---
+
+## SEO and sharing
+
+- Descriptive `<title>`, meta description, canonical link
+- Open Graph and Twitter card tags with a real 1200×630 image
+- `WebApplication` JSON-LD structured data
+- Seven per-operator landing pages at `#guide/<slug>`
+- Heading hierarchy per page, one `<h1>` each
+
+Hash routing is fine for GitHub Pages but search engines treat `#details` as one URL. Once there's real traffic, converting to real paths (`/appeal/parkingeye/`) will do more for SEO than anything else on this list.
+
+---
+
+## Testing
+
+```bash
+npm install   # jsdom only
+npm test      # node tools/smoke-test.js
 ```
 
-Note that a second `:root` block right before `</style>` overrides `--font` and `--display` with a system-UI stack. The design tokens reference "Figtree" and "Bricolage Grotesque", but no web font is loaded, so the site renders in the system font. Delete that override and add a font `<link>` if you want the original typefaces.
+38 checks run against a real DOM in jsdom: boot, content loading, deadline arithmetic including a deliberately late Notice to Keeper, registration, letter generation, ground toggling, escalation, the evidence request, the paywall, history, operator intel, guides, and every legal page. It fails the run on any uncaught error.
 
-**Adding or changing legal grounds.** Edit the `GROUNDS` array. Each entry needs `tag`, `title` and `body`; the card list, the count badge and the letter body all derive from it, so nothing else needs touching.
-
-**Operator and contravention suggestions.** The autocomplete options are plain `<datalist>` elements (`operatorList`, `contraList`) in the ticket form markup — add `<option>`s there.
-
-**Payments.** Swap the `business` hidden input for your own PayPal email, and update the amount across both forms and their button labels.
-
-**Copy and legal wording.** The hero, steps, FAQ and footer disclaimer are all static markup in their sections. The footer's "Not legal advice" line and the closing sentence of every generated letter are the compliance-relevant bits — keep them if you fork this.
+Two caveats: jsdom is not a browser, so this catches logic and wiring, not layout; and jsdom has no canvas, so jsPDF's font probe warns harmlessly.
 
 ---
 
 ## Deploying
 
-Because it's a static file, any host works. **GitHub Pages**, in order of least effort:
+Static hosting — GitHub Pages, Netlify, Cloudflare Pages or Vercel, all with no configuration.
 
-1. Push the repo to GitHub.
-2. Settings → Pages → Source: *Deploy from a branch*.
-3. Branch `main`, folder `/ (root)` → Save.
-4. It goes live at `https://<user>.github.io/<repo>/` in a minute or two.
+**GitHub Pages:** Settings → Pages → Source: *Deploy from a branch* → `main`, folder `/ (root)`.
 
-Also fine: Netlify, Cloudflare Pages, Vercel, or dropping `index.html` on any static host — all work with zero configuration.
+Before going live:
 
-Two things to fix first for a real launch:
-
-- **Delete the trailing Cloudflare challenge script** (see [Known limitations](#known-limitations)). It only adds a hidden iframe and a failed request.
-- **Check the PayPal business account** will accept payments and redirects to your live domain. The `return` and `cancel_return` URLs are generated from `location.href` at runtime, so the code needs no edits when the domain changes — but PayPal's account settings may.
-
-Since the site is a single `index.html`, GitHub Pages serves it at the repo root with no configuration. A custom domain is a `CNAME` file (or a Pages setting) and needs no code change.
+1. Replace the `business` placeholders in `assets/config.js`
+2. Point the canonical, `og:url` and `og:image` tags at your real domain
+3. Decide whether the paywall should be live at all (see [Payments](#payments))
+4. Consider a `LICENSE` file — there isn't one
 
 ---
 
 ## Known limitations
 
-Written down plainly so nothing here is a surprise later:
-
-1. **No backend.** Accounts, sessions and appeal history are per-browser. Clearing site data destroys the account. The same "user" on a phone and a laptop are two unrelated accounts.
-2. **Payments are not verified.** The app trusts the `?paypal=success` query parameter. Anyone can type it into the address bar and receive a free credit. Proper verification needs PayPal IPN or a webhook on a server comparing the amount and custom field against the pending record — this cannot be done client-side.
-3. **The business email is hard-coded in the page source.** That exposes it to scrapers, and it appears twice.
-4. **"65% of appeals succeed" and "12M tickets issued yearly"** are marketing copy in the hero. They have no source attached and should be substantiated (or removed) before running paid traffic to the page.
-5. **Leftover Cloudflare script.** The last line before `</body>` is a Cloudflare bot-challenge snippet (`__CF$cv$params`) captured from wherever the original export came from. It's inert off Cloudflare and safe to delete.
-6. **jsPDF is a single point of failure.** If cdnjs is blocked or offline, PDF export silently degrades to a print dialog. Vendoring the file locally would remove the dependency.
-7. **No analytics or error tracking**, so there's no visibility into where users drop off.
-8. **`index.html` is 1,665 lines** with CSS, markup and logic interleaved. That's fine at this size; if it grows, split it into `styles.css` and `app.js`, and move the grounds into a JSON file.
+1. **No backend.** Accounts, sessions and history are per-browser. Same user on a phone and a laptop are two unrelated accounts, and clearing site data destroys everything.
+2. **Payments unverified.** The `?paypal=success` bypass described above.
+3. **Business email is in the page source** (`config.js` is public), so scrapers will find it.
+4. **Hash routing** limits SEO depth.
+5. **Statistics age.** The POPLA 2025 report and the RAC/DVLA 2024-25 figures will be superseded. `/stats` exists to make staleness obvious — update it when new reports land.
+6. **No analytics by default**, so there's no visibility into drop-off until you enable it.
+7. **Legal content is not lawyer-reviewed.** The statutory citations are accurate to published sources, but the appeal arguments are drafting aids, not advice.
+8. **Fonts are latin-only** subsets; characters outside Latin-1 will fall back to system fonts.
 
 ---
 
 ## Disclaimer
 
-The site is provided for information only and does not constitute legal advice. It does not engage in reserved legal activity, does not lodge appeals on the user's behalf, and does not impersonate a solicitor. Parking charges issued by private companies are not criminal fines. Users should always check the dates, codes and instructions on their own notice.
+The site is provided for information only and does not constitute legal advice. It does not engage in reserved legal activity, does not lodge appeals on the user's behalf, and does not impersonate a solicitor. Parking charges issued by private companies are not criminal fines. Users must check the dates, codes and instructions on their own notice.
 
-No `LICENSE` file is currently included in this repository — add one before distributing or accepting contributions.
+Statutory content was checked against POPLA's 2025 annual report, the RAC Foundation's DVLA analysis, and the Private Parking Code of Practice laid before Parliament on 20 October 2026 (not then in force). Nothing here should be treated as a statement of the law on any particular date.

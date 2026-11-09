@@ -1,0 +1,29 @@
+{
+  "name": "ticketkiller-uk",
+  "version": "2.0.0",
+  "description": "TicketKiller UK — draft a formal appeal against a UK private parking charge. Static site, no build step.",
+  "scripts": {
+    "test": "node tools/smoke-test.js",
+    "serve": "python3 -m http.server 8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scottmillz91/ticketkiller.git"
+  },
+  "keywords": [
+    "parking",
+    "pcn",
+    "pofa",
+    "appeal",
+    "uk"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/scottmillz91/ticketkiller/issues"
+  },
+  "homepage": "https://github.com/scottmillz91/ticketkiller#readme",
+  "devDependencies": {
+    "jsdom": "^31.0.0"
+  },
+  "private": true
+}
