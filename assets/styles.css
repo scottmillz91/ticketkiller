@@ -771,6 +771,78 @@ h1, h2, h3 { text-wrap: balance; }
    rules above, so this must not also apply text-decoration. */
 .stat-src { color: var(--sky); font-size: 11px; }
 
+/* --- Quick check (home) ---
+   Two fields, one button, an answer in the hero. It sits on the dark hero,
+   so it needs its own surface rather than reusing the white form cards. */
+.quick-check {
+  margin: 26px 0 0;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  max-width: 560px;
+}
+.quick-check-label {
+  margin: 0 0 12px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+}
+.quick-check-label span { font-weight: 400; color: rgba(255,255,255,0.7); }
+.quick-check-row { display: grid; gap: 10px; }
+.quick-check-row .qc-field {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.78);
+}
+.quick-check-row .qc-field input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: #fff;
+  color: var(--ink);
+  min-height: 48px;
+}
+@media (min-width: 560px) {
+  .quick-check-row { grid-template-columns: 1fr auto; align-items: end; }
+}
+.quick-check-out {
+  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #fff;
+  border-left: 3px solid var(--sky);
+  padding-left: 12px;
+}
+.quick-check-out[data-tone="warn"] { border-left-color: #f5b942; }
+.quick-check-out[data-tone="ok"] { border-left-color: #34c48f; }
+
+/* --- A payment held with no account here --- */
+.held-credit {
+  background: #fff8e6;
+  border: 1px solid #f0d9a8;
+  border-radius: 18px;
+  padding: 18px 20px;
+  margin: 0 0 20px;
+}
+.held-credit-title { margin: 0 0 6px; font-weight: 800; color: var(--ink); }
+.held-credit-body { margin: 0 0 14px; color: var(--muted); font-size: 14.5px; }
+/* The warning on a notice date the visitor mistyped. */
+.sane-warning {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff4e0;
+  border: 1px solid #f0cf94;
+  color: #7a4a06;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
 /* --- Details form progress ---
    Answers "how much more of this is there?" before the visitor starts
    rather than after they abandon. */

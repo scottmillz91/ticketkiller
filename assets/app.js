@@ -233,16 +233,43 @@
   function findOperator(name) {
     const q = String(name || "").toLowerCase().trim();
     if (!q) return null;
-    return state.operators.find((o) =>
-      o.name.toLowerCase() === q ||
-      q.includes(o.name.toLowerCase().split(" ltd")[0].trim()) ||
-      (o.aliases || []).some((a) => q.includes(a))
-    ) || null;
+
+    /* Order matters here, and not in the obvious way. "Premier Parking
+       Enforcement" contains "premier parking"? No — but it does contain
+       "premier park", the short name of a different company, and list order
+       decided which one won. Matching the most specific name first stops one
+       operator's short name stealing another's charge, which would put the
+       wrong company on the letter. */
+    const exact = state.operators.find((o) => o.name.toLowerCase() === q);
+    if (exact) return exact;
+
+    const scored = [];
+    state.operators.forEach((o) => {
+      const short = o.name.toLowerCase().split(" ltd")[0].trim();
+      const names = [short].concat(o.aliases || []);
+      names.forEach((n) => {
+        if (n && q.includes(n)) scored.push({ o, len: n.length });
+      });
+    });
+    if (!scored.length) return null;
+    scored.sort((a, b) => b.len - a.len);
+    return scored[0].o;
   }
 
   /* ---------------------------------------------------------
      Deadline maths
      --------------------------------------------------------- */
+  /* A date in the future is always a typo — nobody is appealing a charge that
+     has not been issued yet. Left unchecked it produces a countdown in the
+     tens of thousands of days and writes the wrong date into the letter the
+     visitor is about to send, so it is caught here and surfaced, not
+     silently counted from. */
+  function futureNoticeDate() {
+    const raw = parseDay(val("fDate"));
+    if (raw == null) return null;
+    return raw > todayUTC() ? raw : null;
+  }
+
   function computeDeadlines() {
     const noticeDate = parseDay(val("fDate")) || todayUTC();
     const appealDays = parseInt(val("fAppealDays") || D.appealDays, 10) || D.appealDays;
@@ -311,7 +338,9 @@
     const pct = Math.max(0, Math.min(100, Math.round(((d.totalAppealDays - d.appealLeft) / d.totalAppealDays) * 100)));
     const barClass = d.appealLeft < 0 ? "out" : d.appealLeft <= 7 ? "low" : "";
 
+    const wrongDate = futureNoticeDate();
     box.innerHTML = `
+      ${wrongDate ? `<p class="sane-warning" role="alert">That date is in the future — ${esc(longDate(wrongDate))}. Check the month and year on your notice; until then the countdown below is meaningless.</p>` : ""}
       <div class="cd-row">
         <div class="cd-box ${bandClass(d.appealLeft)}">
           <div class="cd-label">Appeal to the operator by</div>
@@ -334,6 +363,56 @@
       </div>
     `;
     $("deadlineCard").hidden = false;
+  }
+
+  /* ---------------------------------------------------------
+     Quick check (home page)
+
+     Answers the two questions a visitor has before they will type six
+     fields: how long have I got, and what is the likely route. It reads the
+     date only — nothing is stored and nothing is sent.
+     --------------------------------------------------------- */
+  function bindQuickCheck() {
+    const btn = $("qcBtn");
+    const input = $("qcDate");
+    const out = $("qcOut");
+    if (!btn || !input || !out) return;
+
+    const run = () => {
+      const day = parseDay(input.value);
+      if (!day) {
+        out.hidden = false;
+        out.textContent = "Put in the date printed on your notice and we'll count the window from it.";
+        out.dataset.tone = "neutral";
+        return;
+      }
+      if (day > todayUTC()) {
+        out.hidden = false;
+        out.textContent = "That date is in the future — check the month and year on your notice.";
+        out.dataset.tone = "warn";
+        return;
+      }
+      const appealBy = addDays(day, D.appealDays);
+      const discountBy = addDays(day, D.discountDays);
+      const left = daysBetween(todayUTC(), appealBy);
+      out.hidden = false;
+      if (left < 0) {
+        out.dataset.tone = "warn";
+        out.textContent =
+          `The usual ${D.appealDays}-day appeal window closed on ${longDate(appealBy)}. ` +
+          `You can still write and ask them to consider it, but say so up front.`;
+        return;
+      }
+      out.dataset.tone = left <= 7 ? "warn" : "ok";
+      out.textContent =
+        `${left} day${left === 1 ? "" : "s"} left to appeal — by ${longDate(appealBy)}. ` +
+        `The reduced rate usually ends on ${longDate(discountBy)}. ` +
+        `Next: add the details and we'll draft the letter and name the right appeals service.`;
+      analytics.track("quick_check", { daysLeft: left });
+    };
+
+    btn.addEventListener("click", run);
+    input.addEventListener("change", run);
   }
 
   /* ---------------------------------------------------------
@@ -495,6 +574,22 @@
     return true;
   }
 
+  /* A payment can be held against an address when the browser has no account
+     by that name — paid then logged out, paid on another device, or paid with
+     a different address. Nothing used to say so, so the money looked gone.
+     This returns the total held, for anything that needs to say it out loud. */
+  function heldCreditTotal() {
+    let held = {};
+    try { held = JSON.parse(store.get(HELD_KEY) || "{}"); } catch { return 0; }
+    return Object.values(held).reduce((n, v) => n + (Number(v) || 0), 0);
+  }
+
+  function heldCreditEmails() {
+    let held = {};
+    try { held = JSON.parse(store.get(HELD_KEY) || "{}"); } catch { return []; }
+    return Object.keys(held).filter((e) => held[e] > 0);
+  }
+
   /* Called after a login or sign-up, so a held payment is not stranded. */
   function applyHeldCredits(email) {
     if (!email) return 0;
@@ -515,6 +610,24 @@
     const btn = $("generateBtn");
     if (!pane || !btn) return;
     const locked = !!currentUser() && !canGenerate();
+
+    /* Paid on this browser, but no account here to spend it on. Say so — the
+       alternative is a visitor quietly believing the money vanished. */
+    const heldPane = $("heldCreditPane");
+    if (heldPane) {
+      const held = heldCreditTotal();
+      const showHeld = !currentUser() && held > 0;
+      heldPane.hidden = !showHeld;
+      if (showHeld) {
+        const emails = heldCreditEmails();
+        const body = $("heldCreditBody");
+        if (body) {
+          body.textContent = emails.length === 1
+            ? `A paid letter is waiting on this device for ${emails[0]}. Log in with that address to use it.`
+            : `A paid letter is waiting on this device, linked to ${emails.length} addresses. Log in with the one you paid with to use it.`;
+        }
+      }
+    }
     const price = `${CFG.pricing ? CFG.pricing.symbol : "£"}${CFG.pricing ? CFG.pricing.extraLetterLabel : "4.99"}`;
     pane.hidden = !locked || !READY.canSell;
 
@@ -524,10 +637,15 @@
        nothing — no toast, no scroll, no navigation. The button is the money
        path; it must never be inert. */
     btn.disabled = false;
-    btn.textContent = locked
-      ? `Buy another letter for ${price}`
-      : "Generate appeal letter";
-    btn.dataset.intent = locked ? "pay" : "generate";
+    /* When selling is off this must not advertise a price it cannot take.
+       It used to read "Buy another letter for £4.99" and then toast
+       "Payments are switched off" — a promise the app could not keep. */
+    btn.textContent = !locked
+      ? "Generate appeal letter"
+      : READY.canSell
+        ? `Buy another letter for ${price}`
+        : "Paid letters are paused for now";
+    btn.dataset.intent = locked && READY.canSell ? "pay" : "generate";
   }
 
   /* ---------------------------------------------------------
@@ -1165,7 +1283,13 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     }
 
     const op = state.operators.find((o) => o.name.toLowerCase().includes(g.operator.toLowerCase().split(" ")[0])) || findOperator(g.operator);
-    const route = op && op.tradeBody === "IPC" ? "the Independent Appeals Service (IAS)" : "POPLA";
+    /* Unknown operators must not be told POPLA by default: an IPC firm's
+       rejection is worthless at POPLA, and the visitor finds out too late. */
+    const route = !op
+      ? "POPLA or the IAS"
+      : op.tradeBody === "IPC"
+        ? "the Independent Appeals Service (IAS)"
+        : "POPLA";
     titleEl.textContent = `How to appeal a ${g.operator} parking charge`;
     bodyEl.innerHTML = `
       <p class="page-sub">If ${esc(g.operator)} issued you a parking charge notice at ${esc(g.place)}, here is the route your appeal takes, the deadline that applies, and the points that most often decide the outcome.</p>
@@ -1296,9 +1420,36 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
   /* ---------------------------------------------------------
      PDF export (jsPDF vendored locally)
      --------------------------------------------------------- */
-  function downloadPdf(text, filenameBase) {
-    const jsPDF = window.jspdf && window.jspdf.jsPDF;
+  /* jsPDF is fetched on first use rather than on page load: it is 356 KB and
+     most visitors never download a PDF. The loader is remembered so two quick
+     clicks do not race and inject the script twice. */
+  let pdfLibPromise = null;
+  function loadPdfLib() {
+    if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+    if (pdfLibPromise) return pdfLibPromise;
+    pdfLibPromise = new Promise((resolve, reject) => {
+      const el = document.createElement("script");
+      el.src = "assets/vendor/jspdf.umd.min.js";
+      el.onload = () => resolve((window.jspdf && window.jspdf.jsPDF) || null);
+      el.onerror = () => { pdfLibPromise = null; reject(new Error("jspdf failed to load")); };
+      document.head.appendChild(el);
+    });
+    return pdfLibPromise;
+  }
+
+  async function downloadPdf(text, filenameBase) {
+    let jsPDF = window.jspdf && window.jspdf.jsPDF;
     if (!jsPDF) {
+      toast("Preparing the PDF…");
+      try {
+        jsPDF = await loadPdfLib();
+      } catch {
+        jsPDF = null;
+      }
+    }
+    if (!jsPDF) {
+      /* Print still produces a paper or PDF copy through the browser, so a
+         failed download is degraded rather than dead. */
       window.print();
       return false;
     }
@@ -1818,11 +1969,25 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
           setTimeout(() => payBtn.removeAttribute("data-nudge"), 1600);
           payBtn.focus({ preventScroll: true });
         }
-        toast("Buy another letter below to generate this one");
+        /* Pointing at a card that is hidden while selling is paused sends the
+           visitor looking for something that is not there. */
+        toast(READY.canSell
+          ? "Buy another letter below to generate this one"
+          : "Paid letters are paused — your free appeal still works");
         return;
       }
       const required = ["fOperator", "fRef", "fVrm", "fName", "fDate"];
       const missing = required.filter((id) => !val(id));
+      /* Refuse rather than warn. The letter quotes this date to the operator,
+         so a wrong one makes the whole letter look careless and gives them an
+         easy reply. A warning that can be ignored is not enough. */
+      const future = futureNoticeDate();
+      if (future) {
+        const f = $("fDate");
+        if (f) { try { f.focus({ preventScroll: true }); f.scrollIntoView({ behavior: "smooth", block: "center" }); } catch { /* jsdom */ } }
+        toast(`The date on the notice can't be in the future — check the month and year`);
+        return;
+      }
       if (missing.length) {
         toast("Please fill operator, notice number, date, registration and your name");
         const first = $(missing[0]);
@@ -1850,9 +2015,9 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
       toast(ok ? "Appeal letter copied" : "Copy failed — select the text and copy manually");
       analytics.track("copy_letter", { ok });
     });
-    if ($("pdfBtn")) $("pdfBtn").addEventListener("click", () => {
+    if ($("pdfBtn")) $("pdfBtn").addEventListener("click", async () => {
       const ref = (val("fRef") || "appeal").replace(/[^\w-]+/g, "");
-      const ok = downloadPdf($("letterText").textContent, `appeal-${ref}`);
+      const ok = await downloadPdf($("letterText").textContent, `appeal-${ref}`);
       toast(ok ? "PDF downloaded" : "Opened print dialog");
       analytics.track("pdf_download", { ok, doc: "appeal" });
     });
@@ -1861,9 +2026,9 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
       toast(ok ? "Escalation text copied" : "Copy failed");
       analytics.track("copy_letter", { ok, doc: "escalation" });
     });
-    if ($("escPdfBtn")) $("escPdfBtn").addEventListener("click", () => {
+    if ($("escPdfBtn")) $("escPdfBtn").addEventListener("click", async () => {
       const ref = (val("fRef") || "appeal").replace(/[^\w-]+/g, "");
-      const ok = downloadPdf($("escalationText").textContent, `popla-${ref}`);
+      const ok = await downloadPdf($("escalationText").textContent, `popla-${ref}`);
       toast(ok ? "PDF downloaded" : "Opened print dialog");
       analytics.track("pdf_download", { ok, doc: "escalation" });
     });
@@ -1889,9 +2054,9 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
       toast(ok ? "Request copied" : "Copy failed");
       analytics.track("copy_letter", { ok, doc: "evidence" });
     });
-    if ($("evPdf")) $("evPdf").addEventListener("click", () => {
+    if ($("evPdf")) $("evPdf").addEventListener("click", async () => {
       const ref = (val("fRef") || "appeal").replace(/[^\w-]+/g, "");
-      const ok = downloadPdf($("evText").textContent, `evidence-request-${ref}`);
+      const ok = await downloadPdf($("evText").textContent, `evidence-request-${ref}`);
       toast(ok ? "PDF downloaded" : "Opened print dialog");
       analytics.track("pdf_download", { ok, doc: "evidence" });
     });
@@ -2082,6 +2247,7 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     bindResults();
     bindEvidencePage();
     bindContact();
+    bindQuickCheck();
 
     loadDraft();
     syncNav();
@@ -2101,6 +2267,12 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     if (yr) yr.textContent = new Date().getFullYear();
 
     analytics.track("session_start", { version: CFG.version });
+    /* The date picker greys out the future. Set from the clock, never from a
+       literal in the HTML, or it goes stale the moment the file is committed. */
+    if ($("fDate")) {
+      const t = new Date(todayUTC());
+      $("fDate").setAttribute("max", t.toISOString().slice(0, 10));
+    }
     document.documentElement.setAttribute("data-tk-ready", "1");
   }
 

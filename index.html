@@ -113,6 +113,21 @@
             </button>
             <button class="btn btn-ghost-light btn-xl" data-nav="pricing">See pricing</button>
           </div>
+
+          <!-- The two questions everyone asks in the first five seconds: do I
+               have to pay, and how long have I got? Answered before asking for
+               six fields. Nothing is sent anywhere — the date stays in the
+               browser, like the rest of the form. -->
+          <div class="quick-check" id="quickCheck">
+            <p class="quick-check-label">Have your notice handy? <span>You'll get an answer straight away.</span></p>
+            <div class="quick-check-row">
+              <label class="qc-field">Date on the notice
+                <input id="qcDate" type="date" />
+              </label>
+              <button class="btn btn-primary" type="button" id="qcBtn">How long have I got?</button>
+            </div>
+            <p class="quick-check-out" id="qcOut" role="status" aria-live="polite" hidden></p>
+          </div>
           <ul class="trust-row" aria-label="Key figures">
             <li>
               <strong>14.4m</strong>
@@ -308,7 +323,7 @@
               <input id="fRef" autocomplete="off" placeholder="e.g. T128719" required />
             </label>
             <label>Date on the notice
-              <input id="fDate" type="date" required />
+              <input id="fDate" type="date" required max="" />
             </label>
             <label>Location
               <input id="fLocation" placeholder="Car park / site" />
@@ -353,6 +368,12 @@
         </form>
 
         <div class="intel-card" id="intelCard" style="margin-top:20px" data-feature="operatorIntel"></div>
+
+        <div id="heldCreditPane" class="held-credit" hidden>
+          <p class="held-credit-title">You've already paid for a letter</p>
+          <p class="held-credit-body" id="heldCreditBody"></p>
+          <button class="btn btn-primary" type="button" data-nav="auth" id="heldCreditLogin">Log in to use it</button>
+        </div>
 
         <div id="paywallPane" hidden>
           <div class="paywall-card">
@@ -751,7 +772,10 @@
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="assets/config.js"></script>
-  <script src="assets/vendor/jspdf.umd.min.js"></script>
+  <!-- jsPDF is 356 KB and most visitors never download a PDF, so it is not
+       fetched on load. downloadPdf() pulls it in the first time a PDF is
+       actually asked for. Loading it here cost every visitor four-fifths of
+       the page weight for a feature they might not use. -->
   <script src="assets/app.js"></script>
 </body>
 </html>
