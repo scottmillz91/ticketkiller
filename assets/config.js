@@ -23,9 +23,15 @@ window.TK_CONFIG = {
     // REQUIRED before any money can be taken. Leaving this blank keeps
     // selling switched off, whatever the payments block below says.
     legalName: "Scott Mills",
-    // Sole trader: a postal address where you can be reached. This is
-    // published on the terms, privacy and contact pages, so it is public.
-    address: "20 Heol Cledwyn, Birchgrove, Swansea, SA7 9LE",
+    /* Selling is PAUSED while this is blank.
+
+       A sole trader must publish the address they trade from, and for this
+       business that is a home address. Leaving it empty keeps every pay
+       button hidden and makes every letter free — that is the gate working,
+       not a fault. Restore a published address (the registered office, once
+       the business is a limited company) to switch selling back on. No
+       Stripe or Netlify setup is affected either way. */
+    address: "",
     country: "United Kingdom",
     // Published on the legal pages and used by the contact form.
     email: "scottmills1791@gmail.com",

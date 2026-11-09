@@ -271,6 +271,25 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(paid ? shown === btns.length : shown === 0,
       `${shown} of ${btns.length} pay buttons visible while selling=${paid ? "on" : "off"}`);
   });
+  check("a paused seller publishes no address and takes no money", () => {
+    /* Selling is paused by leaving business.address empty. Two things must
+       both hold: no street address reaches the browser, and no pay control
+       is reachable. Half of either would be a site that either leaks the
+       address or takes money it must not. */
+    const cfg = fs.readFileSync(path.join(root, "assets", "config.js"), "utf8");
+    const paused = /address:\s*""\s*,/.test(cfg);
+    if (!paused) return;  // resumed: nothing to assert
+    /* The shared DOM runs against a fixture with seller details filled, so
+       it cannot show the paused state itself. What is checked here is that
+       the shipped file really is paused and that the gate keys off the
+       address — the rendered proof is the separate stubbed run below. */
+    assert(!/Swansea|Heol Cledwyn|SA7 9LE/.test(cfg), "the home address is still in the shipped config");
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    const hasOperator = src.slice(src.indexOf("get hasOperator"), src.indexOf("get hasCompany"));
+    assert(/hasAddress/.test(hasOperator), "the seller gate no longer depends on the address");
+    assert(/hasOperator/.test(src.slice(src.indexOf("get canSell"), src.indexOf("get payEndpoint"))),
+      "selling does not depend on the seller being identifiable");
+  });
   check("the money path is never a disabled button", () => {
     /* Regression: syncPaywall() relabelled the generate button "Pay £4.99 to
        generate another" and then set disabled = true. A disabled button fires
