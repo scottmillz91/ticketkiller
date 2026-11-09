@@ -1,0 +1,31 @@
+# Netlify configuration
+#
+# The site itself is still served by GitHub Pages. This config exists only
+# so Netlify builds and hosts the three payment functions under /api/*.
+# Nothing here publishes the static site.
+
+[build]
+  functions = "netlify/functions"
+  publish = "."
+  # No build step: the site is plain HTML, CSS and JS.
+
+[functions]
+  node_bundler = "esbuild"
+
+# /api/checkout            -> netlify/functions/checkout.js
+# /api/verify-session      -> netlify/functions/verify-session.js
+# /api/stripe-webhook      -> netlify/functions/stripe-webhook.js
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
+# The browser calls these from the GitHub Pages origin, which is a
+# different site as far as the browser is concerned.
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "https://scottmillz91.github.io"
+    Access-Control-Allow-Headers = "Content-Type, Stripe-Signature"
+    Access-Control-Allow-Methods = "POST, OPTIONS"

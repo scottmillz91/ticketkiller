@@ -675,34 +675,6 @@ h1, h2, h3 { text-wrap: balance; }
     scroll-behavior: auto !important;
   }
 }
-.pay-btn {
-  width: 100%;
-  min-height: 56px;
-  border-radius: 14px;
-  border: 0;
-  font-weight: 700;
-  font-size: 1.15rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-.pay-paypal {
-  background: #ffc439;
-  color: #003087;
-  font-style: italic;
-  font-family: "Figtree", Georgia, serif;
-}
-.pay-paypal strong { font-style: italic; font-weight: 800; color: #003087; }
-.pay-paypal em { font-style: italic; font-weight: 800; color: #009cde; }
-.pay-or {
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin: 16px 0 10px;
-  position: relative;
-}
 .price-card .btn-xl,
 .paywall-card .btn-xl { width: 100%; }
 
@@ -760,6 +732,15 @@ h1, h2, h3 { text-wrap: balance; }
    ============================================================ */
 
 /* --- Notice / disclaimer strip --- */
+/* Reassurance under the Stripe button. */
+.pay-secure {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--muted);
+  text-align: center;
+}
+
 /* --- Source links on stat badges --- */
 /* Source links: colour and size only. The underline is a border, set by the
    rules above, so this must not also apply text-decoration. */

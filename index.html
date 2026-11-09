@@ -335,21 +335,10 @@
             <p class="chip">You've used your free appeal</p>
             <h2>Pay <span data-price>£4.99</span> for the next letter</h2>
             <p>This account already has a free letter. First appeals are always free to draft with us — this charge covers the next one.</p>
-            <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-              <input type="hidden" name="cmd" value="_xclick" />
-              <input type="hidden" name="business" value="mrmillz1991@gmail.com" />
-              <input type="hidden" name="item_name" value="TicketKiller UK extra appeal" />
-              <input type="hidden" name="amount" value="4.99" />
-              <input type="hidden" name="currency_code" value="GBP" />
-              <input type="hidden" name="no_shipping" value="1" />
-              <input type="hidden" name="no_note" value="1" />
-              <input type="hidden" name="return" value="" />
-              <input type="hidden" name="cancel_return" value="" />
-              <input type="hidden" name="custom" value="" />
-              <input type="hidden" name="rm" value="1" />
-              <button class="pay-btn pay-paypal" type="submit"><strong>Pay</strong><em>Pal</em></button>
-              <button class="btn btn-primary btn-xl" type="submit" style="margin-top:10px;width:100%">Pay <span data-price>£4.99</span></button>
-            </form>
+            <button class="btn btn-primary btn-xl" type="button" data-stripe-pay>
+              Pay <span data-price>£4.99</span> by card
+            </button>
+            <p class="pay-secure">Card details are entered on Stripe's secure page — we never see them.</p>
             <p class="legal-meta" style="margin-top:10px">By paying you agree to the <button class="mini-btn" data-nav="terms" style="padding:2px 8px">terms</button>. Digital delivery is immediate; see the <button class="mini-btn" data-nav="refunds" style="padding:2px 8px">refund policy</button>.</p>
           </div>
         </div>
@@ -471,25 +460,13 @@
             <ul>
               <li>One more letter per ticket</li>
               <li>Pay per ticket, no subscription</li>
-              <li>PayPal or card on PayPal's secure page</li>
+              <li>Card payment on Stripe's secure page</li>
             </ul>
-            <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
-              <input type="hidden" name="cmd" value="_xclick" />
-              <input type="hidden" name="business" value="mrmillz1991@gmail.com" />
-              <input type="hidden" name="item_name" value="TicketKiller UK extra appeal" />
-              <input type="hidden" name="amount" value="4.99" />
-              <input type="hidden" name="currency_code" value="GBP" />
-              <input type="hidden" name="no_shipping" value="1" />
-              <input type="hidden" name="no_note" value="1" />
-              <input type="hidden" name="return" value="" />
-              <input type="hidden" name="cancel_return" value="" />
-              <input type="hidden" name="custom" value="" />
-              <input type="hidden" name="rm" value="1" />
-              <button class="pay-btn pay-paypal" type="submit" aria-label="Pay with PayPal"><strong>Pay</strong><em>Pal</em></button>
-              <p class="pay-or">PayPal also accepts card</p>
-              <button class="btn btn-primary btn-xl" type="submit">Pay <span data-price>£4.99</span></button>
-            </form>
-            <p class="fine">Payment goes to the operator of this site. PayPal charges their fee. See the <button class="mini-btn" data-nav="refunds" style="padding:2px 8px">refund policy</button>.</p>
+            <button class="btn btn-primary btn-xl" type="button" data-stripe-pay>
+              Pay <span data-price>£4.99</span> by card
+            </button>
+            <p class="pay-secure">Card details are entered on Stripe's secure page — we never see them.</p>
+            <p class="fine">Payment goes to the operator of this site. Stripe charges their fee. See the <button class="mini-btn" data-nav="refunds" style="padding:2px 8px">refund policy</button>.</p>
           </article>
         </div>
       </div>
@@ -523,7 +500,7 @@
           </details>
           <details>
             <summary>How can I pay?</summary>
-            <p>Your first appeal is free. Extra appeals are <span data-price>£4.99</span> each, paid through PayPal (PayPal balance or card). There is no subscription. You never have to pay us to lodge an appeal — that is free to do yourself.</p>
+            <p>Your first appeal is free. Extra appeals are <span data-price>£4.99</span> each, paid by card through Stripe. There is no subscription. You never have to pay us to lodge an appeal — that is free to do yourself.</p>
           </details>
           <details>
             <summary>Council ticket or private charge?</summary>
@@ -594,7 +571,7 @@
         <p>A PCN number and vehicle registration relate to a vehicle, and may identify a person. You are responsible for keeping that information secure on your own device. We never receive it.</p>
 
         <h2>Payment</h2>
-        <p>If you buy an extra letter, you are taken to PayPal. PayPal processes the payment as an independent controller under its own privacy notice. We receive a payment confirmation and the email address you used, which is used only to unlock the letter you paid for. We never see your card details.</p>
+        <p>If you buy an extra letter, you are taken to Stripe's hosted checkout page. Stripe processes the payment as an independent controller under its own privacy notice. We receive a payment confirmation and the email address you used, which is used only to unlock the letter you paid for. We never see or store your card details.</p>
 
         <h2>Your rights</h2>
         <p>Because we hold no personal data about you, the usual rights of access, rectification and erasure are met by your own browser: clearing site data erases everything this site has stored about you. <span id="icoLine">You have the right to complain to the Information Commissioner's Office.</span></p>
@@ -636,7 +613,7 @@
         <p>Accounts exist only in your browser. You are responsible for your own device security. If you clear your browser data, your account and letters are lost and cannot be recovered by us.</p>
 
         <h2>6. Charges</h2>
-        <p>Your first letter is free. Further letters cost <span data-price>£4.99</span> each, payable in advance through PayPal. Prices include VAT where applicable.</p>
+        <p>Your first letter is free. Further letters cost <span data-price>£4.99</span> each, payable in advance by card through Stripe. Prices include VAT where applicable.</p>
 
         <h2>7. Liability</h2>
         <p>Nothing in these terms limits liability for death or personal injury caused by negligence, for fraud, or for anything else that cannot lawfully be limited. Subject to that, we are not liable for indirect or consequential loss, or for any loss arising from a decision made by a parking operator, an adjudicator or a court.</p>
@@ -680,7 +657,7 @@
         <p>We may decline a refund where the letter was successfully delivered and you have already used it, or where the request is made long after purchase. We will always explain our reasoning.</p>
 
         <h2>How to ask</h2>
-        <p>Email <span data-contact-email></span> with your PayPal receipt and the PCN reference. We aim to reply <span data-contact-time>within 2 working days</span>, and to refund to the original payment method within 14 days of agreeing it.</p>
+        <p>Email <span data-contact-email></span> with your Stripe receipt and the PCN reference. We aim to reply <span data-contact-time>within 2 working days</span>, and to refund to the original payment method within 14 days of agreeing it.</p>
 
         <h2>Chargebacks</h2>
         <p>Please contact us before raising a chargeback. It is nearly always slower than asking.</p>

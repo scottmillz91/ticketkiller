@@ -15,12 +15,14 @@ window.TK_CONFIG = {
   business: {
     tradingName: "TicketKiller UK",
     // Sole trader: your full name. Limited company: the company name.
-    legalName: "",
+    // REQUIRED before any money can be taken. Leaving this blank keeps
+    // selling switched off, whatever the payments block below says.
+    legalName: "TODO: your full name or company name",
     // A real postal address, or a service address if you are a sole trader.
-    address: "",
+    address: "TODO: your postal or service address",
     country: "United Kingdom",
     // Published on the legal pages and used by the contact form.
-    email: "",
+    email: "TODO: you@yourdomain.co.uk",
     // Optional: company number if you register a limited company.
     companyNumber: "",
     vatNumber: ""
@@ -34,25 +36,36 @@ window.TK_CONFIG = {
     symbol: "£"
   },
 
-  /* ---------- Payments (PayPal _xclick) ----------
+  /* ---------- Payments (Stripe Checkout) ----------
+     Payments are handled by three Netlify functions under /api/.
+     Stripe's secret key lives in Netlify's environment variables, never
+     in this file — anything here is downloaded by every visitor.
+
      Paying is enabled only when ALL of these are true:
-       · paypal.enabled is true
-       · business.legalName and business.email are filled in
-       · paypal.verifyReturns is true (i.e. payments are verified)
-     Otherwise every pay button is hidden and letters are unlimited.
-     See "Payments" in README.md for why verifyReturns matters.     */
-  paypal: {
+       · payments.provider is "stripe"
+       · payments.enabled is true
+       · payments.apiBase points at the deployed functions
+       · business.legalName, address and email are filled in
+     Otherwise every pay button is hidden and letters stay unlimited.
+
+     Card details are entered on Stripe's own page. This site never sees
+     them, which is why it stays out of PCI scope.                    */
+  payments: {
+    provider: "stripe",
     enabled: true,
-    business: "mrmillz1991@gmail.com",
-    itemName: "TicketKiller UK extra appeal",
-    // PayPal cannot verify a return URL client-side. Leave this false
-    // and read the warning in README.md before taking real money.
-    verifyReturns: false
+    // Where the Netlify functions live. Set this after the first deploy,
+    // e.g. "https://ticketkiller-payments.netlify.app". Empty means
+    // "same origin", which is only correct when the site itself is on
+    // Netlify rather than GitHub Pages.
+    apiBase: "",
+    // Kept in sync with PRICE_PENCE in netlify/functions/checkout.js.
+    // The server is authoritative; this is only for display.
+    pricePence: 499
   },
 
   /* ---------- Contact ---------- */
   contact: {
-    email: "",
+    email: "TODO: you@yourdomain.co.uk",
     responseTime: "within 2 working days"
   },
 

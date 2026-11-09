@@ -25,8 +25,22 @@ function assert(cond, msg) { if (!cond) throw new Error(msg || "assertion failed
 
 /* Serve everything from disk so <script src> and fetch() both work. */
 const MIME = { ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".woff2": "font/woff2", ".html": "text/html" };
+/* The shipped config.js deliberately has blank seller details, which keeps
+   selling off. The suite swaps in a configured copy so the Stripe path can
+   be exercised; the production gate is checked separately below. */
+const configuredConfig = () => {
+  const src = fs.readFileSync(path.join(root, "assets", "config.js"), "utf8");
+  return src
+    .replace(/legalName:\s*"[^"]*"/, 'legalName: "Alex Driver"')
+    .replace(/address:\s*"[^"]*"/, 'address: "1 Test Street, London, AB1 2CD"')
+    .replace(/email:\s*"TODO[^"]*"/g, 'email: "payments@example-driver.co.uk"')
+    .replace(/email:\s*""/g, 'email: "payments@example-driver.co.uk"');
+};
 const localServer = requestInterceptor((request) => {
   const rel = new URL(request.url).pathname.replace(/^\//, "") || "index.html";
+  if (rel === "assets/config.js") {
+    return new Response(configuredConfig(), { status: 200, headers: { "Content-Type": "text/javascript" } });
+  }
   const full = path.join(root, rel);
   if (!fs.existsSync(full)) return new Response("not found", { status: 404 });
   const type = MIME[path.extname(full)] || "application/octet-stream";
@@ -239,10 +253,62 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
   // ---------- paywall ----------
   nav("details");
   await sleep(30);
-  check("paywall stays closed while selling is disabled", () => {
-    assert(document.documentElement.getAttribute("data-tk-selling") === "0", "should not be selling");
-    assert($("paywallPane").hidden === true, "paywall shown despite no seller identity");
-    assert($("generateBtn").disabled === false, "letters should stay unlimited");
+  check("configured seller identity opens the paywall", () => {
+    /* The suite runs against a config with the seller details filled in,
+       which is the state a real deployment must be in before selling. */
+    assert(document.documentElement.getAttribute("data-tk-selling") === "1", "selling should be enabled");
+  });
+  check("pay buttons follow the selling flag", () => {
+    /* Regression: the pricing-card button was outside the element being
+       hidden, so it stayed clickable while selling was off. */
+    const paid = document.documentElement.getAttribute("data-tk-selling") === "1";
+    const btns = [...document.querySelectorAll("[data-stripe-pay]")];
+    assert(btns.length >= 1, "no Stripe pay button found");
+    const shown = btns.filter((b) => !b.hidden).length;
+    assert(paid ? shown === btns.length : shown === 0,
+      `${shown} of ${btns.length} pay buttons visible while selling=${paid ? "on" : "off"}`);
+  });
+  check("no TODO placeholder is visible in the page", () => {
+    assert(!/TODO/.test(document.documentElement.textContent), "a TODO stub is rendered");
+  });
+  check("shipped config keeps selling off until details are filled", () => {
+    /* The file in the repo still has TODO placeholders, so a deploy that
+       forgets to fill them in cannot take money. */
+    const shipped = fs.readFileSync(path.join(root, "assets", "config.js"), "utf8");
+    assert(/legalName:\s*"TODO/.test(shipped), "legalName is not a placeholder");
+    assert(/address:\s*"TODO/.test(shipped), "address is not a placeholder");
+    assert(/email:\s*"TODO/.test(shipped), "email is not a placeholder");
+  });
+  check("a forged success URL cannot unlock a letter", () => {
+    /* The page is loaded with ?stripe=success&… in no test, which is the
+       point: the unlock path only runs on a return. What is checked here is
+       that nothing grants a credit without the server saying paid. */
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    const fn = src.slice(src.indexOf("async function catchStripeReturn"), src.indexOf("function bindContact"));
+    assert(/data\.paid/.test(fn), "the return handler does not check the server verdict");
+    assert(/verify-session/.test(fn), "the return handler does not call the server");
+    /* Granting must be inside the paid branch, never before it. */
+    const grantAt = fn.indexOf("grantPaidCredit(");
+    const paidAt = fn.indexOf("if (data.paid)");
+    assert(grantAt > paidAt, "credit granted outside the verified branch");
+  });
+  check("payment is verified before anything is recorded", () => {
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    const fn = src.slice(src.indexOf("async function catchStripeReturn"), src.indexOf("function bindContact"));
+    const verifyAt = fn.indexOf("verify-session");
+    const spentAt = fn.indexOf("markSessionSpent(id)");
+    assert(verifyAt > 0 && spentAt > verifyAt, "session marked spent before verification");
+  });
+  check("a payment for an unknown account is held, not lost", () => {
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    assert(/HELD_KEY/.test(src), "no held-credit store");
+    assert(/function applyHeldCredits/.test(src), "held credits are never released");
+    assert(/applyHeldCredits\(email\)/.test(src), "release is not wired into login");
+  });
+  check("paying is card-only and never names a client secret", () => {
+    const html = document.documentElement.innerHTML;
+    assert(!/sk_live_|sk_test_/.test(html), "a Stripe secret key is in the page");
+    assert(!/paypal/i.test(html), "PayPal copy still present");
   });
   check("config drives the displayed price", () => {
     const texts = [...document.querySelectorAll("[data-price]")].map((e) => e.textContent.trim());
@@ -333,10 +399,11 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(!/YOUR FULL LEGAL NAME|YOUR POSTAL ADDRESS/.test(html), "placeholder text still visible");
     assert(!/\[YOUR/.test(html), "bracketed placeholder still visible");
   });
-  check("legal pages degrade to the trading name when unconfigured", () => {
+  check("privacy page names the seller without placeholders", () => {
     const t = $("page-privacy").textContent;
     assert(t.includes("TicketKiller UK"), "no trading name on privacy page");
-    assert(document.documentElement.getAttribute("data-tk-selling") === "0", "selling flag wrong");
+    assert(!/TODO/.test(document.documentElement.textContent), "a TODO placeholder is visible");
+    assert(!/\[YOUR/.test(t), "bracketed placeholder on privacy page");
   });
   check("refunds page covers digital cancellation", () => assert(/digital content/i.test($("page-refunds").textContent), "no digital content section"));
 

@@ -46,7 +46,7 @@ Static site — no framework, no build step, no backend.
 | Legal pages | Privacy notice, terms, refund policy and contact page |
 | Data page | Every statistic quoted, with its source and what it does *not* prove |
 | Export | Copy to clipboard and PDF download (jsPDF, vendored locally) |
-| Pricing | First appeal free, £4.99 per extra appeal via PayPal |
+| Pricing | First appeal free, £4.99 per extra appeal, paid by card via Stripe |
 
 Target audience: **private** parking charges from operators such as ParkingEye, UKPC, Euro Car Parks and NCP. Council PCNs follow a different statutory process and are out of scope — the FAQ says so.
 
@@ -87,13 +87,13 @@ business: {
 
 | With blanks | Behaviour |
 | --- | --- |
-| Paying | Switched off automatically. Every letter is free; the paywall, PayPal buttons and pricing note adapt. |
+| Paying | Switched off automatically. Every letter is free; the paywall, Stripe buttons and pricing note adapt. |
 | Privacy / terms pages | Identify the trading name only, with no invented legal identity. No bracketed placeholders are shown. |
 | Contact page | Says no address is configured rather than printing an empty label. |
 | Setup banner | Appears **only on localhost**, never on the deployed site, so it doesn't advertise an unfinished build. |
 
 **Fill them in and the legal pages populate.** Payments stay off until you also
-set `paypal.verifyReturns: true` — see [Payments](#payments). That is deliberate:
+fill in the seller details — see [Payments](#payments). That is deliberate:
 the site will not take money while it cannot verify it received any.
 
 Verify the gate with:
@@ -138,7 +138,7 @@ Everything lives in `assets/config.js`:
 | --- | --- |
 | `business` | Legal name, trading name, address, contact email — feeds the legal pages and footer |
 | `pricing` | The displayed price and currency symbol |
-| `paypal` | Business email, item name, and the `enabled` kill switch |
+| `payments` | `provider`, `enabled` kill switch, and `apiBase` for the functions |
 | `contact` | Contact email and the response time quoted to users |
 | `analytics` | Off by default; plausible-style event POSTing |
 | `deadlines` | All the countdown windows (appeal, discount, POPLA, POFA 14 / 28 / 56 days) |
@@ -161,10 +161,10 @@ features: {
 **Currency and pricing gotcha.** The price is written in three kinds of place in `index.html`, but the *displayed* amount now comes from `[data-price]` spans filled from config. If you change the price you must still update:
 
 1. `pricing.extraLetterLabel` in `assets/config.js` — drives the visible text
-2. the `name="amount"` hidden input in **both** PayPal forms in `index.html` (`value="4.99"`)
+2. `PRICE_PENCE` in `netlify/functions/checkout.js` — this is what Stripe actually charges
 3. the literal `<p class="price"><span>£</span>4.99</p>` on the pricing card
 
-The hidden input is what PayPal actually charges; the config only changes what people see. Mismatched, and you display one price while charging another.
+The server value is authoritative; the config only changes what people see. Mismatched and you display one price while charging another.
 
 ---
 
@@ -234,37 +234,93 @@ The file notes in `_note` that trade-body membership changes. The rejection lett
 
 ## Payments
 
-PayPal **`_xclick`** — no SDK, no API key, no server. Before submitting, the app records a pending payment in `localStorage` (email + random nonce) and fills three hidden fields at runtime:
+Stripe Checkout. Card details are typed on Stripe's page, so this codebase never
+handles them and stays out of PCI scope.
 
-| Field | Value |
+### Why there is a server
+
+The site is static, and Stripe cannot be driven from a static page. Creating a
+Checkout session needs the **secret key**, which can create charges and refunds.
+If that key were in `assets/config.js` it would be in every visitor's browser.
+
+So three small serverless functions live in `netlify/functions/`, and only they
+hold the key:
+
+| Endpoint | What it does |
 | --- | --- |
-| `return` | current URL + `?paypal=success` |
-| `cancel_return` | current URL + `?paypal=cancel` |
-| `custom` | `email\|nonce` |
+| `POST /api/checkout` | Creates a Checkout session and returns its URL. The price is fixed server-side, so a buyer cannot name their own amount. |
+| `GET  /api/verify-session` → `POST` | The browser hands back the `session_id` from the redirect. This asks Stripe whether that session was really paid. |
+| `POST /api/stripe-webhook` | Verifies Stripe's signature against the raw body and logs the purchase. This is the only place a payment is treated as real. |
 
-On return, `?paypal=success` grants a credit to the pending email.
+GitHub Pages keeps serving the site. Netlify hosts only `/api/*`.
 
-### ⚠️ The paywall is not enforced
+### The rule the code follows
 
-The app trusts the query string. Anyone can append `?paypal=success` to the URL and unlock a free letter. This is not fixable in the browser — the page has no way to know whether PayPal actually received money.
+**The URL is not evidence.** `?stripe=success` can be typed by hand, so nothing
+unlocks until `/api/verify-session` says `paid: true`. If that call fails, times
+out, or returns anything else, no letter is granted — see `catchStripeReturn()`
+in `assets/app.js`.
 
-`config.paypal.verifyReturns: false` is what keeps payments switched off. The
-site can only sell when it is `true`, which you should only set once one of the
-following is actually in place:
+Each session id is recorded after use, so reloading the success URL cannot mint
+a second letter.
 
+### Setting it up
 
+1. **Stripe.** Create an account, then copy the secret key from Developers → API keys.
+   Use `sk_test_…` first; live keys only once a real payment has worked end to end.
+2. **Netlify.** Add the repo as a new site. `netlify.toml` points it at
+   `netlify/functions`, so no build settings are needed.
+3. **Environment variables** in Netlify → Site settings → Environment variables:
 
-1. **PayPal IPN** — a small server endpoint that receives PayPal's POST, verifies it back to PayPal, checks the amount and the `custom` field, and marks the account paid. Then the browser only *displayed* the result; the server *decided* it.
-2. **PayPal Webhooks + a tiny API** — same idea, modern interface.
-3. **A checkout with server-side capture** — Stripe or PayPal Orders, where the session is created and confirmed server-side.
+   | Variable | Value |
+   | --- | --- |
+   | `STRIPE_SECRET_KEY` | `sk_test_…` / `sk_live_…` |
+   | `SITE_URL` | `https://scottmillz91.github.io/ticketkiller` |
+   | `STRIPE_WEBHOOK_SECRET` | `whsec_…` from step 5 |
 
-Until one of those exists, treat the paid tier as a demo. `config.paypal.enabled = false` hides every pay button and makes letters unlimited, which is the honest setting while testing.
+4. **`assets/config.js`** → set `payments.apiBase` to the Netlify site URL, e.g.
+   `https://ticketkiller-payments.netlify.app`. Leave it empty only if the site
+   itself is served from Netlify.
+5. **Stripe → Developers → Webhooks** → add
+   `https://<netlify-site>/api/stripe-webhook`, subscribed to
+   `checkout.session.completed`. Copy the signing secret into step 3.
+6. **Fill in the seller details** at the top of `assets/config.js` — `legalName`,
+   `address`, `email`. Until they are real, `canSell` stays false and every pay
+   button is hidden. This is deliberate: UK consumer law requires an identifiable
+   trader before money changes hands.
+
+### Test card
+
+`4242 4242 4242 4242`, any future expiry, any CVC.
+
+### What the tests cover
+
+The smoke suite runs against a config with the seller details filled in, and
+checks that the return handler only grants a credit inside the verified branch.
+Server behaviour was exercised separately: unsigned webhooks, tampered bodies,
+unpaid sessions, unreachable Stripe and malformed session ids all resolve to
+"not paid" rather than erroring open.
+
+### Known limits, stated plainly
+
+- **Credits live in `localStorage`.** Clearing site data loses paid letters.
+  Purchases are logged by the webhook so they can be honoured by hand, and the
+  checkout function takes the account email as metadata — which is what makes
+  that possible.
+- **No refund automation.** Refunds are manual from the Stripe dashboard; the
+  refunds page describes the 14-day position.
+- **Rate limiting is per-instance and best-effort**, not a security boundary.
 
 ---
 
 ## Data and privacy
 
-No server, no database, no analytics by default. Nothing typed into the site is transmitted anywhere except the redirect to PayPal.
+The site itself has no database and no analytics by default. Letters and accounts never leave the browser. Two things do leave it, both only when you choose to pay:
+
+- the **email address** of your account, to `/api/checkout`, so a payment can be tied to it
+- a redirect to **Stripe's** hosted checkout page
+
+Nothing else is transmitted anywhere.
 
 `localStorage` keys:
 
@@ -372,7 +428,7 @@ Tune the cut with `SAMPLE_PREVIEW_LINES` in `assets/app.js`.
 ## Known limitations
 
 1. **No backend.** Accounts, sessions and history are per-browser. Same user on a phone and a laptop are two unrelated accounts, and clearing site data destroys everything.
-2. **Payments unverified.** The `?paypal=success` bypass described above.
+2. **Paid credits live in the browser.** A payment is verified server-side, but the resulting credit is stored in `localStorage`, so clearing site data loses it. The webhook logs every purchase and the checkout call carries the account email, so a lost credit can be restored by hand.
    Related: the sample letter on the landing page is watermarked and
    non-selectable, but its text is still in the DOM, as is the letter template.
 3. **Business email is in the page source** (`config.js` is public), so scrapers will find it.
