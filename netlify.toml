@@ -21,11 +21,9 @@
   status = 200
   force = true
 
-# The browser calls these from the GitHub Pages origin, which is a
-# different site as far as the browser is concerned.
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "https://scottmillz91.github.io"
-    Access-Control-Allow-Headers = "Content-Type, Stripe-Signature"
-    Access-Control-Allow-Methods = "POST, OPTIONS"
+# NOTE: CORS is set by the functions themselves, from SITE_URL, not here.
+#
+# A blanket [[headers]] block on /api/* would also land on webhook responses,
+# and having a second copy of Access-Control-Allow-Origin alongside the one
+# the function returns can produce a duplicated header, which browsers reject.
+# The functions are the single source of truth: change SITE_URL, not this file.
