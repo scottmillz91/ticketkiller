@@ -3,93 +3,41 @@
   "_updated": "2026-11-09",
   "operators": [
     {
-      "id": "parkingeye",
-      "name": "ParkingEye Ltd",
-      "aliases": ["parking eye", "parkingeye ltd"],
+      "id": "apcoa",
+      "name": "APCOA Parking UK",
+      "aliases": [
+        "apcoa"
+      ],
       "tradeBody": "BPA",
-      "siteType": "ANPR camera, retail and motorway services",
+      "siteType": "Railway stations and airports",
       "themes": [
-        "Cases usually rest entirely on ANPR entry and exit stills, so ask for full-colour images and the second-by-second timestamps.",
-        "Check the Notice to Keeper against the 14-day POFA limit — pure ANPR cases have no windscreen ticket to extend it.",
-        "Maximum-stay sites often turn on whether the consideration period was enough to read the terms and park."
+        "Station and airport sites are usually byelaw or contractual — check which basis the notice states.",
+        "Drop-off zones rely on very short periods; request the exact entry and exit timestamps.",
+        "Ask for the contractual terms incorporated at the point of entry."
       ]
     },
     {
-      "id": "euro-car-parks",
-      "name": "Euro Car Parks",
-      "aliases": ["euro car parks", "ecp"],
+      "id": "britannia-parking",
+      "name": "Britannia Parking Group Ltd",
+      "aliases": [
+        "britannia parking",
+        "brit park",
+        "britannia"
+      ],
       "tradeBody": "BPA",
-      "siteType": "Retail, leisure and town-centre car parks",
+      "siteType": "Retail parks, town centres and hotel car parks",
       "themes": [
-        "Signage at the entrance is frequently the decisive point — request the site plan and dated photographs.",
-        "Confirm whether the charge was issued on the basis of a windscreen ticket or ANPR, as the POFA deadline differs.",
-        "Landowner authority is worth requesting where the site changed management."
-      ]
-    },
-    {
-      "id": "ukpc",
-      "name": "UK Parking Control Ltd",
-      "aliases": ["uk parking control", "ukpc"],
-      "tradeBody": "BPA",
-      "siteType": "Residential, retail and industrial estates",
-      "themes": [
-        "Often a windscreen ticket followed by a postal notice, so the 28-to-56-day POFA window applies, not the 14-day one.",
-        "Residential sites frequently turn on whether the keeper was ever shown the terms in the tenancy or lease.",
-        "Request the landowner contract where the operator's authority is not obvious."
-      ]
-    },
-    {
-      "id": "ncp",
-      "name": "NCP (National Car Parks)",
-      "aliases": ["ncp", "national car parks"],
-      "tradeBody": "BPA",
-      "siteType": "Pay-and-display, station and town-centre car parks",
-      "themes": [
-        "Failure to display or a faulty machine is worth documenting with a timestamped photograph.",
-        "Check whether a valid ticket was purchased but misread — payment records can be requested.",
-        "Grace periods after paid time expires are commonly the winning point."
-      ]
-    },
-    {
-      "id": "smart-parking",
-      "name": "Smart Parking Ltd",
-      "aliases": ["smart parking"],
-      "tradeBody": "BPA",
-      "siteType": "Retail and leisure, ANPR",
-      "themes": [
-        "ANPR-only evidence: presence at the cameras is not automatically a period of parking.",
-        "A second visit on the same day is a common cause of an apparently excessive recorded stay.",
-        "Ask for the full evidence pack before you accept the recorded duration."
-      ]
-    },
-    {
-      "id": "excel",
-      "name": "Excel Parking Services Ltd",
-      "aliases": ["excel parking"],
-      "tradeBody": "IPC",
-      "siteType": "Retail and urban car parks",
-      "themes": [
-        "IPC operators must offer the Independent Appeals Service (IAS) rather than POPLA — check the wording on the rejection.",
-        "Payment-machine faults and unclear tariff boards are common grounds.",
-        "Request the signage schedule and the machine maintenance log for the date in question."
-      ]
-    },
-    {
-      "id": "met",
-      "name": "MET Parking Services Ltd",
-      "aliases": ["met parking"],
-      "tradeBody": "BPA",
-      "siteType": "Retail parks, hotels and airports",
-      "themes": [
-        "Airport and hotel sites often hinge on the exact terms shown at entry.",
-        "Check the period of parking stated on the notice against the timestamps you are given.",
-        "Consider whether the charge is a genuine estimate of loss or a penalty, given ParkingEye v Beavis."
+        "BPA operator, so a rejection should include a POPLA code — check that it does, and that the code is valid.",
+        "Ask for the signage photographs taken at the time of the alleged contravention, not generic images of the site.",
+        "Check whether the charge was issued in the operator's own name and whether the landowner contract permits it."
       ]
     },
     {
       "id": "civil-enforcement",
       "name": "Civil Enforcement Ltd",
-      "aliases": ["civil enforcement"],
+      "aliases": [
+        "civil enforcement"
+      ],
       "tradeBody": "BPA",
       "siteType": "Retail and residential",
       "themes": [
@@ -99,9 +47,89 @@
       ]
     },
     {
+      "id": "cp-plus",
+      "name": "CP Plus Ltd",
+      "aliases": [
+        "cp plus",
+        "cp+",
+        "group nexus",
+        "groupnexus",
+        "nexus",
+        "nexus platform"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Motorway services, retail and hospital car parks (trading as GroupNexus)",
+      "themes": [
+        "Trades as GroupNexus, so the name on the notice and the name on the website rarely match. Appeal to whichever is printed, quoting the PCN reference exactly.",
+        "Motorway services sites turn on the free-parking period and the grace period that follows it — both are set by the site, not by statute.",
+        "As a BPA operator, a rejected appeal must come with a POPLA code. Write the code down when the rejection arrives; the window to use it is short."
+      ]
+    },
+    {
+      "id": "district-enforcement",
+      "name": "District Enforcement Ltd",
+      "aliases": [
+        "district enforcement"
+      ],
+      "tradeBody": "IPC",
+      "siteType": "Residential estates, universities and retail parks",
+      "themes": [
+        "IPC member: the escalation route is the IAS, not POPLA.",
+        "Residential sites usually turn on whether the keeper was ever shown the terms, and whether the landowner authorised charges.",
+        "Windscreen tickets followed by a postal notice must meet the 28-to-56-day POFA window, not the 14-day one."
+      ]
+    },
+    {
+      "id": "euro-car-parks",
+      "name": "Euro Car Parks",
+      "aliases": [
+        "euro car parks",
+        "ecp"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail, leisure and town-centre car parks",
+      "themes": [
+        "Signage at the entrance is frequently the decisive point — request the site plan and dated photographs.",
+        "Confirm whether the charge was issued on the basis of a windscreen ticket or ANPR, as the POFA deadline differs.",
+        "Landowner authority is worth requesting where the site changed management."
+      ]
+    },
+    {
+      "id": "excel",
+      "name": "Excel Parking Services Ltd",
+      "aliases": [
+        "excel parking"
+      ],
+      "tradeBody": "IPC",
+      "siteType": "Retail and urban car parks",
+      "themes": [
+        "IPC operators must offer the Independent Appeals Service (IAS) rather than POPLA — check the wording on the rejection.",
+        "Payment-machine faults and unclear tariff boards are common grounds.",
+        "Request the signage schedule and the machine maintenance log for the date in question."
+      ]
+    },
+    {
+      "id": "highview",
+      "name": "Highview Parking Ltd",
+      "aliases": [
+        "highview parking",
+        "highview"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail and leisure car parks",
+      "themes": [
+        "Part of the GroupNexus group, alongside CP Plus. Correspondence may come under any of those names.",
+        "ANPR sites: timestamps to the second decide most of these cases, so ask for both images and the camera identifiers.",
+        "A rejected appeal must offer POPLA. No code in the rejection is itself worth raising."
+      ]
+    },
+    {
       "id": "horizon",
       "name": "Horizon Parking",
-      "aliases": ["horizon parking"],
+      "aliases": [
+        "horizon",
+        "horizon parking"
+      ],
       "tradeBody": "BPA",
       "siteType": "Retail, healthcare and education",
       "themes": [
@@ -111,15 +139,300 @@
       ]
     },
     {
-      "id": "apcoa",
-      "name": "APCOA Parking UK",
-      "aliases": ["apcoa"],
+      "id": "initial-parking",
+      "name": "Initial Parking Ltd",
+      "aliases": [
+        "initial parking"
+      ],
       "tradeBody": "BPA",
-      "siteType": "Railway stations and airports",
+      "siteType": "Retail parks and town-centre car parks",
       "themes": [
-        "Station and airport sites are usually byelaw or contractual — check which basis the notice states.",
-        "Drop-off zones rely on very short periods; request the exact entry and exit timestamps.",
-        "Ask for the contractual terms incorporated at the point of entry."
+        "ANPR sites: request both entry and exit images, uncropped, and check the timestamps against the maximum stay.",
+        "The grace period at the end of a stay is a common ground — the BPA code expects time to leave after the permitted period.",
+        "Confirm the Notice to Keeper arrived within 14 days of the parking event if they want to hold the keeper liable."
+      ]
+    },
+    {
+      "id": "met",
+      "name": "MET Parking Services Ltd",
+      "aliases": [
+        "met parking"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail parks, hotels and airports",
+      "themes": [
+        "Airport and hotel sites often hinge on the exact terms shown at entry.",
+        "Check the period of parking stated on the notice against the timestamps you are given.",
+        "Consider whether the charge is a genuine estimate of loss or a penalty, given ParkingEye v Beavis."
+      ]
+    },
+    {
+      "id": "minster-baywatch",
+      "name": "Minster Baywatch Ltd",
+      "aliases": [
+        "minster baywatch",
+        "minster"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail, leisure and residential car parks",
+      "themes": [
+        "BPA operator: escalate a rejection to POPLA using the code in the rejection letter.",
+        "Residential and permit sites often turn on landowner authority and on whether the terms were communicated to the keeper.",
+        "Ask for the full evidence pack, including the signage plan, rather than the photographs they choose to send."
+      ]
+    },
+    {
+      "id": "ncp",
+      "name": "NCP (National Car Parks)",
+      "aliases": [
+        "ncp",
+        "national car parks"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Pay-and-display, station and town-centre car parks",
+      "themes": [
+        "Failure to display or a faulty machine is worth documenting with a timestamped photograph.",
+        "Check whether a valid ticket was purchased but misread — payment records can be requested.",
+        "Grace periods after paid time expires are commonly the winning point."
+      ]
+    },
+    {
+      "id": "park-direct-uk",
+      "name": "Park Direct UK Ltd",
+      "aliases": [
+        "park direct",
+        "park direct uk"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail and commercial car parks",
+      "themes": [
+        "BPA operator: escalate a rejection to POPLA.",
+        "Ask for the evidence pack, including the signage plan and landowner authority.",
+        "Check the Notice to Keeper dates against POFA before arguing anything else."
+      ]
+    },
+    {
+      "id": "parking-and-enforcement-agency",
+      "name": "Parking & Enforcement Agency Ltd",
+      "aliases": [
+        "parking & enforcement agency",
+        "parking and enforcement agency",
+        "pea parking"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail and commercial car parks",
+      "themes": [
+        "BPA member, so the independent stage is POPLA.",
+        "Smaller operators are more likely to have gaps in the Notice to Keeper timing — check the dates carefully.",
+        "Ask them to prove the landowner authorised charges in their own name at this specific site."
+      ]
+    },
+    {
+      "id": "parkingeye",
+      "name": "ParkingEye Ltd",
+      "aliases": [
+        "parking eye",
+        "parkingeye ltd"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "ANPR camera, retail and motorway services",
+      "themes": [
+        "Cases usually rest entirely on ANPR entry and exit stills, so ask for full-colour images and the second-by-second timestamps.",
+        "Check the Notice to Keeper against the 14-day POFA limit — pure ANPR cases have no windscreen ticket to extend it.",
+        "Maximum-stay sites often turn on whether the consideration period was enough to read the terms and park."
+      ]
+    },
+    {
+      "id": "parkmaven",
+      "name": "ParkMaven Ltd",
+      "aliases": [
+        "parkmaven",
+        "park maven"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail, leisure and residential car parks",
+      "themes": [
+        "BPA operator: a rejected appeal should come with a POPLA code.",
+        "Screen-ticket and ANPR sites differ in the POFA timing that applies — check which one you are dealing with before arguing timing.",
+        "Signage clarity is the ground that most often succeeds at sites like these."
+      ]
+    },
+    {
+      "id": "premier-park",
+      "name": "Premier Park Ltd",
+      "aliases": [
+        "premier park"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail, leisure and residential car parks",
+      "themes": [
+        "BPA member, so escalate a rejection to POPLA with the code provided.",
+        "Ask for the landowner authority and the signage plan for the specific site.",
+        "Check the Notice to Keeper meets the 14-day POFA deadline if they seek to hold the keeper liable."
+      ]
+    },
+    {
+      "id": "premier-parking-enforcement",
+      "name": "Premier Parking Enforcement Ltd",
+      "aliases": [
+        "premier parking enforcement"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail, leisure and residential car parks",
+      "themes": [
+        "BPA operator: the independent stage is POPLA.",
+        "Distinct from Premier Park Ltd despite the similar name — use the exact company named on your notice.",
+        "Signage, grace periods and POFA timing are the usual deciding points."
+      ]
+    },
+    {
+      "id": "q-park",
+      "name": "Q-Park Ltd",
+      "aliases": [
+        "q-park",
+        "q park",
+        "qpark"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Town-centre and station multi-storey car parks",
+      "themes": [
+        "BPA member, so a rejection escalates to POPLA.",
+        "Barrier and payment records matter here: ask for the entry and exit times and the payment record together.",
+        "If you paid but overstayed, the argument is about the grace period and the proportionality of the charge, not about whether you paid."
+      ]
+    },
+    {
+      "id": "saba-parking",
+      "name": "Saba Park Solutions UK Ltd",
+      "aliases": [
+        "saba parking",
+        "saba"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Station, hospital and town-centre car parks",
+      "themes": [
+        "BPA operator: POPLA is the independent stage after a rejection.",
+        "Station and hospital sites often have complex tariff structures — ask for the tariff in force on the day.",
+        "Payment machine or app records are worth requesting: their failure is not your liability."
+      ]
+    },
+    {
+      "id": "sip-parking",
+      "name": "SiP Parking Ltd",
+      "aliases": [
+        "sip parking",
+        "sip car parks",
+        "simple intelligent parking",
+        "anpreye",
+        "stops illegal parking"
+      ],
+      "tradeBody": "IPC",
+      "siteType": "Retail, leisure and residential car parks",
+      "themes": [
+        "IPC member, so a rejected appeal escalates to the IAS rather than POPLA. The IAS window is shorter — do not sit on the rejection.",
+        "Operates under several trading names. Use the name on the notice and keep the reference exactly as printed.",
+        "Signage and the clarity of the terms are the strongest grounds at IPC sites, because the IAS decides on the balance of the evidence shown."
+      ]
+    },
+    {
+      "id": "smart-parking",
+      "name": "Smart Parking Ltd",
+      "aliases": [
+        "smart parking"
+      ],
+      "tradeBody": "IPC",
+      "siteType": "Retail and leisure, ANPR",
+      "themes": [
+        "ANPR-only evidence: presence at the cameras is not automatically a period of parking.",
+        "A second visit on the same day is a common cause of an apparently excessive recorded stay.",
+        "Ask for the full evidence pack before you accept the recorded duration."
+      ]
+    },
+    {
+      "id": "spring-parking",
+      "name": "Spring Parking Ltd",
+      "aliases": [
+        "spring parking"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail and leisure car parks",
+      "themes": [
+        "BPA operator, so POPLA is the route after a rejection.",
+        "Request the ANPR images and timestamps to the second, plus the signage photographs from the day.",
+        "Check the charge is pursued in the right name and that the landowner authorised it."
+      ]
+    },
+    {
+      "id": "total-car-parks",
+      "name": "Total Car Parks Ltd",
+      "aliases": [
+        "total car parks",
+        "total car park"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail, leisure and residential car parks",
+      "themes": [
+        "Ask for the landowner authority. Smaller operators frequently issue charges on land where their contract does not clearly let them do so in their own name.",
+        "Signage is the usual weak point: look at whether the terms were visible on the way in, not just deeper into the site.",
+        "Check the Notice to Keeper date against the parking date — the 14-day POFA deadline catches operators of this size often."
+      ]
+    },
+    {
+      "id": "total-parking-solutions",
+      "name": "Total Parking Solutions Ltd",
+      "aliases": [
+        "total parking solutions"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Retail, leisure and commercial car parks",
+      "themes": [
+        "BPA member: POPLA is the independent stage.",
+        "Distinct from Total Car Parks Ltd — check which company is named on the notice.",
+        "The POFA Notice to Keeper timing and the clarity of signage are the usual grounds."
+      ]
+    },
+    {
+      "id": "uk-car-park-management",
+      "name": "UK Car Park Management Ltd",
+      "aliases": [
+        "uk car park management",
+        "ukcpm"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Residential estates and retail car parks",
+      "themes": [
+        "BPA member: escalate to POPLA after a rejection.",
+        "Residential permit schemes frequently fail on whether the keeper was ever shown the terms.",
+        "Ask for the landowner contract — authority to issue charges in their own name is often the weakest link."
+      ]
+    },
+    {
+      "id": "ukpc",
+      "name": "UK Parking Control Ltd",
+      "aliases": [
+        "uk parking control",
+        "ukpc"
+      ],
+      "tradeBody": "BPA",
+      "siteType": "Residential, retail and industrial estates",
+      "themes": [
+        "Often a windscreen ticket followed by a postal notice, so the 28-to-56-day POFA window applies, not the 14-day one.",
+        "Residential sites frequently turn on whether the keeper was ever shown the terms in the tenancy or lease.",
+        "Request the landowner contract where the operator's authority is not obvious."
+      ]
+    },
+    {
+      "id": "ukcps",
+      "name": "UKCPS Ltd",
+      "aliases": [
+        "ukcps"
+      ],
+      "tradeBody": "IPC",
+      "siteType": "Residential estates and retail car parks",
+      "themes": [
+        "IPC member: a rejected appeal escalates to the IAS, not POPLA.",
+        "The IAS window after a rejection is short, so act as soon as the rejection arrives.",
+        "With IPC cases the evidence matters more — submit everything at the first attempt, because there is no second chance to add it."
       ]
     }
   ]

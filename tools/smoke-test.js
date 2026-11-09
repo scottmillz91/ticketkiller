@@ -91,6 +91,40 @@ const dom = new JSDOM(html, {
 
 const { window } = dom;
 const { document } = window;
+
+/* A second, independent page carrying pre-set storage — the way a returning
+   visitor's browser arrives. The main fixture has already booted, so anything
+   that must be decided at start-up needs its own window. */
+function freshWindow(storage = {}) {
+  const seeded = Object.assign({}, storage);
+  const local = {
+    getItem: (k) => (Object.prototype.hasOwnProperty.call(seeded, k) ? seeded[k] : null),
+    setItem: (k, v) => { seeded[k] = String(v); },
+    removeItem: (k) => { delete seeded[k]; },
+    clear: () => { Object.keys(seeded).forEach((k) => delete seeded[k]); },
+    key: (i) => Object.keys(seeded)[i] || null,
+    get length() { return Object.keys(seeded).length; }
+  };
+  return new JSDOM(html, {
+    url: "http://localhost/",
+    runScripts: "dangerously",
+    resources: { interceptors: [localServer] },
+    virtualConsole: vc,
+    pretendToBeVisual: true,
+    beforeParse(w) {
+      w.scrollTo = () => {};
+      w.print = () => {};
+      Object.defineProperty(w, "crypto", { value: webcrypto, configurable: true });
+      Object.defineProperty(w, "localStorage", { value: local, configurable: true });
+      w.fetch = async (url) => {
+        const rel = String(url).replace(/^\.?\//, "").split(/[?#]/)[0];
+        const full = path.join(root, rel);
+        if (!fs.existsSync(full)) return { ok: false, status: 404, json: async () => ({}) };
+        return { ok: true, status: 200, json: async () => JSON.parse(fs.readFileSync(full, "utf8")) };
+      };
+    }
+  }).window;
+}
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const $ = (id) => document.getElementById(id);
 const click = (el) => el.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
@@ -354,6 +388,97 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
       }
     });
     assert(checked >= 8, `only ${checked} pages inspected`);
+  });
+  check("a notice date in the future is refused, not counted from", () => {
+    /* Left unchecked this produced "26,379 days left" and wrote the wrong
+       date into the letter, which the visitor then sent to the operator.
+       Asserted against the source AND exercised through the DOM below. */
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    assert(/function futureNoticeDate\(\)/.test(src), "no future-date guard");
+    assert(/if \(future\) \{/.test(src), "the submit handler does not consult the guard");
+    /* The picker's max must come from the clock, never a literal. */
+    assert(/setAttribute\("max"/.test(src), "the date picker does not cap the future");
+    assert(!/max="\d{4}-\d{2}-\d{2}"/.test(html), "a hard-coded max date will go stale");
+  });
+  check("the home page answers the deadline question before the form", () => {
+    /* "Do I have to pay and how long have I got" is asked in the first few
+       seconds, and the form used to be the only place to find out. */
+    assert(/id="qcDate"/.test(html) && /id="qcBtn"/.test(html), "no quick check on the home page");
+    assert(/function bindQuickCheck/.test(html) === false, "sanity: markup only");
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    const fn = src.slice(src.indexOf("function bindQuickCheck"), src.indexOf("Navigation / routing"));
+    assert(/D\.appealDays/.test(fn), "the quick check invents its own window instead of using the configured one");
+    assert(/daysBetween\(todayUTC\(\), appealBy\)/.test(fn), "it does not count from the notice date");
+    const hero = html.slice(html.indexOf('class="hero"'), html.indexOf('class="band"'));
+    assert(hero.indexOf('id="qcDate"') > 0, "the quick check is not in the hero");
+    assert(hero.indexOf('id="qcDate"') < hero.indexOf("Three steps"), "the quick check sits below the fold");
+  });
+  check("the PDF library is not downloaded until a PDF is asked for", () => {
+    /* 356 KB — four fifths of the page weight — used to be parsed on every
+       visit for a button most people never press. */
+    assert(!/<script[^>]+jspdf/i.test(html), "jspdf is still loaded eagerly in the markup");
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    assert(/function loadPdfLib\(\)/.test(src), "no on-demand loader");
+    assert(/await loadPdfLib\(\)/.test(src), "the loader is never awaited");
+    /* Every caller must await, or it reports success before the PDF exists. */
+    const callers = src.match(/const ok = downloadPdf\(/g) || [];
+    assert(callers.length === 0, `${callers.length} caller(s) still treat the download as synchronous`);
+    assert((src.match(/const ok = await downloadPdf\(/g) || []).length >= 3,
+      "not every PDF button awaits the download");
+  });
+  checkAsync("a payment held without an account is shown, not silently kept", async () => {
+    /* Paid, logged out, then the paywall looked empty: the money seemed gone.
+       Asserted behaviourally — boot with real credit already in storage, the
+       way a returning visitor's browser has it. */
+    assert(/id="heldCreditPane"/.test(html), "nothing on the page can show held credit");
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    assert(/function heldCreditTotal/.test(src), "no way to count held credit");
+    const sync = src.slice(src.indexOf("function syncPaywall"), src.indexOf("function renderOperatorIntel"));
+    assert(/heldCreditTotal\(\)/.test(sync), "the paywall never looks for held credit");
+
+    const w = freshWindow({ "tk_held_credits": JSON.stringify({ "paid@example.com": 1 }) });
+    for (let i = 0; i < 150 && w.document.documentElement.getAttribute("data-tk-ready") !== "1"; i++) await sleep(25);
+    const pane = w.document.getElementById("heldCreditPane");
+    assert(pane && !pane.hidden, "held credit exists but the notice stays hidden");
+    const body = w.document.getElementById("heldCreditBody").textContent;
+    assert(body.includes("paid@example.com"), `the notice does not name the address: ${body}`);
+    /* Selling is paused, so the paywall must stay hidden even with credit held. */
+    assert(w.document.getElementById("paywallPane").hidden, "the paywall is showing while selling is paused");
+  });
+  check("the paused seller never advertises a price it cannot take", () => {
+    /* The button read "Buy another letter for £4.99" and then toasted
+       "Payments are switched off" — a promise the app could not keep. */
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    const sync = src.slice(src.indexOf("function syncPaywall"), src.indexOf("function renderOperatorIntel"));
+    assert(/READY\.canSell/.test(sync), "the locked label ignores whether selling is on");
+    assert(!/btn\.textContent = locked\s*\?/.test(sync),
+      "the label still promises a price unconditionally");
+    assert(/Paid letters are paused/.test(sync), "no honest paused wording");
+  });
+  check("every operator resolves to the right company and appeals service", () => {
+    /* Two real defects this guards: "Premier Parking Enforcement" resolved to
+       "Premier Park Ltd" (a different firm, so the wrong name on the letter),
+       and the Smart Parking route was BPA when it is an IPC member — which
+       sends a rejected appeal to POPLA, where it is worthless. */
+    const data = JSON.parse(fs.readFileSync(path.join(root, "assets", "data", "operators.json"), "utf8"));
+    const ops = data.operators;
+    assert(ops.length >= 25, `only ${ops.length} operators carry appeal intelligence`);
+    ops.forEach((o) => {
+      assert(o.id && o.name, "an operator has no id or name");
+      assert(o.tradeBody === "BPA" || o.tradeBody === "IPC", `${o.name} has no valid trade body`);
+      assert(Array.isArray(o.themes) && o.themes.length >= 2, `${o.name} has no appeal themes`);
+    });
+    const ids = ops.map((o) => o.id);
+    assert(new Set(ids).size === ids.length, "duplicate operator ids");
+    /* Aliases must not collide, or lookup depends on list order. */
+    const seen = {};
+    ops.forEach((o) => [o.name.toLowerCase()].concat(o.aliases || []).forEach((a) => {
+      assert(!seen[a] || seen[a] === o.id, `alias "${a}" is used by both ${seen[a]} and ${o.id}`);
+      seen[a] = o.id;
+    }));
+    const smart = ops.find((o) => o.id === "smart-parking");
+    assert(smart && smart.tradeBody === "IPC",
+      "Smart Parking is an IPC member; marking it BPA sends rejected appeals to POPLA");
   });
   check("icons and manifest are real files, not a data URI", () => {
     /* A data-URI favicon cannot be cached, is dropped by older Safari, and is
