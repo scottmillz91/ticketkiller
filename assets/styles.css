@@ -306,7 +306,12 @@ h1, h2, h3 { text-wrap: balance; }
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 0;
+  /* The column gap has to be explicit. Flexbox does not render a text run
+     made only of white space, so the newlines between the <li> elements in
+     the markup contribute nothing. With the separator suppressed that left
+     "…the price" and "First letter free" butted together as "priceFirst".
+     12px is close to the 0.75em the desktop separator (" · ") occupies. */
+  gap: 6px 12px;
 }
 .hero-proof li {
   /* block, not flex: an inline-flex item wraps its children onto anonymous
@@ -327,7 +332,7 @@ h1, h2, h3 { text-wrap: balance; }
    and that point the separator painted on line two and before each wrapped
    item, which read as stray characters. */
 @media (max-width: 1151px) {
-  .hero-proof { gap: 4px 0; }
+  .hero-proof { gap: 4px 12px; }
   .hero-proof li + li::before { content: none; }
 }
 .hero-proof b { color: var(--gold); font-weight: 700; }
