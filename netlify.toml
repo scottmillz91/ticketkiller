@@ -15,6 +15,7 @@
 # /api/checkout            -> netlify/functions/checkout.js
 # /api/verify-session      -> netlify/functions/verify-session.js
 # /api/stripe-webhook      -> netlify/functions/stripe-webhook.js
+# /api/checkout-health     -> netlify/functions/checkout-health.js  (GET, diagnostic)
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
