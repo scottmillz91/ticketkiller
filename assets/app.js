@@ -66,6 +66,29 @@
   }
 
   /* ---------------------------------------------------------
+     Readiness: what can honestly be shown or sold yet
+     --------------------------------------------------------- */
+  const READY = (() => {
+    const b = CFG.business || {};
+    const filled = (v) => typeof v === "string" && v.trim() !== "" && !/^[\[<]/.test(v.trim());
+    const contactEmail = (CFG.contact && CFG.contact.email) || b.email || "";
+    return {
+      hasLegalName: filled(b.legalName),
+      hasAddress: filled(b.address),
+      hasEmail: filled(contactEmail) && !/example\.(com|org|net)$/i.test(contactEmail),
+      contactEmail,
+      get hasOperator() {
+        return this.hasLegalName && this.hasAddress && this.hasEmail;
+      },
+      // Money may only move when we can identify the seller and verify the payment.
+      get canSell() {
+        const pay = CFG.paypal || {};
+        return pay.enabled !== false && this.hasOperator && pay.verifyReturns === true;
+      }
+    };
+  })();
+
+  /* ---------------------------------------------------------
      Storage — degrades to memory if localStorage is blocked
      --------------------------------------------------------- */
   const memStore = new Map();
@@ -349,8 +372,7 @@
      --------------------------------------------------------- */
   function usedFree(u) { return !!(u.freeUsed || (u.appeals && u.appeals.length)); }
   function canGenerate() {
-    const pay = CFG.paypal || {};
-    if (pay.enabled === false) return !!currentUser();
+    if (!READY.canSell) return !!currentUser();
     const u = currentUser();
     if (!u) return false;
     return !usedFree(u) || (u.credits || 0) > 0;
@@ -373,9 +395,8 @@
     const pane = $("paywallPane");
     const btn = $("generateBtn");
     if (!pane || !btn) return;
-    const pay = CFG.paypal || {};
     const locked = !!currentUser() && !canGenerate();
-    pane.hidden = !locked || pay.enabled === false;
+    pane.hidden = !locked || !READY.canSell;
     btn.disabled = locked;
     btn.textContent = locked
       ? `Pay ${CFG.pricing ? CFG.pricing.symbol : "£"}${CFG.pricing ? CFG.pricing.extraLetterLabel : "4.99"} to generate another`
@@ -947,7 +968,7 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
      The remaining ground text lives in assets/data/grounds.json and
      is public reference material, which is fine.
      --------------------------------------------------------- */
-  const SAMPLE_PREVIEW_LINES = 30;
+  const SAMPLE_PREVIEW_LINES = 20;
 
   function buildPreview(fullText) {
     const lines = String(fullText).split("\n");
@@ -1358,6 +1379,57 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
   }
 
   /* ---------------------------------------------------------
+     Business identity and readiness
+     --------------------------------------------------------- */
+  function renderBusiness() {
+    const name = (CFG.business && CFG.business.tradingName) || "TicketKiller UK";
+    $$("[data-biz-name]").forEach((el) => { el.textContent = name; });
+    $$("[data-biz-legal]").forEach((el) => {
+      el.textContent = READY.hasLegalName ? CFG.business.legalName : name;
+    });
+    $$("[data-biz-address]").forEach((el) => {
+      el.textContent = READY.hasAddress ? CFG.business.address : "";
+    });
+    $$("[data-biz-email], [data-contact-email]").forEach((el) => {
+      el.textContent = READY.hasEmail ? READY.contactEmail : "";
+    });
+    $$("[data-contact-time]").forEach((el) => {
+      el.textContent = (CFG.contact && CFG.contact.responseTime) || "within 2 working days";
+    });
+
+    // Hide empty contact rows rather than printing a label with nothing after it.
+    $$("[data-biz-address], [data-biz-email], [data-biz-legal]").forEach((el) => {
+      if (!el.textContent.trim()) el.hidden = true;
+    });
+
+    // The banner is for the operator, not the public. Only show it to a local
+    // visitor on a dev host; never on the deployed site.
+    const isLocal = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/.test(location.hostname) || location.protocol === "file:";
+    $$("[data-setup-warning]").forEach((el) => {
+      el.hidden = !isLocal || READY.hasOperator;
+    });
+  }
+
+  function applyReadiness() {
+    // Payments: hide every pay surface unless we can honestly sell.
+    const paySurfaces = $$(".paywall-card, .price-card .paypal-form, [data-pay-surface]");
+    paySurfaces.forEach((el) => { el.hidden = !READY.canSell; });
+
+    // Swap the pricing card copy when selling is off.
+    $$("[data-pricing-note]").forEach((el) => {
+      el.textContent = READY.canSell
+        ? ""
+        : "Payments are switched off on this deployment. Every letter is currently free.";
+      el.hidden = READY.canSell;
+    });
+
+    // The contact page needs a real address to be useful.
+    $$("[data-contact-fallback]").forEach((el) => { el.hidden = READY.hasEmail; });
+
+    document.documentElement.setAttribute("data-tk-selling", READY.canSell ? "1" : "0");
+  }
+
+  /* ---------------------------------------------------------
      Sample copy protection (courtesy only)
      ---------------------------------------------------------
      The sample is truncated, so there is little worth taking. These
@@ -1404,14 +1476,8 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     $$("[data-price]").forEach((el) => {
       el.textContent = `${(CFG.pricing && CFG.pricing.symbol) || "£"}${(CFG.pricing && CFG.pricing.extraLetterLabel) || "4.99"}`;
     });
-    $$("[data-biz-name]").forEach((el) => { el.textContent = (CFG.business && CFG.business.tradingName) || "TicketKiller UK"; });
-    $$("[data-biz-email]").forEach((el) => { el.textContent = (CFG.business && CFG.business.email) || ""; });
-    $$("[data-biz-legal]").forEach((el) => { el.textContent = (CFG.business && CFG.business.legalName) || "[YOUR FULL LEGAL NAME]"; });
-    $$("[data-biz-address]").forEach((el) => { el.textContent = (CFG.business && CFG.business.address) || "[YOUR POSTAL ADDRESS]"; });
-    $$("[data-contact-email]").forEach((el) => { el.textContent = (CFG.contact && CFG.contact.email) || ""; });
-    if (CFG.paypal && CFG.paypal.enabled === false) {
-      $$(".paypay-hidden-if-off").forEach((el) => { el.hidden = true; });
-    }
+    renderBusiness();
+    applyReadiness();
 
     bindCopyProtection();
     bindGlobalNav();

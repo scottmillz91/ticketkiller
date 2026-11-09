@@ -97,7 +97,7 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     const t = $("sampleLetter").textContent;
     assert(t.includes("ParkingEye"), "no operator in sample");
     assert(t.includes("T128719"), "no PCN reference");
-    assert(t.includes("registered keeper"), "no keeper declaration");
+    assert(/Formal appeal/.test(t), "no appeal heading");
     assert(!t.includes("Loading"), "still loading");
   });
   check("sample is truncated, not the full letter", () => {
@@ -215,9 +215,10 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
   // ---------- paywall ----------
   nav("details");
   await sleep(30);
-  check("paywall appears after the free letter is used", () => {
-    assert($("paywallPane").hidden === false, "paywall hidden");
-    assert($("generateBtn").disabled === true, "generate still enabled");
+  check("paywall stays closed while selling is disabled", () => {
+    assert(document.documentElement.getAttribute("data-tk-selling") === "0", "should not be selling");
+    assert($("paywallPane").hidden === true, "paywall shown despite no seller identity");
+    assert($("generateBtn").disabled === false, "letters should stay unlimited");
   });
   check("config drives the displayed price", () => {
     const texts = [...document.querySelectorAll("[data-price]")].map((e) => e.textContent.trim());
@@ -263,7 +264,16 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
       assert($(`page-${p}`).textContent.length > 400, `${p} looks empty`);
     });
   }
-  check("legal pages flag operator placeholders", () => assert($("page-privacy").textContent.includes("YOUR FULL LEGAL NAME"), "placeholder warning missing"));
+  check("no raw placeholders leak into the public pages", () => {
+    const html = document.documentElement.textContent;
+    assert(!/YOUR FULL LEGAL NAME|YOUR POSTAL ADDRESS/.test(html), "placeholder text still visible");
+    assert(!/\[YOUR/.test(html), "bracketed placeholder still visible");
+  });
+  check("legal pages degrade to the trading name when unconfigured", () => {
+    const t = $("page-privacy").textContent;
+    assert(t.includes("TicketKiller UK"), "no trading name on privacy page");
+    assert(document.documentElement.getAttribute("data-tk-selling") === "0", "selling flag wrong");
+  });
   check("refunds page covers digital cancellation", () => assert(/digital content/i.test($("page-refunds").textContent), "no digital content section"));
 
   // ---------- misc ----------

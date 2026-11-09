@@ -72,25 +72,38 @@ Serve it rather than double-clicking `index.html`: the app fetches `assets/data/
 
 ## Before you take real money
 
-Two things in this repo are deliberately incomplete, because only you can supply them.
-
-**1. Your business details.** Open `assets/config.js`. The `business` block contains placeholders:
+One block controls this. Open `assets/config.js`:
 
 ```js
-tradingName: "TicketKiller UK",
-legalName:  "[YOUR FULL LEGAL NAME]",   // ← required in UK
-address:    "[YOUR POSTAL ADDRESS]",    // ← required in UK
-email:      "support@example.com",
+business: {
+  tradingName: "TicketKiller UK",
+  legalName: "",     // ← your full name, or the company name
+  address: "",       // ← a real postal or service address
+  email: "",         // ← a working contact address
+}
 ```
 
-These fill the legal pages, the footer and the contact block automatically. Until you replace them, the privacy notice and terms display a visible warning banner telling visitors they are placeholders. **A UK business selling digital services must publish who it is and a contact address.** Distance-selling rules also require a geographic address and an email before payment.
+**Leave them blank and the site stays safe by default:**
 
-Also update these to your real domain, or social previews and canonical links will point at `example.com`:
-`index.html` → `<link rel="canonical">`, `og:url`, `og:image`, `twitter:image`.
+| With blanks | Behaviour |
+| --- | --- |
+| Paying | Switched off automatically. Every letter is free; the paywall, PayPal buttons and pricing note adapt. |
+| Privacy / terms pages | Identify the trading name only, with no invented legal identity. No bracketed placeholders are shown. |
+| Contact page | Says no address is configured rather than printing an empty label. |
+| Setup banner | Appears **only on localhost**, never on the deployed site, so it doesn't advertise an unfinished build. |
 
-**2. Payment verification.** Read [Payments](#payments). As shipped, the paywall is not enforced.
+**Fill them in and the legal pages populate.** Payments stay off until you also
+set `paypal.verifyReturns: true` — see [Payments](#payments). That is deliberate:
+the site will not take money while it cannot verify it received any.
 
----
+Verify the gate with:
+
+```bash
+npm test     # asserts selling is off and no placeholders leak
+```
+
+Also update the canonical and `og:` URLs in `index.html` if you move off
+`scottmillz91.github.io`.
 
 ## Project structure
 
@@ -235,7 +248,11 @@ On return, `?paypal=success` grants a credit to the pending email.
 
 The app trusts the query string. Anyone can append `?paypal=success` to the URL and unlock a free letter. This is not fixable in the browser — the page has no way to know whether PayPal actually received money.
 
-`config.paypal.verifyReturns: false` records the intended fix, not a fix. To take real money you need one of:
+`config.paypal.verifyReturns: false` is what keeps payments switched off. The
+site can only sell when it is `true`, which you should only set once one of the
+following is actually in place:
+
+
 
 1. **PayPal IPN** — a small server endpoint that receives PayPal's POST, verifies it back to PayPal, checks the amount and the `custom` field, and marks the account paid. Then the browser only *displayed* the result; the server *decided* it.
 2. **PayPal Webhooks + a tiny API** — same idea, modern interface.

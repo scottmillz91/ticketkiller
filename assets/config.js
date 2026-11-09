@@ -5,16 +5,22 @@
    Edit this file, not the HTML or the app logic.
    ============================================================ */
 window.TK_CONFIG = {
-  /* ---------- Who you are (required by UK consumer law) ---------- */
+  /* ---------- Who you are (required by UK consumer law) ----------
+     These four fields must be completed before you take any payment.
+     Leave them blank and the site stays usable, but:
+       · paying is switched off automatically
+       · the privacy and terms pages stop claiming an unverified identity
+     See "Before you take real money" in README.md.
+     --------------------------------------------------------------- */
   business: {
     tradingName: "TicketKiller UK",
-    // If you are a sole trader, put your full name here.
-    legalName: "[YOUR FULL LEGAL NAME]",
-    // A real postal address or, for sole traders, a service address.
-    address: "[YOUR POSTAL ADDRESS]",
+    // Sole trader: your full name. Limited company: the company name.
+    legalName: "",
+    // A real postal address, or a service address if you are a sole trader.
+    address: "",
     country: "United Kingdom",
-    // This address is published on the legal pages and used by the contact form.
-    email: "support@example.com",
+    // Published on the legal pages and used by the contact form.
+    email: "",
     // Optional: company number if you register a limited company.
     companyNumber: "",
     vatNumber: ""
@@ -29,8 +35,12 @@ window.TK_CONFIG = {
   },
 
   /* ---------- Payments (PayPal _xclick) ----------
-     Set `enabled: false` to hide every pay button and make
-     letters unlimited while you are still testing.             */
+     Paying is enabled only when ALL of these are true:
+       · paypal.enabled is true
+       · business.legalName and business.email are filled in
+       · paypal.verifyReturns is true (i.e. payments are verified)
+     Otherwise every pay button is hidden and letters are unlimited.
+     See "Payments" in README.md for why verifyReturns matters.     */
   paypal: {
     enabled: true,
     business: "mrmillz1991@gmail.com",
@@ -42,7 +52,7 @@ window.TK_CONFIG = {
 
   /* ---------- Contact ---------- */
   contact: {
-    email: "support@example.com",
+    email: "",
     responseTime: "within 2 working days"
   },
 
