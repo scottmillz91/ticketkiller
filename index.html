@@ -226,9 +226,23 @@
       <div class="wrap narrow section">
         <p class="eyebrow dark">Account</p>
         <h1 class="page-title">Your appeals</h1>
-        <p class="page-sub" id="historySub">Letters you've generated on this account.</p>
-        <div id="historyList"></div>
-        <button class="btn btn-primary btn-xl" data-nav="details" type="button" style="margin-top:16px">New appeal</button>
+        <p class="page-sub">Every letter you have generated, with its deadline still counting down.</p>
+
+        <div class="appeal-summary" id="appealSummary" hidden>
+          <div class="appeal-stats" id="appealStats"></div>
+          <div class="appeal-bar" aria-hidden="true"><i id="appealBarFill"></i></div>
+          <p class="appeal-bar-note" id="appealBarNote"></p>
+        </div>
+
+        <div id="historyList" class="history-list"></div>
+
+        <div class="history-empty" id="historyEmpty" hidden>
+          <p class="history-empty-title">No appeals yet</p>
+          <p class="history-empty-body">Enter the details from a parking charge and your first letter is free. Everything stays in this browser.</p>
+          <button class="btn btn-primary btn-xl" data-nav="details" type="button">Start your first appeal</button>
+        </div>
+
+        <button class="btn btn-secondary btn-xl" data-nav="details" type="button" id="newAppealBtn" style="margin-top:18px">New appeal</button>
       </div>
     </section>
 
@@ -377,10 +391,12 @@
         <div class="results-head">
           <p class="eyebrow dark">Your appeal</p>
           <h1 class="page-title">Grounds and letters</h1>
-          <p class="page-sub">Turn grounds on or off and the letter updates. Then copy or download it.</p>
-          <p><span class="cd-pill ok" id="resultDeadline"></span></p>
-          <button class="btn btn-secondary" data-nav="details" type="button">Edit ticket details</button>
-          <button class="btn btn-secondary" data-nav="evidence" type="button" id="evidenceBtn">Request evidence</button>
+          <p class="page-sub" id="resultFor">Turn grounds on or off and the letter updates. Then copy or download it.</p>
+          <p class="results-deadline"><span class="cd-pill ok" id="resultDeadline"></span></p>
+          <div class="results-actions">
+            <button class="btn btn-secondary" data-nav="details" type="button">Edit ticket details</button>
+            <button class="btn btn-secondary" data-nav="evidence" type="button" id="evidenceBtn">Request evidence</button>
+          </div>
         </div>
 
         <div class="weak-card">

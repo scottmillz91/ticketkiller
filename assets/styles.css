@@ -529,6 +529,9 @@ body.nav-open::before {
   border-radius: 999px;
 }
 .weak-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+/* No grounds selected: the letter still generates, but it has no legal
+   argument in it, so the badge turns amber rather than green. */
+.badge.is-none { background: #fff3e0; color: #8a5300; }
 .weak-list li {
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -634,6 +637,20 @@ body.nav-open::before {
   from { opacity: 0; transform: translate(-50%, 10px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
+/* The undo affordance inside a toast. */
+.toast-action {
+  margin-left: 10px;
+  background: rgba(255,255,255,0.18);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  padding: 3px 11px;
+  cursor: pointer;
+}
+.toast-action:hover { background: rgba(255,255,255,0.3); }
+.toast-action:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 /* Honour the OS "reduce motion" setting. */
 @media (prefers-reduced-motion: reduce) {
@@ -695,24 +712,9 @@ body.nav-open::before {
   color: #fff;
   border-color: var(--navy);
 }
-.history-item {
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: var(--shadow);
-  margin-bottom: 12px;
-  text-align: left;
-  width: 100%;
-  border: 0;
-}
-.history-item strong { display: block; font-size: 1.05rem; }
-.history-item span { color: var(--muted); font-size: 0.9rem; }
 @keyframes sheet {
   from { transform: translateY(24px); opacity: 0; }
   to { transform: none; opacity: 1; }
-}
-
-@media (min-width: 640px) {
 }
 
 @media (min-width: 640px) {
@@ -815,6 +817,27 @@ body.nav-open::before {
 .weak-list li { position: relative; }
 .weak-list li .law-tag { display: inline-block; }
 .ground-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+/* The reason a ground applies, stated once per card instead of as a
+   button-shaped label. */
+.ground-when {
+  display: flex;
+  gap: 7px;
+  align-items: baseline;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.ground-when-label {
+  flex: none;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blue-2);
+}
+.ground-toggle { font-weight: 700; }
+.ground-off .ground-when { opacity: .6; }
 .mini-btn {
   font-size: 12px; font-weight: 600; padding: 6px 11px; border-radius: 99px;
   border: 1px solid var(--line); background: #fff; color: var(--muted); cursor: pointer;
@@ -975,35 +998,166 @@ body.nav-open::before {
 }
 
 
-/* --- Appeal history rows --- */
-.history-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px 12px;
-  align-items: center;
+/* --- Results header --- */
+.results-head {
   background: #fff;
   border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 12px 14px;
-  margin-bottom: 10px;
+  border-radius: 20px;
+  padding: 22px;
+  margin-bottom: 20px;
 }
+.results-head .page-title { margin-bottom: 6px; }
+.results-head .page-sub { margin-bottom: 14px; }
+/* The appeal this letter belongs to: operator and reference, so it is clear
+   which charge is being worked on when there is more than one. */
+#resultFor .dot { color: #b9c6d6; }
+#resultFor strong { color: var(--ink); }
+.results-deadline { margin: 0 0 16px; }
+.results-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.results-actions .btn { min-height: 44px; padding: 10px 16px; font-size: 0.95rem; }
+@media (max-width: 520px) {
+  .results-actions { display: grid; grid-template-columns: 1fr; }
+}
+
+/* --- Appeal history --- */
+/* Header block: three counts and a bar showing how many appeals are still
+   inside their window. Only rendered once there is at least one appeal. */
+.appeal-summary {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin: 0 0 16px;
+}
+.appeal-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.appeal-stats span { display: inline-flex; align-items: baseline; }
+.appeal-stats b {
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin-right: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.appeal-stats .is-warn b { color: var(--gold); }
+.appeal-stats .is-ok b { color: var(--success); }
+.appeal-bar {
+  height: 6px;
+  border-radius: 99px;
+  background: #eef2f8;
+  overflow: hidden;
+  margin: 12px 0 8px;
+}
+.appeal-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--blue), var(--sky));
+  transition: width .3s ease;
+}
+.appeal-bar-note { margin: 0; font-size: 12.5px; color: var(--muted); }
+
+/* Empty state: an explanation and one action, rather than a bare sentence. */
+.history-empty {
+  background: #fff;
+  border: 1px dashed #c9d7e8;
+  border-radius: 16px;
+  padding: 26px 20px;
+  text-align: center;
+}
+.history-empty-title {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+.history-empty-body {
+  color: var(--muted);
+  font-size: 0.94rem;
+  max-width: 34ch;
+  margin: 0 auto 18px;
+  line-height: 1.45;
+}
+
+.history-list { display: grid; gap: 10px; }
+
+.history-row {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+/* Setting a status is not the only thing on a row, so the outcome controls
+   are deliberately quiet until the row is hovered or focused within. */
+.history-row:hover, .history-row:focus-within { border-color: #c2d3e8; }
+
 .history-item {
-  grid-column: 1 / -1;
   display: block;
   text-align: left;
   background: none;
   border: 0;
   padding: 0;
   width: 100%;
+  cursor: pointer;
 }
-.history-item strong { display: block; font-size: 15px; color: var(--ink); }
-.history-item span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
-.history-item:hover strong { color: var(--blue-2); }
-.history-meta { justify-self: start; }
-.history-actions { display: flex; gap: 6px; justify-self: end; flex-wrap: wrap; }
+.history-title {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.history-item:hover .history-title { color: var(--blue-2); }
+.history-item:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
+
+.history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.history-meta .dot { color: #b9c6d6; }
+.history-meta strong { color: var(--ink); font-weight: 700; }
+.history-vrm {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  background: #f0f4fa;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: var(--ink);
+}
+
+.history-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 10px;
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid #eef2f8;
+}
+.history-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.history-actions .mini-btn { border-color: #dbe4f0; }
+.history-actions .mini-btn.is-current {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
 @media (max-width: 520px) {
-  .history-row { grid-template-columns: 1fr; }
-  .history-actions { justify-self: start; }
+  .history-foot { justify-content: flex-start; }
 }
 
 /* --- Operator guide pages --- */
@@ -1039,7 +1193,7 @@ body.nav-open::before {
 
 
 /* --- State classes applied by JS --- */
-.history-item:hover { background: none; }              /* base reset, colour set below */
+.history-item:hover { background: none; }
 .ground-off { opacity: .45; }
 .ground-off .ground-actions { opacity: 1; }
 .ev-item.checked { background: var(--success-bg); border-color: #b9e6d4; }
