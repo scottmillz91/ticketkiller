@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#071018" />
+  <meta name="description" content="Got a UK parking ticket? Enter the details from your PCN and get a formal appeal letter in two minutes. First appeal free." />
+  <title>TicketKiller UK — Fight Your Parking Ticket</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231B6BFF'/%3E%3Cpath d='M8 11h16v2H8zm0 4h10v2H8zm0 4h16v2H8z' fill='white'/%3E%3Cpath d='M7 8l18 16' stroke='%23E8B931' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <style>
+:root {
+  --navy: #071018;
+  --navy-2: #0c1b2e;
+  --ink: #102033;
+  --muted: #5c6d82;
+  --blue: #1b6bff;
+  --blue-2: #0e4fd6;
+  --sky: #6cb6ff;
+  --gold: #e8b931;
+  --paper: #f3f6fb;
+  --white: #ffffff;
+  --line: #dce5f0;
+  --success: #0b8f63;
+  --success-bg: #e7f7f0;
+  --danger: #c81e1e;
+  --radius: 18px;
+  --shadow: 0 18px 50px rgba(7, 16, 24, 0.12);
+  --font: "Figtree", system-ui, sans-serif;
+  --display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.5;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 1.12; margin: 0; }
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -40px;
+  background: var(--gold);
+  color: var(--navy);
+  padding: 8px 12px;
+  z-index: 100;
+  border-radius: 8px;
+}
+.skip-link:focus { top: 12px; }
+
+.wrap {
+  width: min(1120px, calc(100% - 32px));
+  margin-inline: auto;
+}
+.wrap.narrow { width: min(720px, calc(100% - 32px)); }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(7, 16, 24, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-top: var(--safe-t);
+}
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  gap: 16px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: 0;
+  color: #fff;
+  padding: 0;
+}
+.logo-mark { color: var(--blue); display: grid; }
+.logo-text {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.03em;
+}
+.logo-text em { font-style: normal; color: var(--gold); }
+
+.nav { display: none; gap: 4px; }
+.nav button {
+  background: transparent;
+  border: 0;
+  color: rgba(255,255,255,0.78);
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.nav button:hover, .nav button:focus-visible { color: #fff; background: rgba(255,255,255,0.08); }
+
+.menu-btn {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  padding: 0;
+}
+.menu-btn span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+}
+
+.mobile-nav {
+  position: sticky;
+  top: calc(64px + var(--safe-t));
+  z-index: 39;
+  background: var(--navy-2);
+  display: grid;
+  padding: 8px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.mobile-nav[hidden] { display: none; }
+.mobile-nav button {
+  background: none;
+  border: 0;
+  color: #fff;
+  text-align: left;
+  padding: 14px 8px;
+  font-weight: 600;
+  min-height: 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.page { display: none; }
+.page.active { display: block; animation: fade .35s ease; }
+@keyframes fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.hero {
+  position: relative;
+  background: radial-gradient(1200px 500px at 80% -10%, rgba(27,107,255,0.45), transparent 55%),
+              radial-gradient(800px 400px at 0% 100%, rgba(232,185,49,0.16), transparent 50%),
+              var(--navy);
+  color: #fff;
+  overflow: hidden;
+  padding: 48px 0 36px;
+}
+.hero-glow {
+  position: absolute;
+  inset: auto -20% -40% auto;
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(circle, rgba(108,182,255,0.2), transparent 60%);
+  pointer-events: none;
+}
+.hero-inner { position: relative; }
+.eyebrow {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sky);
+  margin: 0 0 14px;
+}
+.eyebrow.dark { color: var(--blue); }
+.hero h1 {
+  font-size: clamp(2.15rem, 8vw, 4.4rem);
+  font-weight: 800;
+  max-width: 16ch;
+  color: #fff;
+}
+.lede {
+  font-size: clamp(1.05rem, 2.4vw, 1.28rem);
+  color: rgba(255,255,255,0.78);
+  max-width: 38ch;
+  margin: 16px 0 28px;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.btn {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn-xl {
+  min-height: 56px;
+  padding: 16px 22px;
+  font-size: 1.05rem;
+  width: 100%;
+}
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(27,107,255,0.35);
+}
+.btn-primary:hover { background: var(--blue-2); }
+.btn-secondary {
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.btn-ghost {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.14);
+  width: auto;
+  min-width: 160px;
+}
+.text-link {
+  background: none;
+  border: 0;
+  color: var(--blue);
+  font-weight: 700;
+  padding: 8px;
+}
+
+.trust-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.trust-row li {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.trust-row strong {
+  font-family: var(--display);
+  font-size: 1.6rem;
+  color: var(--gold);
+}
+.trust-row span { color: rgba(255,255,255,0.75); }
+
+.section { padding: 40px 0 56px; }
+.section-title {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin-bottom: 22px;
+}
+.page-title {
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  margin-bottom: 10px;
+}
+.page-sub { color: var(--muted); margin: 0 0 28px; max-width: 52ch; }
+
+.steps {
+  display: grid;
+  gap: 14px;
+}
+.step-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+.step-num {
+  font-family: var(--display);
+  font-weight: 800;
+  color: var(--blue);
+  font-size: 0.9rem;
+}
+.step-card h3 { margin: 8px 0 8px; font-size: 1.2rem; }
+.step-card p { margin: 0; color: var(--muted); }
+
+.band {
+  background: var(--navy-2);
+  color: #fff;
+  padding: 32px 0;
+}
+.band-inner {
+  display: grid;
+  gap: 16px;
+}
+.band p { margin: 0; font-size: 1.15rem; font-weight: 600; max-width: 46ch; }
+
+.dropzone {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 8px;
+  background: #fff;
+  border: 2px dashed #b9c9de;
+  border-radius: 24px;
+  padding: 36px 18px;
+  color: var(--muted);
+  min-height: 220px;
+}
+.dropzone strong { color: var(--ink); font-size: 1.1rem; }
+.dz-icon { color: var(--blue); }
+.dropzone.drag {
+  border-color: var(--blue);
+  background: #eef4ff;
+}
+.upload-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.scan-card, .paywall-card, .facts-card, .weak-card, .letter-card, .price-card {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+.scan-frame {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0b1220;
+  aspect-ratio: 4/3;
+}
+.scan-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #6cb6ff, transparent);
+  box-shadow: 0 0 24px #1b6bff;
+  animation: scan 1.6s linear infinite;
+}
+@keyframes scan {
+  from { top: 0; }
+  to { top: 100%; }
+}
+.analyse-copy { text-align: center; padding: 22px 8px 8px; }
+.analyse-copy h2 { font-size: 1.4rem; margin-bottom: 6px; }
+.analyse-copy p { color: var(--muted); margin: 0 0 16px; }
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--line);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.analyse-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  text-align: left;
+  max-width: 320px;
+  color: var(--muted);
+}
+.analyse-steps li { padding: 6px 0; }
+.analyse-steps li.done { color: var(--success); font-weight: 600; }
+.analyse-steps li.active { color: var(--ink); font-weight: 700; }
+
+.reject-card {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  padding: 28px 20px;
+  text-align: center;
+}
+.reject-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: #fde8e8;
+  color: var(--danger);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+.reject-card h2 { margin-bottom: 8px; }
+.reject-card p { color: var(--muted); }
+.reject-card img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  background: #0b1220;
+  border-radius: 14px;
+  margin: 12px 0;
+}
+.reject-tips {
+  text-align: left;
+  color: var(--muted);
+  margin: 8px 0 20px;
+  padding-left: 20px;
+}
+.reject-tips li { margin: 8px 0; }
+.reject-card .btn-xl { width: 100%; }
+
+.paywall-card { text-align: center; padding: 32px 20px; }
+.paywall-card h2 { margin: 10px 0 10px; }
+.chip {
+  display: inline-block;
+  background: #fff6d8;
+  color: #8a5b00;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+.muted-chip { background: var(--paper); color: var(--muted); }
+.fine { color: var(--muted); font-size: 0.85rem; }
+
+.results-layout { display: grid; gap: 16px; }
+.ticket-side {
+  background: #fff;
+  border-radius: 24px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 12px;
+}
+.ticket-side img {
+  width: 100%;
+  border-radius: 14px;
+  max-height: 240px;
+  object-fit: contain;
+  background: #0b1220;
+}
+.hint { color: var(--muted); font-size: 0.92rem; margin: 6px 0 16px; }
+.ocr-box {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 4px 14px 10px;
+  background: #fbfcfe;
+}
+.ocr-box summary {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 0;
+}
+.ocr-box pre {
+  white-space: pre-wrap;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink);
+  max-height: 180px;
+  overflow: auto;
+}
+.facts-grid {
+  display: grid;
+  gap: 12px;
+}
+.facts-grid label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.facts-grid input {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 12px;
+  min-height: 48px;
+  color: var(--ink);
+  background: var(--paper);
+}
+.facts-grid input:focus {
+  outline: 2px solid var(--blue);
+  background: #fff;
+}
+.vrm { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; }
+
+.weak-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.badge {
+  background: var(--success-bg);
+  color: var(--success);
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+.weak-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.weak-list li {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  background: linear-gradient(180deg, #f8fbff, #fff);
+}
+.weak-list h3 { font-size: 1.02rem; margin-bottom: 6px; }
+.weak-list p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.law-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 6px;
+}
+
+.letter-toolbar { display: grid; gap: 12px; margin-bottom: 12px; }
+.letter-actions { display: grid; gap: 10px; }
+.letter {
+  white-space: pre-wrap;
+  background: #fbfcfe;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  font-family: "Figtree", Georgia, serif;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  max-height: 480px;
+  overflow: auto;
+  margin: 0;
+}
+
+.price-banner {
+  background: linear-gradient(90deg, #123a8c, #1b6bff);
+  color: #fff;
+  font-weight: 800;
+  text-align: center;
+  padding: 16px 18px;
+  border-radius: 16px;
+  margin-bottom: 22px;
+  font-size: 1.05rem;
+}
+.price-grid { display: grid; gap: 14px; }
+.price-card h2 { margin: 8px 0 4px; }
+.price { font-family: var(--display); font-size: 3rem; font-weight: 800; margin: 0 0 12px; }
+.price span { font-size: 1.4rem; }
+.price-card ul { padding-left: 18px; color: var(--muted); }
+.price-card li { margin: 8px 0; }
+.price-card.featured { border: 2px solid var(--blue); }
+
+.faq details {
+  background: #fff;
+  border-radius: 16px;
+  padding: 4px 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 8px 24px rgba(7,16,24,0.06);
+}
+.faq summary {
+  font-weight: 800;
+  font-family: var(--display);
+  font-size: 1.08rem;
+  padding: 16px 0;
+  cursor: pointer;
+  list-style: none;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq p { margin: 0 0 16px; color: var(--muted); }
+
+.footer {
+  background: var(--navy);
+  color: rgba(255,255,255,0.72);
+  padding: 28px 0 calc(28px + var(--safe-b));
+  margin-top: 12px;
+}
+.footer-inner { display: grid; gap: 8px; }
+.disclaimer {
+  color: #fff;
+  font-weight: 800;
+  margin: 0;
+}
+.footer-meta { margin: 0; font-size: 0.88rem; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + var(--safe-b));
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  z-index: 80;
+  box-shadow: var(--shadow);
+}
+
+.pay-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+.pay-btn {
+  width: 100%;
+  min-height: 56px;
+  border-radius: 14px;
+  border: 0;
+  font-weight: 700;
+  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.pay-apple {
+  background: #111;
+  color: #fff;
+  font-family: system-ui, -apple-system, "SF Pro Text", sans-serif;
+}
+.pay-google {
+  background: #fff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+}
+.gpay-mark {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.gpay-mark span {
+  font-weight: 800;
+  background: conic-gradient(from 180deg, #ea4335, #fbbc05, #34a853, #4285f4, #ea4335);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.pay-paypal {
+  background: #ffc439;
+  color: #003087;
+  font-style: italic;
+  font-family: "Figtree", Georgia, serif;
+}
+.pay-paypal strong { font-style: italic; font-weight: 800; color: #003087; }
+.pay-paypal em { font-style: italic; font-weight: 800; color: #009cde; }
+.pay-or {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 16px 0 10px;
+  position: relative;
+}
+.card-brands {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 10px 0 4px;
+}
+.price-card .btn-xl,
+.paywall-card .btn-xl { width: 100%; }
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.auth-tab {
+  min-height: 48px;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.auth-tab.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.history-item {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+  text-align: left;
+  width: 100%;
+  border: 0;
+}
+.history-item strong { display: block; font-size: 1.05rem; }
+.history-item span { color: var(--muted); font-size: 0.9rem; }
+
+.checkout {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 16, 24, 0.58);
+  z-index: 90;
+  display: grid;
+  align-items: end;
+  padding: 0;
+}
+.checkout[hidden] { display: none; }
+.checkout-sheet {
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  padding: 22px 20px calc(22px + var(--safe-b));
+  max-height: 92dvh;
+  overflow: auto;
+  position: relative;
+  animation: sheet .28s ease;
+}
+@keyframes sheet {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.checkout-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: var(--paper);
+  border-radius: 12px;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--ink);
+}
+.checkout-sheet h2 { margin: 10px 0 4px; }
+.checkout-sub { color: var(--muted); margin: 0 0 18px; }
+.card-form { display: grid; gap: 12px; }
+.card-form[hidden] { display: none; }
+.card-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.card-form input {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 48px;
+  color: var(--ink);
+  background: var(--paper);
+}
+.card-form input:focus {
+  outline: 2px solid var(--blue);
+  background: #fff;
+}
+.card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.pay-status { text-align: center; padding: 28px 8px 12px; }
+.pay-status[hidden] { display: none; }
+.pay-tick {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: var(--success-bg);
+  color: var(--success);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+@media (min-width: 640px) {
+  .checkout { align-items: center; justify-content: center; }
+  .checkout-sheet {
+    width: min(420px, calc(100% - 32px));
+    border-radius: 24px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 640px) {
+  .trust-row { grid-template-columns: repeat(3, 1fr); }
+  .trust-row li { flex-direction: column; gap: 4px; }
+  .btn-xl { width: auto; }
+  .hero-actions .btn-xl { width: auto; }
+  .upload-actions { grid-template-columns: 1fr 1fr; }
+  .letter-actions { grid-template-columns: 1fr 1fr; }
+  .facts-grid { grid-template-columns: 1fr 1fr; }
+  .span-2 { grid-column: 1 / -1; }
+  .price-grid { grid-template-columns: 1fr 1fr; }
+  .menu-btn { display: none; }
+  .nav { display: flex; }
+  .hero { padding: 72px 0 56px; }
+}
+
+@media (min-width: 960px) {
+  .steps { grid-template-columns: repeat(3, 1fr); }
+  .band-inner {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+  .results-layout {
+    grid-template-columns: 280px 1fr;
+  }
+  .results-head, .weak-card, .letter-card { grid-column: 1 / -1; }
+  .ticket-side { grid-row: 2; }
+  .hero h1 { max-width: 14ch; }
+}
+
+:root{--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--display:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;}
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#app">Skip to content</a>
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <button class="logo" data-nav="home" aria-label="TicketKiller UK home">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="28" height="28">
+            <rect width="32" height="32" rx="8" fill="currentColor"/>
+            <path d="M8 11h16v2H8zm0 4h10v2H8zm0 4h16v2H8z" fill="#fff"/>
+            <path d="M7 8l18 16" stroke="#E8B931" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="logo-text">TicketKiller <em>UK</em></span>
+      </button>
+      <nav class="nav" aria-label="Primary">
+        <button data-nav="home">Home</button>
+        <button data-nav="details">Appeal</button>
+        <button data-nav="history">My appeals</button>
+        <button data-nav="pricing">Pricing</button>
+        <button data-nav="faq">FAQ</button>
+        <button data-nav="auth" id="navAuth">Log in</button>
+      </nav>
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="mobile-nav" id="mobileNav" hidden>
+    <button data-nav="home">Home</button>
+    <button data-nav="details">Enter ticket details</button>
+    <button data-nav="history">My appeals</button>
+    <button data-nav="pricing">Pricing</button>
+    <button data-nav="faq">FAQ</button>
+    <button data-nav="auth" id="navAuthMobile">Log in</button>
+  </div>
+
+  <main id="app">
+    <!-- LANDING -->
+    <section class="page active" id="page-home" data-page="home">
+      <div class="hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="wrap hero-inner">
+          <p class="eyebrow">UK parking charges · POFA 2012 · BPA / IPC</p>
+          <h1>Got a Parking Ticket? Fight It in 2 Minutes.</h1>
+          <p class="lede">Type the details from your PCN and get a formal appeal letter. 65% of appeals succeed.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-xl" data-nav="details">
+              Enter ticket details
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 4l1.4 1.4L8.8 10H20v2H8.8l4.6 4.6L12 18l-8-8 8-8z"/></svg>
+            </button>
+          </div>
+          <ul class="trust-row" aria-label="Trust badges">
+            <li>
+              <strong>12M</strong>
+              <span>tickets issued yearly</span>
+            </li>
+            <li>
+              <strong>65%</strong>
+              <span>appeal success rate</span>
+            </li>
+            <li>
+              <strong>100%</strong>
+              <span>legal</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="wrap section">
+        <h2 class="section-title">Three steps. No solicitor required.</h2>
+        <div class="steps">
+          <article class="step-card">
+            <span class="step-num">01</span>
+            <h3>Enter the ticket details</h3>
+            <p>Copy the operator, PCN number, date, location, amount and vehicle registration from your notice.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-num">02</span>
+            <h3>We build the legal grounds</h3>
+            <p>The letter cites POFA 2012 Schedule 4, BPA/IPC codes, signage, grace periods, keeper liability and ANPR issues.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-num">03</span>
+            <h3>Send a formal appeal</h3>
+            <p>Copy a ready-to-send letter, or download a PDF. First appeal is free.</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="band">
+        <div class="wrap band-inner">
+          <p>Private parking firms issued millions of charges last year. Most motorists pay. You do not have to.</p>
+          <button class="btn btn-primary" data-nav="details">Start my free appeal</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- AUTH -->
+    <section class="page" id="page-auth" data-page="auth">
+      <div class="wrap narrow section">
+        <p class="eyebrow dark">Your account</p>
+        <h1 class="page-title" id="authTitle">Log in</h1>
+        <p class="page-sub">Log in to generate letters and see your previous appeals. First appeal is free on your account.</p>
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" id="tabLogin">Log in</button>
+          <button type="button" class="auth-tab" id="tabRegister">Create account</button>
+        </div>
+        <form id="loginForm" class="facts-card">
+          <div class="facts-grid">
+            <label class="span-2">Email
+              <input id="loginEmail" type="email" autocomplete="username" required />
+            </label>
+            <label class="span-2">Password
+              <input id="loginPass" type="password" autocomplete="current-password" required />
+            </label>
+          </div>
+          <button class="btn btn-primary btn-xl" type="submit" style="margin-top:18px;width:100%">Log in</button>
+        </form>
+        <form id="registerForm" class="facts-card" hidden>
+          <div class="facts-grid">
+            <label class="span-2">Your name
+              <input id="regName" autocomplete="name" required />
+            </label>
+            <label class="span-2">Email
+              <input id="regEmail" type="email" autocomplete="username" required />
+            </label>
+            <label class="span-2">Password
+              <input id="regPass" type="password" autocomplete="new-password" minlength="6" required />
+            </label>
+          </div>
+          <button class="btn btn-primary btn-xl" type="submit" style="margin-top:18px;width:100%">Create account</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="page" id="page-history" data-page="history">
+      <div class="wrap narrow section">
+        <p class="eyebrow dark">Account</p>
+        <h1 class="page-title">Your appeals</h1>
+        <p class="page-sub" id="historySub">Letters you’ve generated on this account.</p>
+        <div id="historyList"></div>
+        <button class="btn btn-primary btn-xl" data-nav="details" type="button" style="margin-top:16px">New appeal</button>
+      </div>
+    </section>
+
+    <!-- TICKET DETAILS -->
+    <section class="page" id="page-details" data-page="details">
+      <div class="wrap narrow section">
+        <p class="eyebrow dark">Step 1 of 2</p>
+        <h1 class="page-title">Enter your ticket details</h1>
+        <p class="page-sub">Copy these from the PCN or Notice to Keeper. Then we’ll write a formal appeal letter.</p>
+
+        <form id="ticketForm" class="facts-card" novalidate>
+          <div class="facts-grid">
+            <label>Operator
+              <input id="fOperator" list="operatorList" autocomplete="organization" placeholder="e.g. ParkingEye, PMC, UKPC" required />
+            </label>
+            <label>PCN / notice number
+              <input id="fRef" autocomplete="off" placeholder="e.g. T128719" required />
+            </label>
+            <label>Date
+              <input id="fDate" type="date" required />
+            </label>
+            <label>Location
+              <input id="fLocation" placeholder="Car park / site" />
+            </label>
+            <label class="span-2">Alleged contravention
+              <input id="fContra" list="contraList" placeholder="e.g. Parked longer than maximum stay" />
+            </label>
+            <label>Amount owed
+              <input id="fAmount" inputmode="decimal" placeholder="e.g. £100" required />
+            </label>
+            <label>Vehicle registration
+              <input id="fVrm" class="vrm" maxlength="10" placeholder="AB12 CDE" required />
+            </label>
+            <label class="span-2">Your name (registered keeper)
+              <input id="fName" placeholder="Name on the letter" autocomplete="name" required />
+            </label>
+          </div>
+          <datalist id="operatorList">
+            <option value="ParkingEye Ltd"></option>
+            <option value="Parking Measure Control (UK) Ltd"></option>
+            <option value="Euro Car Parks"></option>
+            <option value="UK Parking Control"></option>
+            <option value="NCP"></option>
+            <option value="Smart Parking Ltd"></option>
+            <option value="Excel Parking Services"></option>
+            <option value="MET Parking Services"></option>
+            <option value="Civil Enforcement Ltd"></option>
+          </datalist>
+          <datalist id="contraList">
+            <option value="Parked for longer than the maximum stay permitted"></option>
+            <option value="Failure to purchase a valid parking ticket"></option>
+            <option value="Parked outside a marked bay"></option>
+            <option value="Vehicle not authorised to park"></option>
+            <option value="Parked in contravention of restrictions at the location"></option>
+          </datalist>
+          <button class="btn btn-primary btn-xl" id="generateBtn" type="submit" style="margin-top:18px;width:100%">Generate appeal letter</button>
+        </form>
+
+        <div id="paywallPane" hidden>
+          <div class="paywall-card">
+            <p class="chip">You’ve used your free appeal</p>
+            <h2>Pay £4.99 for the next letter</h2>
+            <p>This account already has a free letter. Pay with PayPal or card, then PayPal will send you back here and Generate unlocks.</p>
+            <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+              <input type="hidden" name="cmd" value="_xclick" />
+              <input type="hidden" name="business" value="mrmillz1991@gmail.com" />
+              <input type="hidden" name="item_name" value="TicketKiller UK extra appeal" />
+              <input type="hidden" name="amount" value="4.99" />
+              <input type="hidden" name="currency_code" value="GBP" />
+              <input type="hidden" name="no_shipping" value="1" />
+              <input type="hidden" name="no_note" value="1" />
+              <input type="hidden" name="return" value="" />
+              <input type="hidden" name="cancel_return" value="" />
+              <input type="hidden" name="custom" value="" />
+              <input type="hidden" name="rm" value="1" />
+              <button class="pay-btn pay-paypal" type="submit"><strong>Pay</strong><em>Pal</em></button>
+              <button class="btn btn-primary btn-xl" type="submit" style="margin-top:10px;width:100%">Pay £4.99</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="page" id="page-results" data-page="results">
+      <div class="wrap section">
+        <div class="results-head">
+          <p class="eyebrow dark">Your appeal</p>
+          <h1 class="page-title">Legal grounds and letter</h1>
+          <p class="page-sub">Edit any detail and the letter updates. Then copy or download it.</p>
+          <button class="btn btn-secondary" data-nav="details" type="button">Edit ticket details</button>
+        </div>
+
+        <div class="weak-card">
+          <div class="weak-head">
+            <h2>Grounds for appeal</h2>
+            <span class="badge" id="weakCount">0 grounds</span>
+          </div>
+          <ul class="weak-list" id="weakList"></ul>
+        </div>
+
+        <div class="letter-card">
+          <div class="letter-toolbar">
+            <h2>Formal appeal letter</h2>
+            <div class="letter-actions">
+              <button class="btn btn-primary" id="copyBtn" type="button">Copy Appeal Letter</button>
+              <button class="btn btn-secondary" id="pdfBtn" type="button">Download as PDF</button>
+            </div>
+          </div>
+          <pre id="letterText" class="letter"></pre>
+        </div>
+      </div>
+    </section>
+
+        <!-- PRICING -->
+    <section class="page" id="page-pricing" data-page="pricing">
+      <div class="wrap narrow section">
+        <div class="price-banner" role="status">
+          Your first appeal is FREE. Subsequent appeals £4.99 each.
+        </div>
+        <h1 class="page-title">Simple, honest pricing</h1>
+        <p class="page-sub">A private parking charge is typically £70–£100. We cost less than a takeaway coffee after the first ticket.</p>
+
+        <div class="price-grid">
+          <article class="price-card featured">
+            <p class="chip">Most people start here</p>
+            <h2>First appeal</h2>
+            <p class="price"><span>£</span>0</p>
+            <ul>
+              <li>Legal grounds from UK parking law</li>
+              <li>POFA 2012 &amp; BPA/IPC checks</li>
+              <li>Formal appeal letter</li>
+              <li>Copy &amp; PDF download</li>
+            </ul>
+            <button class="btn btn-primary btn-xl" data-nav="details">Enter ticket details</button>
+          </article>
+          <article class="price-card">
+            <p class="chip muted-chip">After that</p>
+            <h2>Extra appeals</h2>
+            <p class="price"><span>£</span>4.99</p>
+            <ul>
+              <li>Same letter for each extra ticket</li>
+              <li>Pay per ticket, no subscription</li>
+              <li>PayPal or card on PayPal’s secure page</li>
+            </ul>
+            <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+              <input type="hidden" name="cmd" value="_xclick" />
+              <input type="hidden" name="business" value="mrmillz1991@gmail.com" />
+              <input type="hidden" name="item_name" value="TicketKiller UK extra appeal" />
+              <input type="hidden" name="amount" value="4.99" />
+              <input type="hidden" name="currency_code" value="GBP" />
+              <input type="hidden" name="no_shipping" value="1" />
+              <input type="hidden" name="no_note" value="1" />
+              <input type="hidden" name="return" value="" />
+              <input type="hidden" name="cancel_return" value="" />
+              <input type="hidden" name="custom" value="" />
+              <input type="hidden" name="rm" value="1" />
+              <button class="pay-btn pay-paypal" type="submit" aria-label="Pay with PayPal">
+                <strong>Pay</strong><em>Pal</em>
+              </button>
+              <p class="pay-or">PayPal also accepts card</p>
+              <button class="btn btn-primary btn-xl" type="submit">Pay £4.99</button>
+            </form>
+            <p class="fine">Opens PayPal. Money goes to your PayPal account. PayPal takes their fee.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="page" id="page-faq" data-page="faq">
+      <div class="wrap narrow section">
+        <p class="eyebrow dark">Common questions</p>
+        <h1 class="page-title">FAQ</h1>
+        <div class="faq" id="faqList">
+          <details open>
+            <summary>Is this legal?</summary>
+            <p>Yes. Appealing a parking charge is a lawful right. Private operators must consider appeals, and BPA members must offer POPLA while IPC members must offer the IAS. TicketKiller UK helps you draft a structured challenge citing UK law (including POFA 2012 Schedule 4) and industry codes. We do not impersonate solicitors, lodge appeals for you, or give personalised legal advice.</p>
+          </details>
+          <details>
+            <summary>What if my appeal is rejected?</summary>
+            <p>If the operator rejects your first appeal, ask them for a POPLA code (BPA operators) or an IAS code (IPC operators). You usually have 28 days from the rejection to escalate. Independent adjudicator success rates are often around 40% or higher when the case is well evidenced — signage, late Notice to Keeper, and grace-period failures are common winners. Do not ignore a rejection: paying the discounted rate, appealing, or escalating are the safe options. Debt collectors cannot force payment without a court claim.</p>
+          </details>
+          <details>
+            <summary>How long do I have to appeal?</summary>
+            <p>Act quickly. For most private parking charges you should appeal to the operator within 28 days of the notice (check the letter — some quote 14 or 21). Paying the reduced amount is typically offered for 14 days; appealing within that window usually preserves the discount if you later lose. Council PCNs have their own 14/28-day windows under the Traffic Management Act 2004. Missing the deadline does not always end the matter, but it weakens your position.</p>
+          </details>
+          <details>
+            <summary>Should I name the driver?</summary>
+            <p>Usually no. If you are the registered keeper, you are not obliged to identify the driver. Naming them can destroy a keeper-liability defence under POFA 2012 Schedule 4. Our letters appeal as keeper and do not admit who was driving.</p>
+          </details>
+          <details>
+            <summary>How can I pay?</summary>
+            <p>Your first appeal is free. Extra appeals are £4.99 each, paid through PayPal (PayPal balance or card). There is no subscription.</p>
+          </details>
+          <details>
+            <summary>Council ticket or private charge?</summary>
+            <p>This tool is aimed at private Parking Charge Notices (ParkingEye, UKPC, Euro Car Parks, and similar). Council PCNs are civil penalties with a different process (informal challenge, then formal representations, then tribunal). The letter still helps you organise facts, but council appeals should follow the wording on the PCN.</p>
+          </details>
+        </div>
+        <button class="btn btn-primary btn-xl" data-nav="details">Enter ticket details</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <p class="disclaimer">Not legal advice. For informational purposes only.</p>
+      <p class="footer-meta">TicketKiller UK does not provide reserved legal activity. Parking charges are not criminal fines. Always check dates, codes and operator instructions on your own notice.</p>
+      <p class="footer-meta">© 2026 TicketKiller UK</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+(() => {
+  const GROUNDS = [
+    {
+      tag: "POFA 2012 Schedule 4",
+      title: "Keeper liability may not have been established",
+      body: "To pursue the registered keeper, the operator must serve a compliant Notice to Keeper within the statutory window (generally 14 days where no windscreen notice was issued, or 56 days where one was) and include the prescribed wording in Schedule 4. Any defect in timing, “period of parking”, or mandatory statements extinguishes keeper liability. You are not obliged to name the driver."
+    },
+    {
+      tag: "BPA / IPC Code of Practice",
+      title: "Signage is unlikely to have formed a clear contract",
+      body: "Entrance and tariff signs must be prominent, legible and consistent. If key terms (maximum stay, charge amount, ANPR in use) were faded, poorly lit, too high, or missing at the point of entry, no contract was formed. Ask the operator for the signage plan and contemporaneous photographs."
+    },
+    {
+      tag: "Grace period",
+      title: "A consideration / grace period does not appear to have been applied",
+      body: "Industry codes require time to read the terms, find a space, and a further period (typically 10 minutes) after paid-for or free time before a charge is issued. Demand the full in/out timestamps to the second."
+    },
+    {
+      tag: "ANPR evidence",
+      title: "Camera timestamps may not prove a parking event",
+      body: "ANPR records a vehicle crossing a line, not that it was parked. Misreads, clock drift, a brief drop-off, or a second visit the same day are common. Require full-colour entry and exit stills. A period of presence is not automatically a period of parking under POFA."
+    },
+    {
+      tag: "Landowner authority",
+      title: "No proof the operator had authority to issue charges",
+      body: "Only the landowner, or a contractor with written authority, can offer parking terms or pursue a charge. Request a redacted copy of the contract showing the site, dates, and the right to issue PCNs in the operator’s own name."
+    }
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const pages = [...document.querySelectorAll(".page")];
+  const USERS_KEY = "tk_users_v1";
+  const SESSION_KEY = "tk_session";
+  const PENDING_KEY = "tk_pending_pay";
+  let afterLogin = "details";
+
+  function users() {
+    try { return JSON.parse(localStorage.getItem(USERS_KEY) || "{}"); }
+    catch { return {}; }
+  }
+  function saveUsers(map) {
+    localStorage.setItem(USERS_KEY, JSON.stringify(map));
+  }
+  function sessionEmail() {
+    return localStorage.getItem(SESSION_KEY) || "";
+  }
+  function currentUser() {
+    const email = sessionEmail();
+    return email ? users()[email] || null : null;
+  }
+  function saveUser(user) {
+    const map = users();
+    map[user.email] = user;
+    saveUsers(map);
+  }
+  async function hashPass(pw) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`tk|${pw}`));
+    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  function usedFree(u) {
+    return !!(u.freeUsed || (u.appeals && u.appeals.length));
+  }
+  function canGenerate() {
+    const u = currentUser();
+    if (!u) return false;
+    return !usedFree(u) || (u.credits || 0) > 0;
+  }
+  function consumeGenerate() {
+    const u = currentUser();
+    if (!u) return;
+    if (!usedFree(u)) {
+      u.freeUsed = true;
+    } else {
+      u.credits = Math.max(0, (u.credits || 0) - 1);
+    }
+    saveUser(u);
+  }
+  function grantPaidCredit(email) {
+    const map = users();
+    const u = map[email];
+    if (!u) return;
+    u.credits = (u.credits || 0) + 1;
+    saveUsers(map);
+    localStorage.removeItem(PENDING_KEY);
+  }
+  function syncPaywall() {
+    const pane = $("paywallPane");
+    if (!pane) return;
+    const locked = !!currentUser() && !canGenerate();
+    pane.hidden = !locked;
+    $("generateBtn").disabled = locked;
+    $("generateBtn").textContent = locked ? "Pay £4.99 to generate another" : "Generate appeal letter";
+  }
+  function syncNav() {
+    const u = currentUser();
+    const label = u ? "Log out" : "Log in";
+    $("navAuth").textContent = label;
+    $("navAuthMobile").textContent = label;
+  }
+  function pageUrl() {
+    return location.href.split("#")[0].split("?")[0];
+  }
+
+  function toast(msg) {
+    const el = $("toast");
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { el.hidden = true; }, 2400);
+  }
+
+  function showPage(name) {
+    if ((name === "details" || name === "history") && !currentUser()) {
+      afterLogin = name;
+      name = "auth";
+    }
+    if (name === "auth" && currentUser() && $("navAuth").textContent === "Log out") {
+      // handled by click interceptor
+    }
+    pages.forEach((p) => p.classList.toggle("active", p.dataset.page === name));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (name === "details") syncPaywall();
+    if (name === "history") renderHistory();
+  }
+
+  document.getElementById("menuBtn").addEventListener("click", () => {
+    const nav = $("mobileNav");
+    const open = nav.hasAttribute("hidden");
+    nav.toggleAttribute("hidden", !open);
+    document.getElementById("menuBtn").setAttribute("aria-expanded", String(open));
+  });
+
+  document.querySelectorAll("[data-nav]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const dest = btn.getAttribute("data-nav");
+      $("mobileNav").setAttribute("hidden", "");
+      document.getElementById("menuBtn").setAttribute("aria-expanded", "false");
+      if (dest === "auth" && currentUser()) {
+        localStorage.removeItem(SESSION_KEY);
+        syncNav();
+        toast("Logged out");
+        showPage("home");
+        return;
+      }
+      showPage(dest);
+    });
+  });
+
+  $("tabLogin").addEventListener("click", () => {
+    $("tabLogin").classList.add("active");
+    $("tabRegister").classList.remove("active");
+    $("loginForm").hidden = false;
+    $("registerForm").hidden = true;
+    $("authTitle").textContent = "Log in";
+  });
+  $("tabRegister").addEventListener("click", () => {
+    $("tabRegister").classList.add("active");
+    $("tabLogin").classList.remove("active");
+    $("loginForm").hidden = true;
+    $("registerForm").hidden = false;
+    $("authTitle").textContent = "Create account";
+  });
+
+  $("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = $("loginEmail").value.trim().toLowerCase();
+    const pass = $("loginPass").value;
+    const u = users()[email];
+    if (!u || u.pass !== await hashPass(pass)) {
+      toast("Email or password is wrong");
+      return;
+    }
+    localStorage.setItem(SESSION_KEY, email);
+    syncNav();
+    toast(`Welcome back, ${u.name}`);
+    showPage(afterLogin || "history");
+  });
+
+  $("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = $("regEmail").value.trim().toLowerCase();
+    const name = $("regName").value.trim();
+    const pass = $("regPass").value;
+    if (pass.length < 6) {
+      toast("Password must be at least 6 characters");
+      return;
+    }
+    const map = users();
+    if (map[email]) {
+      toast("That email already has an account. Log in.");
+      return;
+    }
+    map[email] = {
+      email,
+      name,
+      pass: await hashPass(pass),
+      freeUsed: false,
+      credits: 0,
+      appeals: []
+    };
+    saveUsers(map);
+    localStorage.setItem(SESSION_KEY, email);
+    if ($("fName") && !$("fName").value) $("fName").value = name;
+    syncNav();
+    toast("Account created");
+    showPage(afterLogin || "details");
+  });
+
+  document.querySelectorAll(".paypal-form").forEach((form) => {
+    form.addEventListener("submit", (e) => {
+      const u = currentUser();
+      if (!u) {
+        e.preventDefault();
+        afterLogin = "details";
+        showPage("auth");
+        toast("Log in first so we can unlock this account after payment");
+        return;
+      }
+      const nonce = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+      localStorage.setItem(PENDING_KEY, JSON.stringify({ nonce, email: u.email }));
+      form.querySelector('[name="return"]').value = `${pageUrl()}?paypal=success`;
+      form.querySelector('[name="cancel_return"]').value = `${pageUrl()}?paypal=cancel`;
+      form.querySelector('[name="custom"]').value = `${u.email}|${nonce}`;
+    });
+  });
+
+  (function catchPaypalReturn() {
+    const params = new URLSearchParams(location.search);
+    const status = params.get("paypal");
+    if (status === "success") {
+      try {
+        const pending = JSON.parse(localStorage.getItem(PENDING_KEY) || "null");
+        if (pending?.email) {
+          grantPaidCredit(pending.email);
+          localStorage.setItem(SESSION_KEY, pending.email);
+        }
+      } catch { /* ignore */ }
+      history.replaceState({}, "", pageUrl());
+      toast("Payment confirmed. You can generate another letter.");
+      syncNav();
+      showPage("details");
+    } else if (status === "cancel") {
+      localStorage.removeItem(PENDING_KEY);
+      history.replaceState({}, "", pageUrl());
+      toast("Payment cancelled");
+    }
+  })();
+
+  function letterFromForm() {
+    const operator = $("fOperator").value.trim() || "[Operator]";
+    const ref = $("fRef").value.trim() || "[PCN reference]";
+    const date = $("fDate").value || "[date]";
+    const location = $("fLocation").value.trim() || "[location]";
+    const contra = $("fContra").value.trim() || "[alleged contravention]";
+    const amount = $("fAmount").value.trim() || "[amount]";
+    const v = $("fVrm").value.trim().toUpperCase() || "[VRM]";
+    const name = $("fName").value.trim() || currentUser()?.name || "[Your name]";
+    const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const niceDate = date.match(/^\d{4}-\d{2}-\d{2}$/)
+      ? new Date(date + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+      : date;
+    const grounds = GROUNDS.map((g, i) => `${i + 1}. ${g.title}\n${g.body}`).join("\n\n");
+    return `${name}
+[Your address]
+[Your postcode]
+
+${today}
+
+Appeals Team
+${operator}
+
+Without prejudice
+
+Dear Sir or Madam,
+
+Re: Formal appeal — Parking Charge Notice ${ref}
+Vehicle registration: ${v}
+Location: ${location}
+Date of alleged contravention: ${niceDate}
+Alleged contravention: ${contra}
+Amount demanded: ${amount}
+
+I write as the registered keeper of the vehicle above. I dispute this parking charge in full and I do not accept liability. I am not the creditor’s contracting driver for the purpose of this correspondence, and I decline to identify the driver.
+
+Please cancel the charge. If you refuse, issue a valid POPLA code (if you are a BPA Approved Operator) or an IAS code (if you are an IPC operator) with your rejection.
+
+The grounds of appeal are as follows.
+
+${grounds}
+
+Further points
+
+• I require you to comply with the Protection of Freedoms Act 2012, Schedule 4, if you intend to pursue me as keeper. If any statutory condition is unmet, keeper liability does not arise.
+• Please provide: the full ANPR or officer evidence pack; contemporaneous signage photographs and the site plan; proof of landowner authority to issue charges in your name; and the exact entry and exit timestamps to the second.
+• Do not add debt-recovery fees while this appeal (and any subsequent independent appeal) remains outstanding.
+
+I look forward to written confirmation of cancellation within 35 days.
+
+Yours faithfully,
+
+${name}
+Registered keeper
+
+This letter is generated by TicketKiller UK for informational purposes and is not legal advice.`;
+  }
+
+  function renderAppeal() {
+    $("weakCount").textContent = `${GROUNDS.length} grounds`;
+    $("weakList").innerHTML = GROUNDS.map((g) => `
+      <li>
+        <span class="law-tag">${g.tag}</span>
+        <h3>${g.title}</h3>
+        <p>${g.body}</p>
+      </li>
+    `).join("");
+    $("letterText").textContent = letterFromForm();
+  }
+
+  function saveCurrentAppeal() {
+    const u = currentUser();
+    if (!u) return;
+    const item = {
+      id: Date.now().toString(36),
+      created: new Date().toISOString(),
+      operator: $("fOperator").value.trim(),
+      ref: $("fRef").value.trim(),
+      date: $("fDate").value,
+      location: $("fLocation").value.trim(),
+      contra: $("fContra").value.trim(),
+      amount: $("fAmount").value.trim(),
+      vrm: $("fVrm").value.trim().toUpperCase(),
+      letter: letterFromForm()
+    };
+    u.appeals = u.appeals || [];
+    u.appeals.unshift(item);
+    saveUser(u);
+  }
+
+  function renderHistory() {
+    const u = currentUser();
+    const list = $("historyList");
+    if (!u) {
+      list.innerHTML = "";
+      return;
+    }
+    $("historySub").textContent = `${u.name} · ${u.appeals?.length || 0} appeal(s) · first letter ${u.freeUsed ? "used" : "still free"}`;
+    if (!u.appeals?.length) {
+      list.innerHTML = `<p class="page-sub">No letters yet. Generate one from your ticket details.</p>`;
+      return;
+    }
+    list.innerHTML = u.appeals.map((a) => `
+      <button class="history-item" type="button" data-appeal="${a.id}">
+        <strong>${a.operator || "Appeal"} · ${a.ref || ""}</strong>
+        <span>${a.vrm || ""} · ${a.amount || ""} · ${a.created ? new Date(a.created).toLocaleDateString("en-GB") : ""}</span>
+      </button>
+    `).join("");
+    list.querySelectorAll("[data-appeal]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const a = u.appeals.find((x) => x.id === btn.getAttribute("data-appeal"));
+        if (!a) return;
+        $("fOperator").value = a.operator || "";
+        $("fRef").value = a.ref || "";
+        $("fDate").value = a.date || "";
+        $("fLocation").value = a.location || "";
+        $("fContra").value = a.contra || "";
+        $("fAmount").value = a.amount || "";
+        $("fVrm").value = a.vrm || "";
+        $("fName").value = u.name || "";
+        renderAppeal();
+        $("letterText").textContent = a.letter || letterFromForm();
+        showPage("results");
+      });
+    });
+  }
+
+  $("ticketForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!currentUser()) {
+      afterLogin = "details";
+      showPage("auth");
+      toast("Create an account or log in first");
+      return;
+    }
+    if (!canGenerate()) {
+      syncPaywall();
+      $("paywallPane").scrollIntoView({ behavior: "smooth", block: "center" });
+      toast("Pay £4.99 with PayPal to generate another letter");
+      return;
+    }
+    if (!$("fOperator").value.trim() || !$("fRef").value.trim() || !$("fVrm").value.trim() || !$("fName").value.trim()) {
+      toast("Please fill operator, notice number, registration and your name");
+      return;
+    }
+    consumeGenerate();
+    renderAppeal();
+    saveCurrentAppeal();
+    showPage("results");
+    syncPaywall();
+  });
+
+  ["fOperator","fRef","fDate","fLocation","fContra","fAmount","fVrm","fName"].forEach((id) => {
+    $(id).addEventListener("input", () => {
+      if ($("page-results").classList.contains("active")) renderAppeal();
+    });
+  });
+
+  $("copyBtn").addEventListener("click", async () => {
+    const text = $("letterText").textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+    toast("Appeal letter copied");
+  });
+
+  $("pdfBtn").addEventListener("click", () => {
+    const text = $("letterText").textContent;
+    const ref = ($("fRef").value || "appeal").replace(/[^\w-]+/g, "");
+    if (window.jspdf?.jsPDF) {
+      const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
+      const margin = 54;
+      const width = 495;
+      doc.setFont("times", "normal");
+      doc.setFontSize(11);
+      const lines = doc.splitTextToSize(text, width);
+      let y = 64;
+      lines.forEach((line) => {
+        if (y > 780) {
+          doc.addPage();
+          y = 64;
+        }
+        doc.text(line, margin, y);
+        y += 15;
+      });
+      doc.save(`TicketKiller-UK-appeal-${ref || "letter"}.pdf`);
+      toast("PDF downloaded");
+      return;
+    }
+    window.print();
+  });
+
+  syncNav();
+  syncPaywall();
+})();
+
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a57ca8f34b691205',t:'MTc5NDIyNTY1Ng=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a57ca8f34b691205',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
