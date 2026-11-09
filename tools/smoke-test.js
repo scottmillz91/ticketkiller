@@ -185,7 +185,7 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     click($("weakList").querySelector("[data-toggle-ground]"));
     assert($("letterText").textContent.length !== before, "letter unchanged");
   });
-  check("ground count reflects selection", () => assert(/of 8 grounds/.test($("weakCount").textContent), $("weakCount").textContent));
+  check("ground count reflects selection", () => assert(/of 8 included/.test($("weakCount").textContent), $("weakCount").textContent));
   check("escalation letter generates", () => {
     const t = $("escalationText").textContent;
     assert(t.includes("Independent appeal"), "no escalation heading");
@@ -231,6 +231,46 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
   await sleep(30);
   check("history lists the saved appeal", () => assert($("historyList").querySelectorAll(".history-item").length >= 1, "no saved appeal"));
   check("history shows a countdown pill", () => assert($("historyList").querySelectorAll(".cd-pill").length >= 1, "no status pill"));
+  check("history names the operator and reference", () => {
+    const title = $("historyList").querySelector(".history-title").textContent;
+    assert(title.includes("·"), `title not split: ${title}`);
+  });
+  check("history states the reply-by date", () => assert(/Reply by/.test($("historyList").textContent), "no deadline line"));
+  check("history summary is rendered once there is an appeal", () => {
+    assert(!$("appealSummary").hidden, "summary hidden with an appeal present");
+    assert(/still inside the appeal window/.test($("appealBarNote").textContent), $("appealBarNote").textContent);
+  });
+  check("setting an outcome can be undone", () => {
+    const btn = $("historyList").querySelector('[data-status][data-to="won"]');
+    assert(btn, "no outcome button");
+    btn.click();
+    assert(/Marked as won/.test($("toast").textContent), "no confirmation");
+    const undo = $("toast").querySelector(".toast-action");
+    assert(undo, "no undo affordance");
+    undo.click();
+    assert(!/Marked as won/.test($("toast").textContent) || $("toast").hidden, "toast not replaced");
+  });
+  check("history empty state explains the first free letter", () => {
+    /* Exercised on a throwaway account so the seeded one is left intact. */
+    const kept = window.localStorage.getItem("tk_users_v1");
+    const keptSession = window.localStorage.getItem("tk_session");
+    window.localStorage.setItem("tk_users_v1", JSON.stringify({
+      "empty@example.com": { email: "empty@example.com", name: "Nobody", pass: "x", freeUsed: false, credits: 0, appeals: [], created: new Date().toISOString() }
+    }));
+    window.localStorage.setItem("tk_session", "empty@example.com");
+    nav("history");
+    const shown = !$("historyEmpty").hidden;
+    const hasCta = !!$("historyEmpty").querySelector("[data-nav='details']");
+    const summaryHidden = $("appealSummary").hidden;
+    window.localStorage.setItem("tk_users_v1", kept);
+    window.localStorage.setItem("tk_session", keptSession);
+    nav("history");
+    assert(shown, "empty state not shown");
+    assert(hasCta, "no call to action in the empty state");
+    assert(summaryHidden, "summary shown with no appeals");
+  });
+  check("grounds no longer fake a button", () =>
+    assert(!$("weakList").querySelector(".mini-btn[style]"), "a non-interactive span is still styled as a button"));
 
   // ---------- operators + guides ----------
   nav("operators");

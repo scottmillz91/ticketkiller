@@ -167,14 +167,30 @@
   /* ---------------------------------------------------------
      Toast
      --------------------------------------------------------- */
-  function toast(msg) {
+  /* An optional action renders as a button inside the toast. Used for undo,
+     which is more reliable than a timed window: the user has to decide. */
+  function toast(msg, action) {
     const el = $("toast");
     if (!el) return;
     el.textContent = msg;
+    if (action) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "toast-action";
+      btn.textContent = "Undo";
+      btn.addEventListener("click", () => {
+        el.hidden = true;
+        el.removeAttribute("data-show");
+        clearTimeout(toast._t);
+        action();
+      });
+      el.appendChild(btn);
+    }
     el.hidden = false;
     el.setAttribute("data-show", "1");
     clearTimeout(toast._t);
-    toast._t = setTimeout(() => { el.hidden = true; el.removeAttribute("data-show"); }, 2800);
+    /* Longer when there is something to act on. */
+    toast._t = setTimeout(() => { el.hidden = true; el.removeAttribute("data-show"); }, action ? 6000 : 2800);
   }
 
   /* ---------------------------------------------------------
@@ -681,14 +697,24 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
         <span class="law-tag">${esc(g.tag)}</span>
         <h3>${esc(g.title)}</h3>
         <p>${esc(g.body)}</p>
+        <div class="ground-when">
+          <span class="ground-when-label">Applies if</span>
+          <span>${esc(g.when)}</span>
+        </div>
         <div class="ground-actions">
-          <button class="mini-btn" type="button" aria-pressed="${on}" data-toggle-ground="${esc(g.id)}">${on ? "Included" : "Excluded"}</button>
-          <span class="mini-btn" style="cursor:default">Applies when: ${esc(g.when)}</span>
+          <button class="mini-btn ground-toggle" type="button" aria-pressed="${on}" data-toggle-ground="${esc(g.id)}">${on ? "Included in letter" : "Excluded"}</button>
         </div>
       </li>`;
     }).join("");
     const n = state.selectedGrounds.size;
-    if ($("weakCount")) $("weakCount").textContent = `${n} of ${state.grounds.length} grounds`;
+    const total = state.grounds.length;
+    const badge = $("weakCount");
+    if (badge) {
+      badge.textContent = n === total ? `All ${total} included` : `${n} of ${total} included`;
+      /* Nought included is not an error, but it does mean the letter has
+         nothing to argue, so it is worth flagging before a copy. */
+      badge.className = n === 0 ? "badge is-none" : "badge";
+    }
     $$("[data-toggle-ground]", host).forEach((b) => b.addEventListener("click", () => {
       const id = b.getAttribute("data-toggle-ground");
       if (state.selectedGrounds.has(id)) state.selectedGrounds.delete(id);
@@ -719,6 +745,21 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
       : `${d.appealLeft} day${d.appealLeft === 1 ? "" : "s"} left to appeal · deadline ${longDate(d.appealBy)}`;
     host.className = `cd-pill ${cls}`;
     host.textContent = text;
+
+    /* Name the charge above the grounds, so it is obvious which appeal the
+       letter being edited belongs to. */
+    const forEl = $("resultFor");
+    if (!forEl) return;
+    const parts = [];
+    const op = val("fOperator");
+    const ref = val("fRef");
+    const vrm = val("fVrm");
+    if (op) parts.push(`<strong>${esc(op)}</strong>`);
+    if (ref) parts.push(esc(ref));
+    if (vrm) parts.push(`<span class="history-vrm">${esc(vrm.toUpperCase())}</span>`);
+    forEl.innerHTML = parts.length
+      ? `${parts.join(' <span class="dot">·</span> ')}<br><span>Turn grounds on or off and the letter updates.</span>`
+      : "Turn grounds on or off and the letter updates. Then copy or download it.";
   }
 
   /* ---------------------------------------------------------
@@ -755,43 +796,138 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     return "open";
   }
 
+  /* Human wording for an appeal's state. "open" is derived from the stored
+     deadline rather than persisted, so a draft ages into "window closed" by
+     itself instead of sitting there saying it is still live. */
+  const STATUS_LABEL = {
+    open: ["Open", "ok"],
+    won: ["Won", "ok"],
+    lost: ["Lost", "crit"],
+    escalated: ["Escalated", "warn"],
+    expired: ["Window closed", "crit"]
+  };
+
+  function appealPill(u, a) {
+    const st = appealStatus(u, a);
+    const [label] = STATUS_LABEL[st] || STATUS_LABEL.open;
+    if (st !== "open") return `<span class="cd-pill ${STATUS_LABEL[st][1]}">${label}</span>`;
+    const dl = parseDay(a.deadline);
+    const days = dl ? daysBetween(todayUTC(), dl) : null;
+    if (days === null) return `<span class="cd-pill ok">Open</span>`;
+    /* Inside a week is the point where saying something is useful. */
+    const cls = days <= 3 ? "crit" : days <= 7 ? "warn" : "ok";
+    return `<span class="cd-pill ${cls}">${days} day${days === 1 ? "" : "s"} left</span>`;
+  }
+
+  /* "£100" or "100" both display as £100. Anything unparseable is passed
+     through untouched rather than invented. */
+  function money(v) {
+    if (!v) return "";
+    const t = String(v).trim();
+    const m = t.match(/^£?\s*([\d,]+(?:\.\d{1,2})?)$/);
+    if (!m) return t;
+    const n = Number(m[1].replace(/,/g, ""));
+    if (!isFinite(n)) return t;
+    return "£" + n.toLocaleString("en-GB", { maximumFractionDigits: 2 });
+  }
+
+  function niceDate(iso) {
+    const d = parseDay(iso);
+    if (!d) return "";
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  }
+
   function renderHistory() {
     const u = currentUser();
     const list = $("historyList");
+    const empty = $("historyEmpty");
+    const summary = $("appealSummary");
+    const newBtn = $("newAppealBtn");
     if (!list) return;
-    if (!u) { list.innerHTML = ""; return; }
 
-    const subs = $("historySub");
-    if (subs) {
-      const open = (u.appeals || []).filter((a) => appealStatus(u, a) === "open").length;
-      subs.textContent = `${u.name} · ${(u.appeals || []).length} letter(s) · ${open} still inside the appeal window · first letter ${u.freeUsed ? "used" : "still free"}`;
-    }
-
-    if (!u.appeals || !u.appeals.length) {
-      list.innerHTML = `<p class="page-sub">No letters yet. Generate one from your ticket details — the first is free.</p>`;
+    if (!u) {
+      list.innerHTML = "";
+      if (summary) summary.hidden = true;
+      if (empty) empty.hidden = true;
+      if (newBtn) newBtn.hidden = true;
       return;
     }
 
-    list.innerHTML = u.appeals.map((a) => {
+    const appeals = u.appeals || [];
+    const has = appeals.length > 0;
+
+    /* With nothing saved, the empty state carries the only call to action. */
+    if (empty) empty.hidden = has;
+    if (newBtn) newBtn.hidden = !has;
+
+    const counts = { open: 0, won: 0, lost: 0, escalated: 0, expired: 0 };
+    appeals.forEach((a) => { counts[appealStatus(u, a)] += 1; });
+
+    if (summary) summary.hidden = !has;
+    if (has) {
+      const stats = [];
+      /* Lead with whatever is most useful: work still live, else the result. */
+      if (counts.open) stats.push(`<span class="is-warn"><b>${counts.open}</b>still to send</span>`);
+      if (counts.won) stats.push(`<span class="is-ok"><b>${counts.won}</b>won</span>`);
+      if (counts.escalated) stats.push(`<span><b>${counts.escalated}</b>escalated</span>`);
+      if (counts.lost) stats.push(`<span><b>${counts.lost}</b>lost</span>`);
+      if (counts.expired) stats.push(`<span><b>${counts.expired}</b>window closed</span>`);
+      const statsEl = $("appealStats");
+      if (statsEl) statsEl.innerHTML = stats.join("");
+      const pct = Math.round((counts.open / appeals.length) * 100);
+      if ($("appealBarFill")) $("appealBarFill").style.width = pct + "%";
+      if ($("appealBarNote")) {
+        $("appealBarNote").textContent = counts.open
+          ? `${counts.open} of ${appeals.length} still inside the appeal window.`
+          : "No appeals are still open — every deadline has passed or a result is recorded.";
+      }
+    }
+
+    if (!has) { list.innerHTML = ""; return; }
+
+    list.innerHTML = appeals.map((a) => {
       const st = appealStatus(u, a);
       const dl = parseDay(a.deadline);
       const days = dl ? daysBetween(todayUTC(), dl) : null;
-      const pill = st === "won" ? `<span class="cd-pill ok">Won</span>`
-        : st === "lost" ? `<span class="cd-pill crit">Lost</span>`
-        : st === "escalated" ? `<span class="cd-pill warn">Escalated</span>`
-        : st === "expired" ? `<span class="cd-pill crit">Window closed</span>`
-        : `<span class="cd-pill ${bandClass(days)}">${days} day${days === 1 ? "" : "s"} left</span>`;
+      const current = state.viewedAppealId === a.id;
+
+      const meta = [];
+      if (a.vrm) meta.push(`<span class="history-vrm">${esc(a.vrm)}</span>`);
+      if (a.amount) meta.push(`<strong>${esc(money(a.amount))}</strong>`);
+      if (a.contra) meta.push(esc(a.contra));
+      /* created is a full ISO timestamp, which parseDay rejects; it is
+         formatted separately rather than pushed into the day helper. */
+      if (a.created) {
+        const made = new Date(a.created);
+        if (!isNaN(made)) meta.push(made.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }));
+      }
+
+      /* Deadline is the thing people come here to check, so it is stated in
+         words as well as by the pill. */
+      let dlLine = "";
+      if (st === "open" && dl && days !== null) {
+        dlLine = `Reply by <strong>${niceDate(a.deadline)}</strong>`;
+      } else if (st === "expired" && dl) {
+        dlLine = `Deadline was <strong>${niceDate(a.deadline)}</strong>`;
+      }
+
+      /* Only offer the outcomes that are not already recorded. */
+      const opts = [["won", "Won"], ["lost", "Lost"], ["escalated", "Escalate"]];
+      const actions = opts.map(([to, label]) =>
+        `<button class="mini-btn ${st === to ? "is-current" : ""}" type="button"
+           data-status="${esc(a.id)}" data-to="${to}"
+           aria-pressed="${st === to}">${label}</button>`).join("");
+
       return `
-      <div class="history-row">
-        <button class="history-item" type="button" data-appeal="${esc(a.id)}">
-          <strong>${esc(a.operator || "Appeal")} · ${esc(a.ref || "")}</strong>
-          <span>${esc(a.vrm || "")} · ${esc(a.amount || "")} · ${esc(a.contra || "")} · ${a.created ? new Date(a.created).toLocaleDateString("en-GB") : ""}</span>
+      <div class="history-row" data-row="${esc(a.id)}">
+        <button class="history-item" type="button" data-appeal="${esc(a.id)}" aria-label="Open ${esc(a.operator || "appeal")} ${esc(a.ref || "")}">
+          <span class="history-title">${esc(a.operator || "Appeal")}${a.ref ? ` <span class="dot">·</span> ${esc(a.ref)}` : ""}</span>
+          <span class="history-meta">${meta.join('<span class="dot">·</span>')}</span>
+          ${dlLine ? `<span class="history-meta">${dlLine}</span>` : ""}
         </button>
-        <div class="history-meta">${pill}</div>
-        <div class="history-actions">
-          <button class="mini-btn" data-status="${esc(a.id)}" data-to="won">Won</button>
-          <button class="mini-btn" data-status="${esc(a.id)}" data-to="lost">Lost</button>
-          <button class="mini-btn" data-status="${esc(a.id)}" data-to="escalated">Escalate</button>
+        <div class="history-foot">
+          ${appealPill(u, a)}
+          <div class="history-actions">${actions}</div>
         </div>
       </div>`;
     }).join("");
@@ -802,11 +938,29 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
       const u2 = currentUser();
       const a = (u2.appeals || []).find((x) => x.id === btn.getAttribute("data-status"));
       if (!a) return;
-      a.status = btn.getAttribute("data-to");
+      const to = btn.getAttribute("data-to");
+      /* Clicking the outcome that is already recorded clears it. Without this
+         a mis-tap was permanent, and a won appeal could not be reopened. */
+      const next = a.status === to ? "draft" : to;
+      const prev = a.status;
+      a.status = next;
       saveUser(u2);
       renderHistory();
-      toast(a.status === "won" ? "Marked as won — nice one." : a.status === "lost" ? "Marked as lost." : "Marked as escalated.");
-      analytics.track("appeal_status", { status: a.status });
+      const msg = next === "draft"
+        ? "Status cleared — the appeal is open again."
+        : next === "won" ? "Marked as won."
+        : next === "lost" ? "Marked as lost."
+        : "Marked as escalated to POPLA or the IAS.";
+      toast(msg, () => {
+        const u3 = currentUser();
+        const a3 = (u3.appeals || []).find((x) => x.id === a.id);
+        if (!a3) return;
+        a3.status = prev;
+        saveUser(u3);
+        renderHistory();
+        toast(prev === "draft" ? "Status cleared." : "Status restored.");
+      });
+      analytics.track("appeal_status", { status: next });
     }));
   }
 
