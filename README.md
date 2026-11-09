@@ -327,29 +327,30 @@ Before going live:
 
 ## The public sample letter
 
-The landing page shows a generated example letter. It is deliberately:
+The landing page shows a **truncated preview**, not the full letter:
 
-- **reduced in size** (`transform: scale(0.88)`), so it reads as a preview rather than a document
-- **watermarked** with a tiled "SAMPLE" overlay
-- **not selectable or copyable** — `user-select: none`, plus handlers that cancel
-  `contextmenu`, `copy`, `cut`, `dragstart` and `selectstart`
-- marked `aria-hidden="true"` so screen readers skip the sample and use the
-  description instead
+- `buildPreview()` in `assets/app.js` cuts the rendered letter at around
+  30 lines, backing up to a paragraph boundary so it never stops mid-sentence
+- what renders is the letterhead, the reference block, the keeper declaration
+  and **ground 1 of 8** — roughly 1,300 of 4,700 characters
+- it fades out, and a card underneath says how many lines are missing with a
+  button to generate a real letter
+- selection and right-click are still disabled, as a courtesy rather than a
+  control
 
-**Be clear about what this is.** It is deterrence, not protection. The sample
-text is in the DOM and the letter template itself ships in `assets/app.js`,
-which any visitor can read. There is no client-side way to show a letter and
-also keep it secret — anyone determined will get it from view-source in under a
-minute.
+**Why truncation and not a watermark.** A watermark leaves the full letter in
+the page and tries to discourage copying. Truncation means the rest is never
+sent to the browser at all, so there is nothing to lift. The seven withheld
+grounds — signage, grace period, ANPR, landowner authority, *Beavis* — are the
+part worth paying for.
 
-The real protection is the paywall, and that is currently enforced only
-client-side (see [Payments](#payments)). If the £4.99 tier matters to you, the
-fix is the server-side verification described there, not more CSS.
+**What is still public.** The ground texts live in `assets/data/grounds.json`
+because the results page needs them. A determined person can assemble the
+arguments from there. That is acceptable: they would be getting public
+reference material, not a ready-to-send letter. Do not put anything
+genuinely proprietary in that file.
 
-The one thing worth keeping: do not put the *full* generated letter on the
-public page. A shortened or truncated preview contains less to lift. If the
-watermark starts to feel heavy-handed, truncating to the first page and
-blurring the rest is the better trade.
+Tune the cut with `SAMPLE_PREVIEW_LINES` in `assets/app.js`.
 
 ## Known limitations
 

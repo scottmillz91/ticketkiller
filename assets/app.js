@@ -908,30 +908,32 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
      Sample letter on the landing page
      --------------------------------------------------------- */
   /* ---------------------------------------------------------
-     Watermark for the public sample.
-     Not a security measure — see the note in the README. It
-     exists so a screenshot can't be passed off as a clean
-     template, and so the sample can be shown smaller.
+     Public sample: a truncated preview, not the full letter.
+     ---------------------------------------------------------
+     The landing page shows only the opening section, so the page
+     never receives a complete, ready-to-send appeal. This is real
+     truncation — the missing grounds are never sent to the browser.
+     The remaining ground text lives in assets/data/grounds.json and
+     is public reference material, which is fine.
      --------------------------------------------------------- */
-  const SAMPLE_WATERMARK = "SAMPLE";
+  const SAMPLE_PREVIEW_LINES = 30;
 
-  function tileWatermark(text) {
-    const CH = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let seed = 20261109;
-    const rnd = () => {
-      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-      return seed / 0x7fffffff;
-    };
-    let out = "";
-    for (let row = 0; row < 15; row++) {
-      let line = "";
-      const offset = Math.floor(rnd() * 8);
-      for (let col = 0; col < 11; col++) {
-        line += (col + offset) % 4 === 0 ? ` ${text} ` : Array.from({ length: 4 }, () => CH[Math.floor(rnd() * CH.length)]).join("");
-      }
-      out += line + "\n";
+  function buildPreview(fullText) {
+    const lines = String(fullText).split("\n");
+    // Keep the whole document if it is already short.
+    if (lines.length <= SAMPLE_PREVIEW_LINES) {
+      return { head: fullText, restCount: 0 };
     }
-    return out;
+    let cut = SAMPLE_PREVIEW_LINES;
+    // Never stop in the middle of a word: back up to the last blank line
+    // so the preview ends on a clean paragraph boundary.
+    for (let i = cut; i > Math.max(6, cut - 10); i--) {
+      if (lines[i - 1].trim() === "" || lines[i - 1].trim().length < 60) { cut = i; break; }
+    }
+    return {
+      head: lines.slice(0, cut).join("\n"),
+      restCount: lines.length - cut
+    };
   }
 
   function renderSample() {
@@ -954,8 +956,16 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     setVal("fPostcode", "AB1 2CD");
 
     const text = buildLetter();
-    const wm = tileWatermark(SAMPLE_WATERMARK);
-    host.innerHTML = `<div class="sample-body">${esc(text)}</div><pre class="sample-wm">${esc(wm)}</pre>`;
+    const { head, restCount } = buildPreview(text);
+    host.innerHTML =
+      `<div class="sample-body">${esc(head)}</div>` +
+      `<div class="sample-fade" aria-hidden="true"></div>` +
+      `<div class="sample-cta">` +
+      `<p class="sample-cta-line">${restCount ? `The remaining ${restCount} lines — including the grounds that apply to your notice — are generated with your own details.` : "Generate the full letter with your own details."}</p>` +
+      `<button class="btn btn-primary" type="button" data-nav="details">Generate my letter</button>` +
+      `</div>`;
+    const cta = host.querySelector("[data-nav]");
+    if (cta) cta.addEventListener("click", () => showPage(currentUser() ? "details" : "auth"));
 
     Object.entries(saved).forEach(([k, v]) => {
       const map = { op: "fOperator", ref: "fRef", date: "fDate", loc: "fLocation", contra: "fContra", amount: "fAmount", vrm: "fVrm", name: "fName", addr: "fAddress", pc: "fPostcode" };
@@ -1302,12 +1312,11 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
   }
 
   /* ---------------------------------------------------------
-     Sample copy protection (deterrence only)
+     Sample copy protection (courtesy only)
      ---------------------------------------------------------
-     Blocks right-click, cut/copy and drag initiation inside the
-     sample, and stops Ctrl/Cmd+A selecting it. Anyone can still
-     read the text in the DOM. This raises the effort of lifting
-     the letter, nothing more.
+     The sample is truncated, so there is little worth taking. These
+     handlers just stop someone selecting the faded preview and
+     quoting it as if it were a complete letter.
      --------------------------------------------------------- */
   function bindCopyProtection() {
     const sample = $("sampleLetter");
@@ -1316,7 +1325,7 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
 
     card.addEventListener("contextmenu", (e) => {
       e.preventDefault();
-      toast("This is a sample. Generate your own letter — the first one is free.");
+      toast("This is a preview. The first letter is free — generate your own.");
     });
     card.addEventListener("copy", (e) => { e.preventDefault(); });
     card.addEventListener("cut", (e) => { e.preventDefault(); });
