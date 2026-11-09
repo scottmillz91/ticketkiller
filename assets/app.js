@@ -279,6 +279,35 @@
      --------------------------------------------------------- */
   const PAGES = ["home", "auth", "history", "details", "evidence", "results", "pricing", "faq", "operators", "guide", "privacy", "terms", "refunds", "contact", "stats"];
 
+  const PAGE_TITLES = {
+    home: ["TicketKiller UK — Appeal a Private Parking Ticket in 2 Minutes", "Legal grounds, a formal appeal letter and a deadline tracker for UK private parking charges. First appeal free."],
+    auth: ["Log in or create an account — TicketKiller UK", "Log in to generate appeal letters and see your previous appeals."],
+    history: ["Your appeals — TicketKiller UK", "Every letter you have generated, with its deadline still counting down."],
+    details: ["Enter your ticket details — TicketKiller UK", "Copy the details off your PCN and see your appeal deadline instantly."],
+    evidence: ["Request the evidence — TicketKiller UK", "Draft a UK GDPR Article 15 request for the ANPR stills, signage and landowner contract."],
+    results: ["Your grounds and letter — TicketKiller UK", "The grounds that apply to your notice, plus a formal appeal letter you can copy or download."],
+    pricing: ["Pricing — TicketKiller UK", "First appeal free, then £4.99 per letter. No subscription."],
+    faq: ["Frequently asked questions — TicketKiller UK", "Deadlines, POPLA and IAS escalation, keeper liability and the new Code of Practice."],
+    operators: ["Operator intelligence — TicketKiller UK", "What usually decides appeals against each private parking operator."],
+    guide: ["Appeal guides by operator — TicketKiller UK", "How to appeal a parking charge from a specific operator, step by step."],
+    stats: ["The data behind the claims — TicketKiller UK", "Every figure we quote, with its source and what it does not prove."],
+    privacy: ["Privacy notice — TicketKiller UK", "What this site stores, where it is stored, and your rights."],
+    terms: ["Terms of use — TicketKiller UK", "The basis on which this drafting tool is provided."],
+    refunds: ["Refund policy — TicketKiller UK", "When we refund a paid letter, and your digital-content cancellation rights."],
+    contact: ["Contact — TicketKiller UK", "Questions about a letter, a payment or your data."]
+  };
+
+  function setPageMeta(page) {
+    const entry = PAGE_TITLES[page];
+    if (entry) {
+      document.title = entry[0];
+      const md = document.querySelector('meta[name="description"]');
+      if (md) md.setAttribute("content", entry[1]);
+      const ogt = document.querySelector('meta[property="og:title"]');
+      if (ogt) ogt.setAttribute("content", entry[0]);
+    }
+  }
+
   function showPage(name, opts = {}) {
     if (!PAGES.includes(name)) name = "home";
     if ((name === "details" || name === "history" || name === "evidence") && !currentUser()) {
@@ -286,10 +315,12 @@
       name = "auth";
     }
     $$(".page").forEach((p) => p.classList.toggle("active", p.dataset.page === name));
+    setPageMeta(name);
+    document.body.classList.remove("nav-open");
     const nav = $("mobileNav");
     if (nav) nav.setAttribute("hidden", "");
     const mb = $("menuBtn");
-    if (mb) mb.setAttribute("aria-expanded", "false");
+    if (mb) { mb.setAttribute("aria-expanded", "false"); mb.setAttribute("aria-label", "Open menu"); }
 
     if (name === "details") { syncPaywall(); renderDeadlines(); renderOperatorIntel(); }
     if (name === "evidence") renderEvidence();
@@ -1161,11 +1192,26 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
      Page wiring
      --------------------------------------------------------- */
   function bindGlobalNav() {
-    if ($("menuBtn")) $("menuBtn").addEventListener("click", () => {
-      const nav = $("mobileNav");
-      const open = nav.hasAttribute("hidden");
-      nav.toggleAttribute("hidden", !open);
-      $("menuBtn").setAttribute("aria-expanded", String(open));
+    const navEl = $("mobileNav");
+    const btnEl = $("menuBtn");
+    const setMenu = (open) => {
+      if (!navEl || !btnEl) return;
+      navEl.toggleAttribute("hidden", !open);
+      btnEl.setAttribute("aria-expanded", String(open));
+      btnEl.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      document.body.classList.toggle("nav-open", open);
+    };
+    if (btnEl) btnEl.addEventListener("click", () => setMenu(navEl.hasAttribute("hidden")));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && navEl && !navEl.hasAttribute("hidden")) {
+        setMenu(false);
+        if (btnEl) btnEl.focus();
+      }
+    });
+    document.addEventListener("click", (e) => {
+      if (!navEl || navEl.hasAttribute("hidden")) return;
+      if (navEl.contains(e.target) || (btnEl && btnEl.contains(e.target))) return;
+      setMenu(false);
     });
 
     $$("[data-nav]").forEach((btn) => {

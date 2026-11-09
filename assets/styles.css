@@ -58,8 +58,21 @@ body {
 }
 
 img { max-width: 100%; display: block; }
-button, input { font: inherit; }
-button { cursor: pointer; }
+button, input, select, textarea { font: inherit; }
+button, [role="button"] { cursor: pointer; }
+
+/* Visible keyboard focus everywhere. The default outline was suppressed
+   on several controls, which left keyboard users with no indicator. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.topbar :where(button, a):focus-visible,
+.hero :where(button, a):focus-visible,
+.intel-card :where(button, a):focus-visible {
+  outline-color: var(--gold);
+}
 h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 1.12; margin: 0; }
 
 .skip-link {
@@ -84,7 +97,9 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(7, 16, 24, 0.92);
+  background: var(--navy);
+  background: rgba(7, 16, 24, 0.94);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255,255,255,0.06);
   padding-top: var(--safe-t);
@@ -145,13 +160,31 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
 }
 
 .mobile-nav {
-  position: sticky;
+  position: fixed;
+  left: 0;
+  right: 0;
   top: calc(64px + var(--safe-t));
   z-index: 39;
   background: var(--navy-2);
   display: grid;
-  padding: 8px 16px 16px;
+  padding: 8px 16px calc(16px + var(--safe-b));
   border-bottom: 1px solid rgba(255,255,255,0.06);
+  max-height: calc(100dvh - 64px - var(--safe-t));
+  overflow-y: auto;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.45);
+  animation: nav-drop .18s ease;
+}
+@keyframes nav-drop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+body.nav-open::before {
+  content: "";
+  position: fixed;
+  inset: calc(64px + var(--safe-t)) 0 0;
+  background: rgba(4, 10, 16, 0.55);
+  z-index: 38;
+  animation: fade .18s ease;
 }
 .mobile-nav[hidden] { display: none; }
 .mobile-nav button {
@@ -179,7 +212,7 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
               var(--navy);
   color: #fff;
   overflow: hidden;
-  padding: 48px 0 36px;
+  padding: 40px 0 32px;
 }
 .hero-glow {
   position: absolute;
@@ -216,8 +249,27 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
+/* Secondary action on the dark hero */
+.btn-ghost-light {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.22);
+}
+.btn-ghost-light:hover { background: rgba(255,255,255,0.16); }
+.hero-proof {
+  margin: -4px 0 26px;
+  font-size: 0.86rem;
+  color: rgba(255,255,255,0.62);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+}
+.hero-proof span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.hero-proof b { color: var(--gold); font-weight: 700; }
+@media (max-width: 839px) { .hero h1 { font-size: clamp(2rem, 9.5vw, 2.6rem); } .lede { margin-bottom: 24px; } }
 
 .btn {
   border: 0;
@@ -666,6 +718,25 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
   font-weight: 700;
   z-index: 80;
   box-shadow: var(--shadow);
+  max-width: calc(100% - 32px);
+  text-align: center;
+  font-size: 14px;
+  animation: toast-in .22s ease;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Honour the OS "reduce motion" setting. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .pay-stack {
@@ -1087,12 +1158,14 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
   color: #16232f;
   padding: 18px 20px 74px;
   pointer-events: none;
+  max-height: 300px;
+  overflow: hidden;
 }
 .sample-fade {
   position: absolute;
   left: 0; right: 0;
   bottom: 74px;
-  height: 56px;
+  height: 64px;
   background: linear-gradient(to bottom, rgba(255,255,255,0), #fff 85%);
   pointer-events: none;
 }
@@ -1113,6 +1186,7 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
   margin-inline: auto;
 }
 .sample-cta .btn { width: 100%; }
+@media (min-width: 900px) { .sample-body { max-height: 360px; } }
 .sample-note { color: var(--muted); font-size: 12px; }
 
 /* --- Toast anouncement for reminders --- */
@@ -1128,4 +1202,67 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
 .mailto-box {
   background: var(--paper); border: 1px dashed var(--line); border-radius: 12px;
   padding: 12px 14px; font-size: 13px; word-break: break-word; margin-top: 12px;
+}
+
+
+/* --- Appeal history rows --- */
+.history-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 12px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.history-item {
+  grid-column: 1 / -1;
+  display: block;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  width: 100%;
+}
+.history-item strong { display: block; font-size: 15px; color: var(--ink); }
+.history-item span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.history-item:hover strong { color: var(--blue-2); }
+.history-meta { justify-self: start; }
+.history-actions { display: flex; gap: 6px; justify-self: end; flex-wrap: wrap; }
+@media (max-width: 520px) {
+  .history-row { grid-template-columns: 1fr; }
+  .history-actions { justify-self: start; }
+}
+
+/* --- Operator guide pages --- */
+#seoBody h2 { font-size: 20px; margin: 26px 0 8px; }
+#seoBody ul { padding-left: 20px; }
+#seoBody li { margin-bottom: 8px; color: #2b3d52; }
+#seoBody .legal-meta { margin-top: 24px; }
+
+/* --- Tick list (replaces fake disabled checkboxes) --- */
+.ticklist {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+}
+.ticklist li {
+  position: relative;
+  padding: 9px 0 9px 30px;
+  font-size: 14px;
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+.ticklist li:last-child { border-bottom: 0; }
+.ticklist li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 12px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--success-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.2l2.6 2.6L12 5.4' fill='none' stroke='%230b8f63' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat;
 }
