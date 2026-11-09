@@ -425,7 +425,13 @@
     const mb = $("menuBtn");
     if (mb) { mb.setAttribute("aria-expanded", "false"); mb.setAttribute("aria-label", "Open menu"); }
 
-    if (name === "details") { syncPaywall(); renderDeadlines(); renderOperatorIntel(); updateFormProgress(); }
+    if (name === "details") {
+      syncPaywall(); renderDeadlines(); renderOperatorIntel(); updateFormProgress();
+      /* The cards above the form decide where the bar rests, and they are
+         filled in on this same tick. Measure once they are settled. */
+      requestAnimationFrame(pinFormProgress);
+    }
+    else { setProgressPinned(false); }
     if (name === "evidence") renderEvidence();
     if (name === "history") renderHistory();
     if (name === "operators") renderOperatorGrid();
@@ -1567,6 +1573,9 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
   function bindContact() {
     const form = $("contactForm");
     if (!form) return;
+    window.addEventListener("scroll", pinFormProgress, { passive: true });
+    window.addEventListener("resize", () => { setProgressPinned(false); pinFormProgress(); }, { passive: true });
+
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const to = (CFG.contact && CFG.contact.email) || (CFG.business && CFG.business.email) || "";
@@ -1681,6 +1690,12 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     const fill = bar.querySelector("i");
     if (fill) fill.style.width = `${pct}%`;
     bar.classList.toggle("is-complete", done === total);
+    /* The label can wrap to a second line, which changes the bar's height and
+       so the spacer that holds its place. Re-measure rather than assume. */
+    if (progressPinned) {
+      const spacer = $("formProgressSpacer");
+      if (spacer) spacer.style.height = `${$("formProgress").offsetHeight}px`;
+    }
 
     if (hint) {
       if (done === total) {
@@ -1699,6 +1714,59 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
         hint.textContent = "Your name goes on the letter as the registered keeper.";
       }
     }
+  }
+
+  /* ---------------------------------------------------------
+     Pinning the progress line
+     ---------------------------------------------------------
+     Explicit, not `position: sticky`. Sticky is decided by the browser with
+     several silent failure modes, and it failed on a real phone after every
+     one of those had been ruled out in source. This measures instead: when
+     the natural position would scroll above the topbar, the element is
+     taken out of flow and placed under the topbar; a spacer holds its place
+     so the page does not jump.
+     --------------------------------------------------------- */
+  let progressPinned = false;
+
+  function topbarHeight() {
+    const bar = document.querySelector(".topbar");
+    const h = bar ? bar.getBoundingClientRect().height : 0;
+    return h || 64;
+  }
+
+  /* Where the bar would sit if it were not floating. The spacer holds that
+     position while the bar is out of flow, so this stays measurable. */
+  function naturalProgressTop(el) {
+    const spacer = $("formProgressSpacer");
+    /* Inline: the bar itself is where it belongs. Floating: it has been taken
+       out of flow, so the spacer is the only witness to that position. */
+    if (progressPinned && spacer) return spacer.getBoundingClientRect().top;
+    return el.getBoundingClientRect().top;
+  }
+
+  function setProgressPinned(on) {
+    const el = $("formProgress");
+    if (!el || on === progressPinned) return;
+    progressPinned = on;
+    const spacer = $("formProgressSpacer");
+    if (spacer) spacer.style.height = on ? `${el.offsetHeight}px` : "0px";
+    /* Park it just under the real topbar rather than trusting a hard-coded
+       64px, which is wrong on any device with a notch inset. */
+    if (on) el.style.top = `${topbarHeight() + 6}px`;
+    el.classList.toggle("is-floating", on);
+  }
+
+  function pinFormProgress() {
+    const el = $("formProgress");
+    if (!el) return;
+    const page = el.closest(".page");
+    if (!page || !page.classList.contains("active") || el.hidden) {
+      setProgressPinned(false);
+      return;
+    }
+    /* One rule both ways: pin when the resting place is above the topbar,
+       release when it is below again. No separate hysteresis to get wrong. */
+    setProgressPinned(naturalProgressTop(el) <= topbarHeight() + 6);
   }
 
   function bindDetails() {
