@@ -271,6 +271,34 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(paid ? shown === btns.length : shown === 0,
       `${shown} of ${btns.length} pay buttons visible while selling=${paid ? "on" : "off"}`);
   });
+  check("the progress line stays put while the form scrolls", () => {
+    /* The form is taller than a phone screen. The count scrolled away exactly
+       when the later fields came into view, which is where people give up.
+       Two things make sticky work and one silently breaks it:
+         - the element must sit outside the padded card, or it un-sticks at
+           the card's padding edge
+         - no ancestor may be transformed; transform creates a containing
+           block and disables sticky in some browsers. The page-enter
+           animation used to translateY, which did exactly that.
+       jsdom has no layout engine, so this asserts the invariants rather than
+       claiming to have watched it stick. */
+    const css = cssSource();
+    const rule = css.slice(css.indexOf(".form-progress {"), css.indexOf("}", css.indexOf(".form-progress {")));
+    assert(/position:\s*sticky/.test(rule), "the progress line is not sticky");
+    assert(/top:\s*calc\(64px \+ var\(--safe-t\)/.test(rule), "it does not clear the fixed topbar");
+    assert(/z-index:\s*30/.test(rule), "it would cover the topbar (which is z-index 40)");
+    assert(/background:\s*(#fff|var\(--white\))i*/.test(rule) || /background:\s*#fff/.test(rule),
+      "it is transparent, so content will show through as it scrolls under");
+    const fade = css.slice(css.indexOf("@keyframes fade"), css.indexOf("}", css.indexOf("@keyframes fade")) + 1);
+    assert(!/transform/.test(fade), "the page animation transforms its page, which disables sticky inside it");
+    /* Placement matters as much as the CSS: inside the form it would un-stick
+       at the card's padding edge, which is before the button. */
+    const formStart = html.indexOf('<form id="ticketForm"');
+    const formEnd = html.indexOf("</form>", formStart);
+    const progressAt = html.indexOf('id="formProgress"');
+    assert(progressAt > 0 && !(progressAt > formStart && progressAt < formEnd),
+      "the progress line is inside the form, so it will un-stick early");
+  });
   check("details form reports how much is left to fill", () => {
     /* The form is a dozen fields copied off a paper ticket; the commonest
        way to lose someone is that they cannot tell how close they are to

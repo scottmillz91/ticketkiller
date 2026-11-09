@@ -261,6 +261,16 @@
         <h1 class="page-title">Enter your ticket details</h1>
         <p class="page-sub">Copy these from the PCN or Notice to Keeper. The deadline tracker updates as you fill it in.</p>
 
+        <div class="form-progress" id="formProgress">
+          <div class="form-progress-row">
+            <span class="form-progress-label" id="formProgressLabel">0 of 6 required fields</span>
+            <span class="form-progress-pct" id="formProgressPct">0%</span>
+          </div>
+          <div class="form-progress-bar" role="progressbar" aria-labelledby="formProgressLabel"
+               aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="formProgressBar"><i></i></div>
+          <p class="form-progress-hint" id="formProgressHint">Start with the operator and the notice number — both are on the front of the PCN.</p>
+        </div>
+
         <div class="deadline-card" id="deadlineCard" hidden>
           <h2>Deadline tracker</h2>
           <p class="hint">Based on the date on your notice and the appeal period your operator allows. Change either below.</p>
@@ -285,15 +295,6 @@
         </div>
 
         <form id="ticketForm" class="facts-card" novalidate>
-          <div class="form-progress" id="formProgress">
-            <div class="form-progress-row">
-              <span class="form-progress-label" id="formProgressLabel">0 of 6 required fields</span>
-              <span class="form-progress-pct" id="formProgressPct">0%</span>
-            </div>
-            <div class="form-progress-bar" role="progressbar" aria-labelledby="formProgressLabel"
-                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="formProgressBar"><i></i></div>
-            <p class="form-progress-hint" id="formProgressHint">Start with the operator and the notice number — both are on the front of the PCN.</p>
-          </div>
           <div class="facts-grid">
             <label>Operator
               <input id="fOperator" list="operatorList" autocomplete="organization" placeholder="e.g. ParkingEye, UKPC, NCP" required />
