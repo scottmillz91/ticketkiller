@@ -52,13 +52,16 @@ variable**. Add these two now. The third comes in step 3.
 | Key | Value |
 | --- | --- |
 | `STRIPE_SECRET_KEY` | `sk_test_…` from Stripe → **Developers → API keys** |
-| `SITE_URL` | `https://scottmillz91.github.io/ticketkiller` |
+| `SITE_URL` | `https://scottmillz91.github.io/ticketkiller,https://your-site.netlify.app` |
 
 Two things people get wrong here:
 
-- `SITE_URL` is the **GitHub Pages** address, not the Netlify one. It is the
-  origin the browser will be calling *from*, and it decides which site is
-  allowed to call these functions.
+- `SITE_URL` is a **comma-separated list** of every address the site is served
+  from, with no trailing slash. It is the origin the browser calls *from*, and
+  it decides which site may call these functions and where a visitor is sent
+  back after paying. The site is published to both GitHub Pages and the
+  Netlify deploy, so **list both** — a single value makes the other host fail
+  with *"SITE_URL is not configured"* or a CORS error.
 - No trailing slash. `…/ticketkiller/` will look right and fail CORS.
 
 After adding variables you must **redeploy** for them to take effect:
@@ -223,8 +226,9 @@ Only after step 6 passes end to end.
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | "Payments are not configured on the server" | `STRIPE_SECRET_KEY` missing | Add it in Netlify, then **redeploy** |
-| "Could not start checkout" | `SITE_URL` missing, or key rejected | Check the Netlify function log for the real reason |
-| Browser console: CORS error | `SITE_URL` wrong, or has a trailing slash | Must be exactly `https://scottmillz91.github.io/ticketkiller`… **without** a trailing slash |
+| "SITE_URL is not configured" | the variable is empty in Production | Add it, then **redeploy** |
+| "Could not start checkout" | key rejected by Stripe | Check the Netlify function log for the real reason |
+| Browser console: CORS error | `SITE_URL` missing this host, or has a trailing slash | List every host, comma-separated, **without** trailing slashes |
 | Paid, but "Could not reach the payment server" | `apiBase` wrong in `config.js` | It must be the Netlify URL, with no trailing slash |
 | Paid, but "Stripe has no record of that payment" | Wrong `STRIPE_SECRET_KEY` mode — live key looking up a test session, or the reverse | Keys and payments must be in the same mode |
 | Webhook delivery shows `400` | `STRIPE_WEBHOOK_SECRET` wrong | Copy it again from the endpoint page, then redeploy |
