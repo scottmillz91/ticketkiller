@@ -579,12 +579,8 @@
         <h1 class="page-title">Privacy notice</h1>
         <p class="legal-meta">Last updated 9 November 2026</p>
 
-        <div class="legal-warning" data-setup-warning hidden>
-          <strong>Setup needed (visible here only, not on the live site).</strong> Fill in <code>business.legalName</code>, <code>address</code> and <code>email</code> in <code>assets/config.js</code>. Until then this page describes the trading name only and payments stay switched off.
-        </div>
-
         <h2>Who is responsible for your data</h2>
-        <p>The data controller is <span data-biz-legal>TicketKiller UK</span><span class="data-controller-extra">, whose address is <span data-biz-address></span></span>. Contact: <span data-biz-email></span>.</p>
+        <p id="controllerLine">The data controller is TicketKiller UK.</p>
 
         <h2>What this site collects</h2>
         <p><strong>Nothing is transmitted to us.</strong> The site is a static page with no server. Everything you type — your name, address, vehicle registration, PCN number and the text of your letters — is stored in your own browser's <code>localStorage</code> and never sent to us or to any server we control.</p>
@@ -597,7 +593,7 @@
         <p>If you buy an extra letter, you are taken to PayPal. PayPal processes the payment as an independent controller under its own privacy notice. We receive a payment confirmation and the email address you used, which is used only to unlock the letter you paid for. We never see your card details.</p>
 
         <h2>Your rights</h2>
-        <p>Because we hold no personal data about you, the usual rights of access, rectification and erasure are met by your own browser: clearing site data erases everything this site has stored about you. If you believe we hold something about you, email <span data-biz-email></span>.</p>
+        <p>Because we hold no personal data about you, the usual rights of access, rectification and erasure are met by your own browser: clearing site data erases everything this site has stored about you. <span id="icoLine">You have the right to complain to the Information Commissioner's Office.</span></p>
         <p>You have the right to complain to the Information Commissioner's Office at <a href="https://ico.org.uk/" target="_blank" rel="noopener">ico.org.uk</a>.</p>
 
         <h2>Retention</h2>
@@ -614,10 +610,6 @@
         <p class="eyebrow dark">Legal</p>
         <h1 class="page-title">Terms of use</h1>
         <p class="legal-meta">Last updated 9 November 2026</p>
-
-        <div class="legal-warning" data-setup-warning hidden>
-          <strong>Setup needed (visible here only, not on the live site).</strong> Fill in the <code>business</code> block in <code>assets/config.js</code> before publishing. These terms are a starting draft, not a substitute for advice on consumer law.
-        </div>
 
         <h2>1. What this service is</h2>
         <p><span data-biz-name>TicketKiller UK</span> is a document drafting tool. It produces a suggested appeal letter and supporting material about UK private parking charges. It is not a solicitor, does not carry out reserved legal activities, and does not represent you in any appeal.</p>
@@ -652,7 +644,7 @@
         <p>These terms are governed by the law of England and Wales, and the courts of England and Wales have exclusive jurisdiction.</p>
 
         <h2>10. Contact</h2>
-        <p><span data-biz-email></span>, or use the <button class="mini-btn" data-nav="contact" style="padding:2px 8px">contact form</button>.</p>
+        <p id="termsContactLine">Use the <button class="mini-btn" data-nav="contact" style="padding:2px 8px">contact form</button> to reach us.</p>
       </div>
     </section>
 
@@ -699,9 +691,9 @@
         <p class="page-sub">Questions about a letter, a payment, or how the site handles your data. We aim to reply <span data-contact-time>within 2 working days</span>.</p>
 
         <div class="facts-card" style="margin-bottom:18px">
-          <p style="margin:0"><strong>Email</strong><br><span data-biz-email></span></p>
-          <p style="margin:10px 0 0"><strong>Operator</strong><br><span data-biz-legal></span>, trading as <span data-biz-name></span></p>
-          <p style="margin:10px 0 0"><strong>Address</strong><br><span data-biz-address></span></p>
+          <p style="margin:0" data-row="email"><strong>Email</strong><br><span data-biz-email></span></p>
+          <p style="margin:10px 0 0" data-row="operator"><strong>Operator</strong><br><span data-biz-legal></span></p>
+          <p style="margin:10px 0 0" data-row="address"><strong>Address</strong><br><span data-biz-address></span></p>
         </div>
 
         <form class="facts-card" id="contactForm" novalidate>
@@ -743,7 +735,7 @@
         <button data-nav="contact">Contact</button>
         <button data-nav="stats">The data</button>
       </div>
-      <p class="footer-meta">© <span id="footerYear">2026</span> <span data-biz-name>TicketKiller UK</span> · <span data-biz-legal></span></p>
+      <p class="footer-meta">© <span id="footerYear">2026</span> <span data-biz-name>TicketKiller UK</span><span id="footerLegal"></span></p>
     </div>
   </footer>
 
