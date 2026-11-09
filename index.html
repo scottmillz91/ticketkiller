@@ -440,6 +440,7 @@
         <div class="price-banner" role="status">
           Your first appeal is FREE. Subsequent appeals <span data-price>£4.99</span> each.
         </div>
+        <p class="legal-warning" data-pricing-note hidden></p>
         <h1 class="page-title">Simple, honest pricing</h1>
         <p class="page-sub">A private parking charge is typically £70–£100. Appealing directly to the operator, and then to POPLA or the IAS, is always free — we only ever charge for drafting extra letters.</p>
 
@@ -578,12 +579,12 @@
         <h1 class="page-title">Privacy notice</h1>
         <p class="legal-meta">Last updated 9 November 2026</p>
 
-        <div class="legal-warning">
-          <strong>Read this first.</strong> This notice assumes the site is operated by <span data-biz-legal>[YOUR FULL LEGAL NAME]</span>, trading as <span data-biz-name>TicketKiller UK</span>. The operator must replace the placeholders with their real name, address and contact email before publishing this site or taking any payment.
+        <div class="legal-warning" data-setup-warning hidden>
+          <strong>Setup needed (visible here only, not on the live site).</strong> Fill in <code>business.legalName</code>, <code>address</code> and <code>email</code> in <code>assets/config.js</code>. Until then this page describes the trading name only and payments stay switched off.
         </div>
 
         <h2>Who is responsible for your data</h2>
-        <p>The data controller is <span data-biz-legal>[YOUR FULL LEGAL NAME]</span>, trading as <span data-biz-name>TicketKiller UK</span>, whose address is <span data-biz-address>[YOUR POSTAL ADDRESS]</span>. Contact: <span data-biz-email></span>.</p>
+        <p>The data controller is <span data-biz-legal>TicketKiller UK</span><span class="data-controller-extra">, whose address is <span data-biz-address></span></span>. Contact: <span data-biz-email></span>.</p>
 
         <h2>What this site collects</h2>
         <p><strong>Nothing is transmitted to us.</strong> The site is a static page with no server. Everything you type — your name, address, vehicle registration, PCN number and the text of your letters — is stored in your own browser's <code>localStorage</code> and never sent to us or to any server we control.</p>
@@ -614,8 +615,8 @@
         <h1 class="page-title">Terms of use</h1>
         <p class="legal-meta">Last updated 9 November 2026</p>
 
-        <div class="legal-warning">
-          <strong>Read this first.</strong> These terms assume the site is operated by <span data-biz-legal>[YOUR FULL LEGAL NAME]</span>, trading as <span data-biz-name>TicketKiller UK</span>. The operator must replace the placeholders before publishing. This is a starting draft, not a substitute for advice on consumer law.
+        <div class="legal-warning" data-setup-warning hidden>
+          <strong>Setup needed (visible here only, not on the live site).</strong> Fill in the <code>business</code> block in <code>assets/config.js</code> before publishing. These terms are a starting draft, not a substitute for advice on consumer law.
         </div>
 
         <h2>1. What this service is</h2>
@@ -721,6 +722,9 @@
           <button class="btn btn-primary btn-xl" type="submit" style="margin-top:18px;width:100%">Open email with this message</button>
           <div class="legal-meta" id="contactResult" hidden></div>
           <p class="legal-meta" style="margin-top:12px">This form has no server: it opens your own email app with the message filled in.</p>
+          <div class="legal-warning" data-contact-fallback hidden>
+            <strong>No contact address is configured on this deployment.</strong> Set <code>contact.email</code> in <code>assets/config.js</code> so messages have somewhere to go.
+          </div>
         </form>
 
         <p class="legal-meta" style="margin-top:20px">If you are unhappy with how we have handled your data, you can complain to the ICO at <a href="https://ico.org.uk/" target="_blank" rel="noopener">ico.org.uk</a>.</p>
