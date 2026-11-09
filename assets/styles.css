@@ -204,9 +204,13 @@ body.nav-open::before {
 
 .page { display: none; }
 .page.active { display: block; animation: fade .35s ease; }
+/* Opacity only. This animation used to translate the page on the Y axis, and
+   a transformed element becomes a containing block — which silently breaks
+   position:sticky for anything inside it. The form progress bar depends on
+   that, and the movement was 8px, so it costs nothing to drop. */
 @keyframes fade {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .hero {
@@ -769,12 +773,22 @@ h1, h2, h3 { text-wrap: balance; }
 /* --- Details form progress ---
    Answers "how much more of this is there?" before the visitor starts
    rather than after they abandon. */
+/* The form is taller than a phone screen, so the progress line has to travel
+   with the visitor. Without this it scrolled away exactly when the later
+   fields — the ones people give up on — came into view.
+   Sticks below the fixed topbar (64px + the notch inset), z-index 30 so it
+   slides under the topbar rather than over it, and stops at the end of the
+   form because sticky is bounded by its containing block. */
 .form-progress {
+  position: sticky;
+  top: calc(64px + var(--safe-t) + 6px);
+  z-index: 30;
   margin: 0 0 20px;
-  padding: 14px 16px;
-  background: var(--paper);
+  padding: 12px 14px;
+  background: #fff;
   border: 1px solid var(--line);
   border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(7, 16, 24, 0.10);
 }
 .form-progress-row {
   display: flex;
@@ -820,6 +834,13 @@ h1, h2, h3 { text-wrap: balance; }
 }
 @media (prefers-reduced-motion: reduce) {
   .form-progress-bar i { transition: none; }
+}
+/* A pinned bar must not eat a third of a small screen. The hint is guidance,
+   not the count, so it goes first. */
+@media (max-width: 560px) and (max-height: 700px) {
+  .form-progress { padding: 10px 12px; }
+  .form-progress-hint { display: none; }
+  .form-progress-bar { margin-bottom: 0; }
 }
 
 /* --- Deadline tracker --- */
