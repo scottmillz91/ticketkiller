@@ -4,850 +4,54 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#071018" />
-  <meta name="description" content="Got a UK parking ticket? Enter the details from your PCN and get a formal appeal letter in two minutes. First appeal free." />
-  <title>TicketKiller UK — Fight Your Parking Ticket</title>
+  <title>TicketKiller UK — Appeal a Private Parking Ticket in 2 Minutes</title>
+  <meta name="description" content="Got a UK parking ticket from a private operator? Enter the details from your PCN, get the legal grounds that apply, a formal appeal letter and a live deadline tracker. First appeal free." />
+  <link rel="canonical" href="https://example.com/" />
+  <meta name="robots" content="index,follow" />
+
+  <!-- Open Graph / social sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="TicketKiller UK" />
+  <meta property="og:locale" content="en_GB" />
+  <meta property="og:title" content="TicketKiller UK — Appeal a Private Parking Ticket in 2 Minutes" />
+  <meta property="og:description" content="Enter the details from your PCN and get the legal grounds that apply, a formal appeal letter you can copy or download, and a live countdown on your deadline. First appeal free." />
+  <meta property="og:url" content="https://example.com/" />
+  <meta property="og:image" content="https://example.com/assets/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="TicketKiller UK — Appeal a Private Parking Ticket" />
+  <meta name="twitter:description" content="Legal grounds, a formal appeal letter and a deadline tracker for UK private parking charges. First appeal free." />
+  <meta name="twitter:image" content="https://example.com/assets/og-image.jpg" />
+
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231B6BFF'/%3E%3Cpath d='M8 11h16v2H8zm0 4h10v2H8zm0 4h16v2H8z' fill='white'/%3E%3Cpath d='M7 8l18 16' stroke='%23E8B931' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
-  <style>
-:root {
-  --navy: #071018;
-  --navy-2: #0c1b2e;
-  --ink: #102033;
-  --muted: #5c6d82;
-  --blue: #1b6bff;
-  --blue-2: #0e4fd6;
-  --sky: #6cb6ff;
-  --gold: #e8b931;
-  --paper: #f3f6fb;
-  --white: #ffffff;
-  --line: #dce5f0;
-  --success: #0b8f63;
-  --success-bg: #e7f7f0;
-  --danger: #c81e1e;
-  --radius: 18px;
-  --shadow: 0 18px 50px rgba(7, 16, 24, 0.12);
-  --font: "Figtree", system-ui, sans-serif;
-  --display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
-  --safe-b: env(safe-area-inset-bottom, 0px);
-  --safe-t: env(safe-area-inset-top, 0px);
-}
+  <link rel="preload" href="assets/fonts/figtree-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="assets/styles.css" />
 
-*, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: var(--font);
-  color: var(--ink);
-  background: var(--paper);
-  line-height: 1.5;
-  min-height: 100dvh;
-  -webkit-font-smoothing: antialiased;
-}
-
-img { max-width: 100%; display: block; }
-button, input { font: inherit; }
-button { cursor: pointer; }
-h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 1.12; margin: 0; }
-
-.skip-link {
-  position: absolute;
-  left: 12px;
-  top: -40px;
-  background: var(--gold);
-  color: var(--navy);
-  padding: 8px 12px;
-  z-index: 100;
-  border-radius: 8px;
-}
-.skip-link:focus { top: 12px; }
-
-.wrap {
-  width: min(1120px, calc(100% - 32px));
-  margin-inline: auto;
-}
-.wrap.narrow { width: min(720px, calc(100% - 32px)); }
-
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  background: rgba(7, 16, 24, 0.92);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  padding-top: var(--safe-t);
-}
-.topbar-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 64px;
-  gap: 16px;
-}
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: none;
-  border: 0;
-  color: #fff;
-  padding: 0;
-}
-.logo-mark { color: var(--blue); display: grid; }
-.logo-text {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: 1.05rem;
-  letter-spacing: -0.03em;
-}
-.logo-text em { font-style: normal; color: var(--gold); }
-
-.nav { display: none; gap: 4px; }
-.nav button {
-  background: transparent;
-  border: 0;
-  color: rgba(255,255,255,0.78);
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-weight: 600;
-}
-.nav button:hover, .nav button:focus-visible { color: #fff; background: rgba(255,255,255,0.08); }
-
-.menu-btn {
-  width: 44px;
-  height: 44px;
-  border: 0;
-  background: rgba(255,255,255,0.08);
-  border-radius: 12px;
-  display: grid;
-  place-content: center;
-  gap: 5px;
-  padding: 0;
-}
-.menu-btn span {
-  display: block;
-  width: 18px;
-  height: 2px;
-  background: #fff;
-  border-radius: 2px;
-}
-
-.mobile-nav {
-  position: sticky;
-  top: calc(64px + var(--safe-t));
-  z-index: 39;
-  background: var(--navy-2);
-  display: grid;
-  padding: 8px 16px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.mobile-nav[hidden] { display: none; }
-.mobile-nav button {
-  background: none;
-  border: 0;
-  color: #fff;
-  text-align: left;
-  padding: 14px 8px;
-  font-weight: 600;
-  min-height: 48px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-.page { display: none; }
-.page.active { display: block; animation: fade .35s ease; }
-@keyframes fade {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
-}
-
-.hero {
-  position: relative;
-  background: radial-gradient(1200px 500px at 80% -10%, rgba(27,107,255,0.45), transparent 55%),
-              radial-gradient(800px 400px at 0% 100%, rgba(232,185,49,0.16), transparent 50%),
-              var(--navy);
-  color: #fff;
-  overflow: hidden;
-  padding: 48px 0 36px;
-}
-.hero-glow {
-  position: absolute;
-  inset: auto -20% -40% auto;
-  width: 70%;
-  height: 70%;
-  background: radial-gradient(circle, rgba(108,182,255,0.2), transparent 60%);
-  pointer-events: none;
-}
-.hero-inner { position: relative; }
-.eyebrow {
-  display: inline-block;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--sky);
-  margin: 0 0 14px;
-}
-.eyebrow.dark { color: var(--blue); }
-.hero h1 {
-  font-size: clamp(2.15rem, 8vw, 4.4rem);
-  font-weight: 800;
-  max-width: 16ch;
-  color: #fff;
-}
-.lede {
-  font-size: clamp(1.05rem, 2.4vw, 1.28rem);
-  color: rgba(255,255,255,0.78);
-  max-width: 38ch;
-  margin: 16px 0 28px;
-}
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 32px;
-}
-
-.btn {
-  border: 0;
-  border-radius: 14px;
-  padding: 12px 18px;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 48px;
-  transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
-}
-.btn:active { transform: translateY(1px); }
-.btn-xl {
-  min-height: 56px;
-  padding: 16px 22px;
-  font-size: 1.05rem;
-  width: 100%;
-}
-.btn-primary {
-  background: var(--blue);
-  color: #fff;
-  box-shadow: 0 10px 24px rgba(27,107,255,0.35);
-}
-.btn-primary:hover { background: var(--blue-2); }
-.btn-secondary {
-  background: #fff;
-  color: var(--ink);
-  border: 1px solid var(--line);
-}
-.btn-ghost {
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.14);
-  width: auto;
-  min-width: 160px;
-}
-.text-link {
-  background: none;
-  border: 0;
-  color: var(--blue);
-  font-weight: 700;
-  padding: 8px;
-}
-
-.trust-row {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-.trust-row li {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  padding: 16px 18px;
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-.trust-row strong {
-  font-family: var(--display);
-  font-size: 1.6rem;
-  color: var(--gold);
-}
-.trust-row span { color: rgba(255,255,255,0.75); }
-
-.section { padding: 40px 0 56px; }
-.section-title {
-  font-size: clamp(1.5rem, 4vw, 2rem);
-  margin-bottom: 22px;
-}
-.page-title {
-  font-size: clamp(1.8rem, 6vw, 2.6rem);
-  margin-bottom: 10px;
-}
-.page-sub { color: var(--muted); margin: 0 0 28px; max-width: 52ch; }
-
-.steps {
-  display: grid;
-  gap: 14px;
-}
-.step-card {
-  background: #fff;
-  border-radius: var(--radius);
-  padding: 22px;
-  box-shadow: var(--shadow);
-}
-.step-num {
-  font-family: var(--display);
-  font-weight: 800;
-  color: var(--blue);
-  font-size: 0.9rem;
-}
-.step-card h3 { margin: 8px 0 8px; font-size: 1.2rem; }
-.step-card p { margin: 0; color: var(--muted); }
-
-.band {
-  background: var(--navy-2);
-  color: #fff;
-  padding: 32px 0;
-}
-.band-inner {
-  display: grid;
-  gap: 16px;
-}
-.band p { margin: 0; font-size: 1.15rem; font-weight: 600; max-width: 46ch; }
-
-.dropzone {
-  display: grid;
-  place-items: center;
-  text-align: center;
-  gap: 8px;
-  background: #fff;
-  border: 2px dashed #b9c9de;
-  border-radius: 24px;
-  padding: 36px 18px;
-  color: var(--muted);
-  min-height: 220px;
-}
-.dropzone strong { color: var(--ink); font-size: 1.1rem; }
-.dz-icon { color: var(--blue); }
-.dropzone.drag {
-  border-color: var(--blue);
-  background: #eef4ff;
-}
-.upload-actions {
-  display: grid;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.scan-card, .paywall-card, .facts-card, .weak-card, .letter-card, .price-card {
-  background: #fff;
-  border-radius: 24px;
-  box-shadow: var(--shadow);
-  padding: 20px;
-}
-.scan-frame {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #0b1220;
-  aspect-ratio: 4/3;
-}
-.scan-frame img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.scan-line {
-  position: absolute;
-  left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #6cb6ff, transparent);
-  box-shadow: 0 0 24px #1b6bff;
-  animation: scan 1.6s linear infinite;
-}
-@keyframes scan {
-  from { top: 0; }
-  to { top: 100%; }
-}
-.analyse-copy { text-align: center; padding: 22px 8px 8px; }
-.analyse-copy h2 { font-size: 1.4rem; margin-bottom: 6px; }
-.analyse-copy p { color: var(--muted); margin: 0 0 16px; }
-.spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--line);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  margin: 0 auto 14px;
-  animation: spin .8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.analyse-steps {
-  list-style: none;
-  padding: 0;
-  margin: 0 auto;
-  text-align: left;
-  max-width: 320px;
-  color: var(--muted);
-}
-.analyse-steps li { padding: 6px 0; }
-.analyse-steps li.done { color: var(--success); font-weight: 600; }
-.analyse-steps li.active { color: var(--ink); font-weight: 700; }
-
-.reject-card {
-  background: #fff;
-  border-radius: 24px;
-  box-shadow: var(--shadow);
-  padding: 28px 20px;
-  text-align: center;
-}
-.reject-icon {
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 12px;
-  border-radius: 50%;
-  background: #fde8e8;
-  color: var(--danger);
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  font-size: 1.4rem;
-}
-.reject-card h2 { margin-bottom: 8px; }
-.reject-card p { color: var(--muted); }
-.reject-card img {
-  width: 100%;
-  max-height: 180px;
-  object-fit: contain;
-  background: #0b1220;
-  border-radius: 14px;
-  margin: 12px 0;
-}
-.reject-tips {
-  text-align: left;
-  color: var(--muted);
-  margin: 8px 0 20px;
-  padding-left: 20px;
-}
-.reject-tips li { margin: 8px 0; }
-.reject-card .btn-xl { width: 100%; }
-
-.paywall-card { text-align: center; padding: 32px 20px; }
-.paywall-card h2 { margin: 10px 0 10px; }
-.chip {
-  display: inline-block;
-  background: #fff6d8;
-  color: #8a5b00;
-  font-weight: 700;
-  font-size: 0.8rem;
-  padding: 6px 10px;
-  border-radius: 999px;
-}
-.muted-chip { background: var(--paper); color: var(--muted); }
-.fine { color: var(--muted); font-size: 0.85rem; }
-
-.results-layout { display: grid; gap: 16px; }
-.ticket-side {
-  background: #fff;
-  border-radius: 24px;
-  padding: 14px;
-  box-shadow: var(--shadow);
-  display: grid;
-  gap: 12px;
-}
-.ticket-side img {
-  width: 100%;
-  border-radius: 14px;
-  max-height: 240px;
-  object-fit: contain;
-  background: #0b1220;
-}
-.hint { color: var(--muted); font-size: 0.92rem; margin: 6px 0 16px; }
-.ocr-box {
-  margin-top: 16px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 4px 14px 10px;
-  background: #fbfcfe;
-}
-.ocr-box summary {
-  cursor: pointer;
-  font-weight: 700;
-  padding: 10px 0;
-}
-.ocr-box pre {
-  white-space: pre-wrap;
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--ink);
-  max-height: 180px;
-  overflow: auto;
-}
-.facts-grid {
-  display: grid;
-  gap: 12px;
-}
-.facts-grid label {
-  display: grid;
-  gap: 6px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.facts-grid input {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 12px 12px;
-  min-height: 48px;
-  color: var(--ink);
-  background: var(--paper);
-}
-.facts-grid input:focus {
-  outline: 2px solid var(--blue);
-  background: #fff;
-}
-.vrm { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; }
-
-.weak-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.badge {
-  background: var(--success-bg);
-  color: var(--success);
-  font-weight: 800;
-  font-size: 0.8rem;
-  padding: 6px 10px;
-  border-radius: 999px;
-}
-.weak-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.weak-list li {
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 14px;
-  background: linear-gradient(180deg, #f8fbff, #fff);
-}
-.weak-list h3 { font-size: 1.02rem; margin-bottom: 6px; }
-.weak-list p { margin: 0; color: var(--muted); font-size: 0.95rem; }
-.law-tag {
-  display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--blue);
-  margin-bottom: 6px;
-}
-
-.letter-toolbar { display: grid; gap: 12px; margin-bottom: 12px; }
-.letter-actions { display: grid; gap: 10px; }
-.letter {
-  white-space: pre-wrap;
-  background: #fbfcfe;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 18px;
-  font-family: "Figtree", Georgia, serif;
-  font-size: 0.95rem;
-  line-height: 1.55;
-  max-height: 480px;
-  overflow: auto;
-  margin: 0;
-}
-
-.price-banner {
-  background: linear-gradient(90deg, #123a8c, #1b6bff);
-  color: #fff;
-  font-weight: 800;
-  text-align: center;
-  padding: 16px 18px;
-  border-radius: 16px;
-  margin-bottom: 22px;
-  font-size: 1.05rem;
-}
-.price-grid { display: grid; gap: 14px; }
-.price-card h2 { margin: 8px 0 4px; }
-.price { font-family: var(--display); font-size: 3rem; font-weight: 800; margin: 0 0 12px; }
-.price span { font-size: 1.4rem; }
-.price-card ul { padding-left: 18px; color: var(--muted); }
-.price-card li { margin: 8px 0; }
-.price-card.featured { border: 2px solid var(--blue); }
-
-.faq details {
-  background: #fff;
-  border-radius: 16px;
-  padding: 4px 16px;
-  margin-bottom: 10px;
-  box-shadow: 0 8px 24px rgba(7,16,24,0.06);
-}
-.faq summary {
-  font-weight: 800;
-  font-family: var(--display);
-  font-size: 1.08rem;
-  padding: 16px 0;
-  cursor: pointer;
-  list-style: none;
-}
-.faq summary::-webkit-details-marker { display: none; }
-.faq p { margin: 0 0 16px; color: var(--muted); }
-
-.footer {
-  background: var(--navy);
-  color: rgba(255,255,255,0.72);
-  padding: 28px 0 calc(28px + var(--safe-b));
-  margin-top: 12px;
-}
-.footer-inner { display: grid; gap: 8px; }
-.disclaimer {
-  color: #fff;
-  font-weight: 800;
-  margin: 0;
-}
-.footer-meta { margin: 0; font-size: 0.88rem; }
-
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: calc(20px + var(--safe-b));
-  transform: translateX(-50%);
-  background: var(--ink);
-  color: #fff;
-  padding: 12px 16px;
-  border-radius: 999px;
-  font-weight: 700;
-  z-index: 80;
-  box-shadow: var(--shadow);
-}
-
-.pay-stack {
-  display: grid;
-  gap: 10px;
-  margin-top: 8px;
-}
-.pay-btn {
-  width: 100%;
-  min-height: 56px;
-  border-radius: 14px;
-  border: 0;
-  font-weight: 700;
-  font-size: 1.15rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-.pay-apple {
-  background: #111;
-  color: #fff;
-  font-family: system-ui, -apple-system, "SF Pro Text", sans-serif;
-}
-.pay-google {
-  background: #fff;
-  color: #3c4043;
-  border: 1px solid #dadce0;
-}
-.gpay-mark {
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.gpay-mark span {
-  font-weight: 800;
-  background: conic-gradient(from 180deg, #ea4335, #fbbc05, #34a853, #4285f4, #ea4335);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.pay-paypal {
-  background: #ffc439;
-  color: #003087;
-  font-style: italic;
-  font-family: "Figtree", Georgia, serif;
-}
-.pay-paypal strong { font-style: italic; font-weight: 800; color: #003087; }
-.pay-paypal em { font-style: italic; font-weight: 800; color: #009cde; }
-.pay-or {
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin: 16px 0 10px;
-  position: relative;
-}
-.card-brands {
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 600;
-  margin: 10px 0 4px;
-}
-.price-card .btn-xl,
-.paywall-card .btn-xl { width: 100%; }
-
-.auth-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.auth-tab {
-  min-height: 48px;
-  border: 1px solid var(--line);
-  background: #fff;
-  border-radius: 12px;
-  font-weight: 700;
-  color: var(--muted);
-}
-.auth-tab.active {
-  background: var(--navy);
-  color: #fff;
-  border-color: var(--navy);
-}
-.history-item {
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: var(--shadow);
-  margin-bottom: 12px;
-  text-align: left;
-  width: 100%;
-  border: 0;
-}
-.history-item strong { display: block; font-size: 1.05rem; }
-.history-item span { color: var(--muted); font-size: 0.9rem; }
-
-.checkout {
-  position: fixed;
-  inset: 0;
-  background: rgba(7, 16, 24, 0.58);
-  z-index: 90;
-  display: grid;
-  align-items: end;
-  padding: 0;
-}
-.checkout[hidden] { display: none; }
-.checkout-sheet {
-  background: #fff;
-  border-radius: 24px 24px 0 0;
-  padding: 22px 20px calc(22px + var(--safe-b));
-  max-height: 92dvh;
-  overflow: auto;
-  position: relative;
-  animation: sheet .28s ease;
-}
-@keyframes sheet {
-  from { transform: translateY(24px); opacity: 0; }
-  to { transform: none; opacity: 1; }
-}
-.checkout-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 44px;
-  height: 44px;
-  border: 0;
-  background: var(--paper);
-  border-radius: 12px;
-  font-size: 1.6rem;
-  line-height: 1;
-  color: var(--ink);
-}
-.checkout-sheet h2 { margin: 10px 0 4px; }
-.checkout-sub { color: var(--muted); margin: 0 0 18px; }
-.card-form { display: grid; gap: 12px; }
-.card-form[hidden] { display: none; }
-.card-form label {
-  display: grid;
-  gap: 6px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.card-form input {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 12px;
-  min-height: 48px;
-  color: var(--ink);
-  background: var(--paper);
-}
-.card-form input:focus {
-  outline: 2px solid var(--blue);
-  background: #fff;
-}
-.card-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.pay-status { text-align: center; padding: 28px 8px 12px; }
-.pay-status[hidden] { display: none; }
-.pay-tick {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 12px;
-  border-radius: 50%;
-  background: var(--success-bg);
-  color: var(--success);
-  display: grid;
-  place-items: center;
-  font-size: 1.5rem;
-  font-weight: 800;
-}
-
-@media (min-width: 640px) {
-  .checkout { align-items: center; justify-content: center; }
-  .checkout-sheet {
-    width: min(420px, calc(100% - 32px));
-    border-radius: 24px;
-    margin: 0 auto;
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "TicketKiller UK",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Any",
+    "description": "Helps UK motorists draft a formal appeal against private parking charge notices, with the grounds that apply and a deadline tracker.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP", "description": "First appeal free; additional appeals charged per letter." },
+    "areaServed": "GB"
   }
-}
-
-@media (min-width: 640px) {
-  .trust-row { grid-template-columns: repeat(3, 1fr); }
-  .trust-row li { flex-direction: column; gap: 4px; }
-  .btn-xl { width: auto; }
-  .hero-actions .btn-xl { width: auto; }
-  .upload-actions { grid-template-columns: 1fr 1fr; }
-  .letter-actions { grid-template-columns: 1fr 1fr; }
-  .facts-grid { grid-template-columns: 1fr 1fr; }
-  .span-2 { grid-column: 1 / -1; }
-  .price-grid { grid-template-columns: 1fr 1fr; }
-  .menu-btn { display: none; }
-  .nav { display: flex; }
-  .hero { padding: 72px 0 56px; }
-}
-
-@media (min-width: 960px) {
-  .steps { grid-template-columns: repeat(3, 1fr); }
-  .band-inner {
-    grid-template-columns: 1fr auto;
-    align-items: center;
-  }
-  .results-layout {
-    grid-template-columns: 280px 1fr;
-  }
-  .results-head, .weak-card, .letter-card { grid-column: 1 / -1; }
-  .ticket-side { grid-row: 2; }
-  .hero h1 { max-width: 14ch; }
-}
-
-:root{--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--display:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;}
-</style>
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#app">Skip to content</a>
+
+  <div class="notice-strip">
+    <div class="wrap">
+      <p style="margin:0">
+        <strong>Information, not legal advice.</strong> Appeals are free to lodge — you never have to pay us to appeal.
+        <a href="#privacy">Privacy</a> · <a href="#terms">Terms</a> · <a href="#refunds">Refunds</a> · <a href="#contact">Contact</a>
+      </p>
+    </div>
+  </div>
 
   <header class="topbar">
     <div class="wrap topbar-inner">
@@ -865,6 +69,7 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
         <button data-nav="home">Home</button>
         <button data-nav="details">Appeal</button>
         <button data-nav="history">My appeals</button>
+        <button data-nav="operators">Operators</button>
         <button data-nav="pricing">Pricing</button>
         <button data-nav="faq">FAQ</button>
         <button data-nav="auth" id="navAuth">Log in</button>
@@ -879,38 +84,42 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
     <button data-nav="home">Home</button>
     <button data-nav="details">Enter ticket details</button>
     <button data-nav="history">My appeals</button>
+    <button data-nav="operators">Operator guides</button>
+    <button data-nav="guide">Appeal guides</button>
     <button data-nav="pricing">Pricing</button>
+    <button data-nav="stats">The data</button>
     <button data-nav="faq">FAQ</button>
+    <button data-nav="contact">Contact</button>
     <button data-nav="auth" id="navAuthMobile">Log in</button>
   </div>
 
   <main id="app">
-    <!-- LANDING -->
+    <!-- ============ HOME ============ -->
     <section class="page active" id="page-home" data-page="home">
       <div class="hero">
         <div class="hero-glow" aria-hidden="true"></div>
         <div class="wrap hero-inner">
-          <p class="eyebrow">UK parking charges · POFA 2012 · BPA / IPC</p>
+          <p class="eyebrow">UK private parking charges · POFA 2012 · BPA / IPC</p>
           <h1>Got a Parking Ticket? Fight It in 2 Minutes.</h1>
-          <p class="lede">Type the details from your PCN and get a formal appeal letter. 65% of appeals succeed.</p>
+          <p class="lede">Type the details from your PCN and get a formal appeal letter that cites the law that actually applies to your case — plus a countdown on the deadline.</p>
           <div class="hero-actions">
             <button class="btn btn-primary btn-xl" data-nav="details">
               Enter ticket details
               <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 4l1.4 1.4L8.8 10H20v2H8.8l4.6 4.6L12 18l-8-8 8-8z"/></svg>
             </button>
           </div>
-          <ul class="trust-row" aria-label="Trust badges">
+          <ul class="trust-row" aria-label="Key figures">
             <li>
-              <strong>12M</strong>
-              <span>tickets issued yearly</span>
+              <strong>14.4m</strong>
+              <span>keeper requests by private firms, 2024-25 <a class="stat-src" href="https://www.racfoundation.org/" target="_blank" rel="noopener">RAC Foundation</a></span>
             </li>
             <li>
-              <strong>65%</strong>
-              <span>appeal success rate</span>
+              <strong>49,080</strong>
+              <span>charges cancelled at POPLA, year to Sep 2025 <a class="stat-src" href="https://www.popla.co.uk/" target="_blank" rel="noopener">POPLA</a></span>
             </li>
             <li>
-              <strong>100%</strong>
-              <span>legal</span>
+              <strong>£0</strong>
+              <span>to lodge an appeal, and £0 for your first letter</span>
             </li>
           </ul>
         </div>
@@ -922,30 +131,53 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
           <article class="step-card">
             <span class="step-num">01</span>
             <h3>Enter the ticket details</h3>
-            <p>Copy the operator, PCN number, date, location, amount and vehicle registration from your notice.</p>
+            <p>Operator, PCN number, date, location, amount and registration. You get an instant deadline countdown as you type.</p>
           </article>
           <article class="step-card">
             <span class="step-num">02</span>
             <h3>We build the legal grounds</h3>
-            <p>The letter cites POFA 2012 Schedule 4, BPA/IPC codes, signage, grace periods, keeper liability and ANPR issues.</p>
+            <p>The letter cites POFA 2012 Schedule 4, the BPA/IPC code, signage, grace periods, keeper liability and ANPR issues — and tells you which apply.</p>
           </article>
           <article class="step-card">
             <span class="step-num">03</span>
             <h3>Send a formal appeal</h3>
-            <p>Copy a ready-to-send letter, or download a PDF. First appeal is free.</p>
+            <p>Copy the letter or download a PDF. If they reject you, the POPLA or IAS escalation is drafted for you too. First appeal free.</p>
           </article>
+        </div>
+      </div>
+
+      <div class="wrap section" data-feature="sampleLetter">
+        <h2 class="section-title">See the letter before you sign up</h2>
+        <p class="page-sub">This is real output, generated from example details for a ParkingEye ANPR charge. Your letter cites your dates, your operator and your grounds.</p>
+        <div class="sample-wrap">
+          <div>
+            <pre class="sample-letter" id="sampleLetter">Loading sample letter…</pre>
+            <p class="legal-meta" style="margin-top:10px">Illustration only. Not legal advice.</p>
+          </div>
+          <div>
+            <div class="step-hint">
+              <strong>Why it works:</strong> the letter appeals as the registered keeper, declines to identify the driver, demands the evidence pack, and asks for the POPLA or IAS code. Those four moves are what make a challenge hard to ignore.
+            </div>
+            <ul class="checklist">
+              <li><input type="checkbox" checked disabled /><span class="done">Legal grounds tied to your notice type</span></li>
+              <li><input type="checkbox" checked disabled /><span class="done">Deadline and reduced-rate countdown</span></li>
+              <li><input type="checkbox" checked disabled /><span class="done">Evidence request drafted as a UK GDPR Article 15 request</span></li>
+              <li><input type="checkbox" checked disabled /><span class="done">POPLA / IAS escalation letter if they say no</span></li>
+            </ul>
+            <p><button class="btn btn-primary btn-xl" data-nav="details">Start my free appeal</button></p>
+          </div>
         </div>
       </div>
 
       <div class="band">
         <div class="wrap band-inner">
-          <p>Private parking firms issued millions of charges last year. Most motorists pay. You do not have to.</p>
+          <p>Private parking firms made 14.4 million requests for keeper details in 2024-25. Most people pay. You do not have to.</p>
           <button class="btn btn-primary" data-nav="details">Start my free appeal</button>
         </div>
       </div>
     </section>
 
-    <!-- AUTH -->
+    <!-- ============ AUTH ============ -->
     <section class="page" id="page-auth" data-page="auth">
       <div class="wrap narrow section">
         <p class="eyebrow dark">Your account</p>
@@ -980,36 +212,63 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
           </div>
           <button class="btn btn-primary btn-xl" type="submit" style="margin-top:18px;width:100%">Create account</button>
         </form>
+        <p class="legal-meta" style="margin-top:18px">
+          Your account and letters are stored in this browser only. We have no server, so nothing you type here is transmitted to us.
+          Read the <button class="mini-btn" data-nav="privacy" style="padding:2px 8px">privacy notice</button>.
+        </p>
       </div>
     </section>
 
-    <!-- HISTORY -->
+    <!-- ============ HISTORY ============ -->
     <section class="page" id="page-history" data-page="history">
       <div class="wrap narrow section">
         <p class="eyebrow dark">Account</p>
         <h1 class="page-title">Your appeals</h1>
-        <p class="page-sub" id="historySub">Letters you’ve generated on this account.</p>
+        <p class="page-sub" id="historySub">Letters you've generated on this account.</p>
         <div id="historyList"></div>
         <button class="btn btn-primary btn-xl" data-nav="details" type="button" style="margin-top:16px">New appeal</button>
       </div>
     </section>
 
-    <!-- TICKET DETAILS -->
+    <!-- ============ DETAILS ============ -->
     <section class="page" id="page-details" data-page="details">
       <div class="wrap narrow section">
-        <p class="eyebrow dark">Step 1 of 2</p>
+        <p class="eyebrow dark">Step 1 of 3</p>
         <h1 class="page-title">Enter your ticket details</h1>
-        <p class="page-sub">Copy these from the PCN or Notice to Keeper. Then we’ll write a formal appeal letter.</p>
+        <p class="page-sub">Copy these from the PCN or Notice to Keeper. The deadline tracker updates as you fill it in.</p>
+
+        <div class="deadline-card" id="deadlineCard" hidden>
+          <h2>Deadline tracker</h2>
+          <p class="hint">Based on the date on your notice and the appeal period your operator allows. Change either below.</p>
+          <div class="deadline-grid">
+            <label>Appeal period stated on your notice
+              <select id="fAppealDays">
+                <option value="14">14 days</option>
+                <option value="21">21 days</option>
+                <option value="28" selected>28 days (most common)</option>
+                <option value="56">56 days (some IPC operators)</option>
+              </select>
+            </label>
+            <label>Reduced-payment period
+              <select id="fDiscountDays">
+                <option value="14" selected>14 days</option>
+                <option value="21">21 days</option>
+                <option value="0">No reduction offered</option>
+              </select>
+            </label>
+          </div>
+          <div id="deadlineOut"></div>
+        </div>
 
         <form id="ticketForm" class="facts-card" novalidate>
           <div class="facts-grid">
             <label>Operator
-              <input id="fOperator" list="operatorList" autocomplete="organization" placeholder="e.g. ParkingEye, PMC, UKPC" required />
+              <input id="fOperator" list="operatorList" autocomplete="organization" placeholder="e.g. ParkingEye, UKPC, NCP" required />
             </label>
             <label>PCN / notice number
               <input id="fRef" autocomplete="off" placeholder="e.g. T128719" required />
             </label>
-            <label>Date
+            <label>Date on the notice
               <input id="fDate" type="date" required />
             </label>
             <label>Location
@@ -1027,18 +286,23 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
             <label class="span-2">Your name (registered keeper)
               <input id="fName" placeholder="Name on the letter" autocomplete="name" required />
             </label>
+            <label>Your address
+              <input id="fAddress" placeholder="Street and town" autocomplete="street-address" />
+            </label>
+            <label>Postcode
+              <input id="fPostcode" placeholder="e.g. AB1 2CD" autocomplete="postal-code" />
+            </label>
+            <label>Was a ticket on your windscreen?
+              <select id="fTicketType">
+                <option value="anpr" selected>No — camera or postal notice</option>
+                <option value="ntd">Yes — I found a ticket on the car</option>
+              </select>
+            </label>
+            <label>Date you received the Notice to Keeper
+              <input id="fNtkDate" type="date" />
+            </label>
           </div>
-          <datalist id="operatorList">
-            <option value="ParkingEye Ltd"></option>
-            <option value="Parking Measure Control (UK) Ltd"></option>
-            <option value="Euro Car Parks"></option>
-            <option value="UK Parking Control"></option>
-            <option value="NCP"></option>
-            <option value="Smart Parking Ltd"></option>
-            <option value="Excel Parking Services"></option>
-            <option value="MET Parking Services"></option>
-            <option value="Civil Enforcement Ltd"></option>
-          </datalist>
+          <datalist id="operatorList"></datalist>
           <datalist id="contraList">
             <option value="Parked for longer than the maximum stay permitted"></option>
             <option value="Failure to purchase a valid parking ticket"></option>
@@ -1049,11 +313,13 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
           <button class="btn btn-primary btn-xl" id="generateBtn" type="submit" style="margin-top:18px;width:100%">Generate appeal letter</button>
         </form>
 
+        <div class="intel-card" id="intelCard" style="margin-top:20px" data-feature="operatorIntel"></div>
+
         <div id="paywallPane" hidden>
           <div class="paywall-card">
-            <p class="chip">You’ve used your free appeal</p>
-            <h2>Pay £4.99 for the next letter</h2>
-            <p>This account already has a free letter. Pay with PayPal or card, then PayPal will send you back here and Generate unlocks.</p>
+            <p class="chip">You've used your free appeal</p>
+            <h2>Pay <span data-price>£4.99</span> for the next letter</h2>
+            <p>This account already has a free letter. First appeals are always free to draft with us — this charge covers the next one.</p>
             <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
               <input type="hidden" name="cmd" value="_xclick" />
               <input type="hidden" name="business" value="mrmillz1991@gmail.com" />
@@ -1067,21 +333,52 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
               <input type="hidden" name="custom" value="" />
               <input type="hidden" name="rm" value="1" />
               <button class="pay-btn pay-paypal" type="submit"><strong>Pay</strong><em>Pal</em></button>
-              <button class="btn btn-primary btn-xl" type="submit" style="margin-top:10px;width:100%">Pay £4.99</button>
+              <button class="btn btn-primary btn-xl" type="submit" style="margin-top:10px;width:100%">Pay <span data-price>£4.99</span></button>
             </form>
+            <p class="legal-meta" style="margin-top:10px">By paying you agree to the <button class="mini-btn" data-nav="terms" style="padding:2px 8px">terms</button>. Digital delivery is immediate; see the <button class="mini-btn" data-nav="refunds" style="padding:2px 8px">refund policy</button>.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- RESULTS -->
+    <!-- ============ EVIDENCE ============ -->
+    <section class="page" id="page-evidence" data-page="evidence">
+      <div class="wrap narrow section">
+        <p class="eyebrow dark">Step 2 of 3</p>
+        <h1 class="page-title">Request the evidence</h1>
+        <p class="page-sub">Operators must be able to prove the charge. Ask for the pack up front — it is the single most effective move in a private parking case.</p>
+
+        <div class="step-hint">
+          <strong>Why this matters:</strong> a request under UK GDPR Article 15 is a legal obligation on them, not a favour. They have one month, and if they ignore it the appeal is much stronger.
+        </div>
+
+        <div class="evidence-list" id="evidenceList"></div>
+
+        <div class="letter-card" style="margin-top:22px">
+          <div class="letter-toolbar">
+            <h2>Evidence request letter</h2>
+            <div class="letter-actions">
+              <button class="btn btn-primary" id="evCopy" type="button">Copy request</button>
+              <button class="btn btn-secondary" id="evPdf" type="button">Download as PDF</button>
+            </div>
+          </div>
+          <pre id="evText" class="letter"></pre>
+        </div>
+
+        <p style="margin-top:18px"><button class="btn btn-secondary" data-nav="results" type="button">Back to your appeal</button></p>
+      </div>
+    </section>
+
+    <!-- ============ RESULTS ============ -->
     <section class="page" id="page-results" data-page="results">
       <div class="wrap section">
         <div class="results-head">
           <p class="eyebrow dark">Your appeal</p>
-          <h1 class="page-title">Legal grounds and letter</h1>
-          <p class="page-sub">Edit any detail and the letter updates. Then copy or download it.</p>
+          <h1 class="page-title">Grounds and letters</h1>
+          <p class="page-sub">Turn grounds on or off and the letter updates. Then copy or download it.</p>
+          <p><span class="cd-pill ok" id="resultDeadline"></span></p>
           <button class="btn btn-secondary" data-nav="details" type="button">Edit ticket details</button>
+          <button class="btn btn-secondary" data-nav="evidence" type="button" id="evidenceBtn">Request evidence</button>
         </div>
 
         <div class="weak-card">
@@ -1094,25 +391,44 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
 
         <div class="letter-card">
           <div class="letter-toolbar">
-            <h2>Formal appeal letter</h2>
+            <h2>Your documents</h2>
             <div class="letter-actions">
-              <button class="btn btn-primary" id="copyBtn" type="button">Copy Appeal Letter</button>
-              <button class="btn btn-secondary" id="pdfBtn" type="button">Download as PDF</button>
+              <button class="btn btn-primary" id="copyBtn" type="button">Copy appeal letter</button>
+              <button class="btn btn-secondary" id="pdfBtn" type="button">Download PDF</button>
             </div>
           </div>
-          <pre id="letterText" class="letter"></pre>
+          <div class="tabbar" role="tablist">
+            <button id="tabPrimary" role="tab" aria-selected="true">Appeal to the operator</button>
+            <button id="tabEscalation" role="tab" aria-selected="false">Escalation (POPLA / IAS)</button>
+          </div>
+          <div class="tabpanel" id="panelPrimary">
+            <pre id="letterText" class="letter"></pre>
+          </div>
+          <div class="tabpanel" id="panelEscalation" hidden>
+            <div class="step-hint" style="margin-bottom:14px">
+              Use this only after the operator rejects you. You'll need the verification code from their rejection letter, which goes in the <em>PCN reference</em> field or directly into the letter.
+            </div>
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">POPLA / IAS verification code
+              <input id="fPoplaCode" placeholder="e.g. 1234567890" style="width:100%;margin-top:6px;padding:11px 12px;border:1px solid var(--line);border-radius:12px" />
+            </label>
+            <div class="letter-actions" style="margin:14px 0">
+              <button class="btn btn-primary" id="escCopyBtn" type="button">Copy escalation</button>
+              <button class="btn btn-secondary" id="escPdfBtn" type="button">Download PDF</button>
+            </div>
+            <pre id="escalationText" class="letter"></pre>
+          </div>
         </div>
       </div>
     </section>
 
-        <!-- PRICING -->
+    <!-- ============ PRICING ============ -->
     <section class="page" id="page-pricing" data-page="pricing">
       <div class="wrap narrow section">
         <div class="price-banner" role="status">
-          Your first appeal is FREE. Subsequent appeals £4.99 each.
+          Your first appeal is FREE. Subsequent appeals <span data-price>£4.99</span> each.
         </div>
         <h1 class="page-title">Simple, honest pricing</h1>
-        <p class="page-sub">A private parking charge is typically £70–£100. We cost less than a takeaway coffee after the first ticket.</p>
+        <p class="page-sub">A private parking charge is typically £70–£100. Appealing directly to the operator, and then to POPLA or the IAS, is always free — we only ever charge for drafting extra letters.</p>
 
         <div class="price-grid">
           <article class="price-card featured">
@@ -1120,10 +436,13 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
             <h2>First appeal</h2>
             <p class="price"><span>£</span>0</p>
             <ul>
-              <li>Legal grounds from UK parking law</li>
+              <li>Legal grounds matched to your notice type</li>
               <li>POFA 2012 &amp; BPA/IPC checks</li>
               <li>Formal appeal letter</li>
+              <li>Evidence request letter</li>
+              <li>POPLA / IAS escalation letter</li>
               <li>Copy &amp; PDF download</li>
+              <li>Deadline tracker</li>
             </ul>
             <button class="btn btn-primary btn-xl" data-nav="details">Enter ticket details</button>
           </article>
@@ -1132,9 +451,9 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
             <h2>Extra appeals</h2>
             <p class="price"><span>£</span>4.99</p>
             <ul>
-              <li>Same letter for each extra ticket</li>
+              <li>One more letter per ticket</li>
               <li>Pay per ticket, no subscription</li>
-              <li>PayPal or card on PayPal’s secure page</li>
+              <li>PayPal or card on PayPal's secure page</li>
             </ul>
             <form class="paypal-form" action="https://www.paypal.com/cgi-bin/webscr" method="post">
               <input type="hidden" name="cmd" value="_xclick" />
@@ -1148,19 +467,17 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
               <input type="hidden" name="cancel_return" value="" />
               <input type="hidden" name="custom" value="" />
               <input type="hidden" name="rm" value="1" />
-              <button class="pay-btn pay-paypal" type="submit" aria-label="Pay with PayPal">
-                <strong>Pay</strong><em>Pal</em>
-              </button>
+              <button class="pay-btn pay-paypal" type="submit" aria-label="Pay with PayPal"><strong>Pay</strong><em>Pal</em></button>
               <p class="pay-or">PayPal also accepts card</p>
-              <button class="btn btn-primary btn-xl" type="submit">Pay £4.99</button>
+              <button class="btn btn-primary btn-xl" type="submit">Pay <span data-price>£4.99</span></button>
             </form>
-            <p class="fine">Opens PayPal. Money goes to your PayPal account. PayPal takes their fee.</p>
+            <p class="fine">Payment goes to the operator of this site. PayPal charges their fee. See the <button class="mini-btn" data-nav="refunds" style="padding:2px 8px">refund policy</button>.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- FAQ -->
+    <!-- ============ FAQ ============ -->
     <section class="page" id="page-faq" data-page="faq">
       <div class="wrap narrow section">
         <p class="eyebrow dark">Common questions</p>
@@ -1168,498 +485,255 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
         <div class="faq" id="faqList">
           <details open>
             <summary>Is this legal?</summary>
-            <p>Yes. Appealing a parking charge is a lawful right. Private operators must consider appeals, and BPA members must offer POPLA while IPC members must offer the IAS. TicketKiller UK helps you draft a structured challenge citing UK law (including POFA 2012 Schedule 4) and industry codes. We do not impersonate solicitors, lodge appeals for you, or give personalised legal advice.</p>
+            <p>Yes. Appealing a parking charge is a lawful right. Private operators must consider appeals, and BPA members must offer POPLA while IPC members must offer the IAS. <span data-biz-name>TicketKiller UK</span> helps you draft a structured challenge citing UK law (including POFA 2012 Schedule 4) and industry codes. We do not impersonate solicitors, lodge appeals for you, or give personalised legal advice.</p>
           </details>
           <details>
             <summary>What if my appeal is rejected?</summary>
-            <p>If the operator rejects your first appeal, ask them for a POPLA code (BPA operators) or an IAS code (IPC operators). You usually have 28 days from the rejection to escalate. Independent adjudicator success rates are often around 40% or higher when the case is well evidenced — signage, late Notice to Keeper, and grace-period failures are common winners. Do not ignore a rejection: paying the discounted rate, appealing, or escalating are the safe options. Debt collectors cannot force payment without a court claim.</p>
+            <p>If the operator rejects your first appeal, ask them for a POPLA code (BPA operators) or an IAS code (IPC operators). You usually have 28 days from the rejection to escalate. Do not ignore a rejection: paying the discounted rate, appealing, or escalating are the safe options. Debt collectors cannot force payment without a court claim. The results page drafts your escalation letter.</p>
           </details>
           <details>
             <summary>How long do I have to appeal?</summary>
-            <p>Act quickly. For most private parking charges you should appeal to the operator within 28 days of the notice (check the letter — some quote 14 or 21). Paying the reduced amount is typically offered for 14 days; appealing within that window usually preserves the discount if you later lose. Council PCNs have their own 14/28-day windows under the Traffic Management Act 2004. Missing the deadline does not always end the matter, but it weakens your position.</p>
+            <p>For most private parking charges you should appeal to the operator within 28 days of the notice — but check the letter, because some quote 14 or 21 days. The reduced payment is usually offered for 14 days; appealing inside that window normally preserves the discount if you later lose. Council PCNs have their own 14/28-day windows under the Traffic Management Act 2004. The deadline tracker does this arithmetic for you.</p>
           </details>
           <details>
             <summary>Should I name the driver?</summary>
             <p>Usually no. If you are the registered keeper, you are not obliged to identify the driver. Naming them can destroy a keeper-liability defence under POFA 2012 Schedule 4. Our letters appeal as keeper and do not admit who was driving.</p>
           </details>
           <details>
+            <summary>Has the new Private Parking Code of Practice started?</summary>
+            <p>Not yet. The government laid a statutory Code before Parliament on 20 October 2026 under the Parking (Code of Practice) Act 2019. It is subject to a period of parliamentary scrutiny and comes into force 21 days after it is issued, with transitional arrangements published separately. Until then, operators follow their trade association's code — the BPA/IPC Single Code — and a charge is assessed under the rules in force on the date of the parking event.</p>
+          </details>
+          <details>
             <summary>How can I pay?</summary>
-            <p>Your first appeal is free. Extra appeals are £4.99 each, paid through PayPal (PayPal balance or card). There is no subscription.</p>
+            <p>Your first appeal is free. Extra appeals are <span data-price>£4.99</span> each, paid through PayPal (PayPal balance or card). There is no subscription. You never have to pay us to lodge an appeal — that is free to do yourself.</p>
           </details>
           <details>
             <summary>Council ticket or private charge?</summary>
             <p>This tool is aimed at private Parking Charge Notices (ParkingEye, UKPC, Euro Car Parks, and similar). Council PCNs are civil penalties with a different process (informal challenge, then formal representations, then tribunal). The letter still helps you organise facts, but council appeals should follow the wording on the PCN.</p>
           </details>
+          <details>
+            <summary>Where is my data kept?</summary>
+            <p>In this browser only. There is no server, no database and no analytics running on this site. Clearing your browser data removes your account and letters permanently. See the <button class="mini-btn" data-nav="privacy" style="padding:2px 8px">privacy notice</button>.</p>
+          </details>
         </div>
         <button class="btn btn-primary btn-xl" data-nav="details">Enter ticket details</button>
+      </div>
+    </section>
+
+    <!-- ============ OPERATORS ============ -->
+    <section class="page" id="page-operators" data-page="operators">
+      <div class="wrap section">
+        <p class="eyebrow dark">Reference</p>
+        <h1 class="page-title">Operator intelligence</h1>
+        <p class="page-sub">What usually decides appeals against each operator, and where a rejection goes next. Trade-body membership changes — always check the appeal route printed on your own rejection letter.</p>
+        <div class="op-grid" id="opGrid"></div>
+        <p style="margin-top:24px"><button class="btn btn-primary btn-xl" data-nav="details">Enter your ticket details</button></p>
+      </div>
+    </section>
+
+    <!-- ============ GUIDES (SEO landing pages) ============ -->
+    <section class="page" id="page-guide" data-page="guide">
+      <div class="wrap narrow section">
+        <p class="eyebrow dark">Appeal guides</p>
+        <h1 class="page-title" id="seoTitle">Appeal guides by operator</h1>
+        <div id="seoBody"></div>
+      </div>
+    </section>
+
+    <!-- ============ STATS ============ -->
+    <section class="page" id="page-stats" data-page="stats">
+      <div class="wrap section">
+        <p class="eyebrow dark">Transparency</p>
+        <h1 class="page-title">The data behind the claims</h1>
+        <p class="page-sub">Every figure we quote, where it comes from, and what it actually means. If a number is missing here, we shouldn't be using it.</p>
+        <div class="stat-grid" id="statGrid"></div>
+        <h2 class="section-title" style="margin-top:34px">What these numbers do and don't say</h2>
+        <ul class="checklist" style="max-width:760px">
+          <li><span><strong>14.4 million</strong> is the number of keeper-data requests private firms made to the DVLA in 2024-25. It is a proxy for charges issued, not a count of them.</span></li>
+          <li><span><strong>45.8%</strong> of concluded POPLA appeals ended in cancellation, but most of that is operators withdrawing before a ruling. Of appeals actually decided, 21.5% were allowed.</span></li>
+          <li><span>Success rates are not a promise. Your case turns on your evidence, your signage and your notice's compliance with POFA.</span></li>
+          <li><span>The IAS does not publish per-operator allowed rates, so no comparable figure is quoted for IPC operators.</span></li>
+        </ul>
+        <p style="margin-top:22px"><button class="btn btn-primary" data-nav="details">Check my own deadline</button></p>
+      </div>
+    </section>
+
+    <!-- ============ PRIVACY ============ -->
+    <section class="page" id="page-privacy" data-page="privacy">
+      <div class="wrap narrow section legal">
+        <p class="eyebrow dark">Legal</p>
+        <h1 class="page-title">Privacy notice</h1>
+        <p class="legal-meta">Last updated 9 November 2026</p>
+
+        <div class="legal-warning">
+          <strong>Read this first.</strong> This notice assumes the site is operated by <span data-biz-legal>[YOUR FULL LEGAL NAME]</span>, trading as <span data-biz-name>TicketKiller UK</span>. The operator must replace the placeholders with their real name, address and contact email before publishing this site or taking any payment.
+        </div>
+
+        <h2>Who is responsible for your data</h2>
+        <p>The data controller is <span data-biz-legal>[YOUR FULL LEGAL NAME]</span>, trading as <span data-biz-name>TicketKiller UK</span>, whose address is <span data-biz-address>[YOUR POSTAL ADDRESS]</span>. Contact: <span data-biz-email></span>.</p>
+
+        <h2>What this site collects</h2>
+        <p><strong>Nothing is transmitted to us.</strong> The site is a static page with no server. Everything you type — your name, address, vehicle registration, PCN number and the text of your letters — is stored in your own browser's <code>localStorage</code> and never sent to us or to any server we control.</p>
+        <p>We do not use cookies, and no analytics or advertising scripts run on this site by default.</p>
+
+        <h2>What you enter about other people</h2>
+        <p>A PCN number and vehicle registration relate to a vehicle, and may identify a person. You are responsible for keeping that information secure on your own device. We never receive it.</p>
+
+        <h2>Payment</h2>
+        <p>If you buy an extra letter, you are taken to PayPal. PayPal processes the payment as an independent controller under its own privacy notice. We receive a payment confirmation and the email address you used, which is used only to unlock the letter you paid for. We never see your card details.</p>
+
+        <h2>Your rights</h2>
+        <p>Because we hold no personal data about you, the usual rights of access, rectification and erasure are met by your own browser: clearing site data erases everything this site has stored about you. If you believe we hold something about you, email <span data-biz-email></span>.</p>
+        <p>You have the right to complain to the Information Commissioner's Office at <a href="https://ico.org.uk/" target="_blank" rel="noopener">ico.org.uk</a>.</p>
+
+        <h2>Retention</h2>
+        <p>Your letters remain in your browser until you delete them or clear site data. We cannot delete them for you, because we never had them.</p>
+
+        <h2>Changes</h2>
+        <p>If this notice changes materially — for example if a server or analytics service is added — the date at the top changes and the difference is described here.</p>
+      </div>
+    </section>
+
+    <!-- ============ TERMS ============ -->
+    <section class="page" id="page-terms" data-page="terms">
+      <div class="wrap narrow section legal">
+        <p class="eyebrow dark">Legal</p>
+        <h1 class="page-title">Terms of use</h1>
+        <p class="legal-meta">Last updated 9 November 2026</p>
+
+        <div class="legal-warning">
+          <strong>Read this first.</strong> These terms assume the site is operated by <span data-biz-legal>[YOUR FULL LEGAL NAME]</span>, trading as <span data-biz-name>TicketKiller UK</span>. The operator must replace the placeholders before publishing. This is a starting draft, not a substitute for advice on consumer law.
+        </div>
+
+        <h2>1. What this service is</h2>
+        <p><span data-biz-name>TicketKiller UK</span> is a document drafting tool. It produces a suggested appeal letter and supporting material about UK private parking charges. It is not a solicitor, does not carry out reserved legal activities, and does not represent you in any appeal.</p>
+
+        <h2>2. Not legal advice</h2>
+        <p>The material is general information. It is not legal advice about your particular circumstances and should not be relied on as such. You are responsible for checking every fact, date, code and legal reference before you send anything.</p>
+
+        <h2>3. No guarantee of outcome</h2>
+        <p>We do not promise that any appeal will succeed. Operators and independent adjudicators decide cases on their own evidence.</p>
+
+        <h2>4. Your responsibilities</h2>
+        <ul>
+          <li>Give accurate details from your own notice.</li>
+          <li>Do not use the service to make a false statement or to pursue a claim you know to be dishonest.</li>
+          <li>Keep copies of your letters and of your own evidence.</li>
+          <li>Check the deadline on your notice — a countdown in this tool is a helper, not an authority.</li>
+        </ul>
+
+        <h2>5. Accounts and data</h2>
+        <p>Accounts exist only in your browser. You are responsible for your own device security. If you clear your browser data, your account and letters are lost and cannot be recovered by us.</p>
+
+        <h2>6. Charges</h2>
+        <p>Your first letter is free. Further letters cost <span data-price>£4.99</span> each, payable in advance through PayPal. Prices include VAT where applicable.</p>
+
+        <h2>7. Liability</h2>
+        <p>Nothing in these terms limits liability for death or personal injury caused by negligence, for fraud, or for anything else that cannot lawfully be limited. Subject to that, we are not liable for indirect or consequential loss, or for any loss arising from a decision made by a parking operator, an adjudicator or a court.</p>
+
+        <h2>8. Consumer rights</h2>
+        <p>Nothing here affects your statutory rights. See the <button class="mini-btn" data-nav="refunds" style="padding:2px 8px">refund policy</button> for digital-content cancellation rights.</p>
+
+        <h2>9. Governing law</h2>
+        <p>These terms are governed by the law of England and Wales, and the courts of England and Wales have exclusive jurisdiction.</p>
+
+        <h2>10. Contact</h2>
+        <p><span data-biz-email></span>, or use the <button class="mini-btn" data-nav="contact" style="padding:2px 8px">contact form</button>.</p>
+      </div>
+    </section>
+
+    <!-- ============ REFUNDS ============ -->
+    <section class="page" id="page-refunds" data-page="refunds">
+      <div class="wrap narrow section legal">
+        <p class="eyebrow dark">Legal</p>
+        <h1 class="page-title">Refund policy</h1>
+        <p class="legal-meta">Last updated 9 November 2026</p>
+
+        <h2>The short version</h2>
+        <p>If a letter we generated is broken, unusable, or you were charged twice, we refund it. If you simply changed your mind after the letter unlocked, the legal position on digital content applies — see below.</p>
+
+        <h2>Your statutory right to cancel digital content</h2>
+        <p>Under the Consumer Contracts Regulations 2013, digital content supplied immediately is exempt from the 14-day cancellation right once supply has begun with your express consent and acknowledgement that you lose that right. The checkout asks for that consent before payment. If you do not want to lose the cancellation right, do not complete the purchase.</p>
+
+        <h2>When we refund in full</h2>
+        <table>
+          <thead><tr><th>Problem</th><th>What we do</th></tr></thead>
+          <tbody>
+            <tr><td>A letter failed to generate or download after payment</td><td>Full refund, or a replacement letter — your choice</td></tr>
+            <tr><td>You were charged twice for the same letter</td><td>Full refund of the duplicate</td></tr>
+            <tr><td>You were charged but no credit appeared on your account</td><td>Credit applied within one working day, or a full refund</td></tr>
+            <tr><td>The service was unavailable when you tried to use it</td><td>Full refund</td></tr>
+          </tbody>
+        </table>
+
+        <h2>When we may decline</h2>
+        <p>We may decline a refund where the letter was successfully delivered and you have already used it, or where the request is made long after purchase. We will always explain our reasoning.</p>
+
+        <h2>How to ask</h2>
+        <p>Email <span data-contact-email></span> with your PayPal receipt and the PCN reference. We aim to reply <span data-contact-time>within 2 working days</span>, and to refund to the original payment method within 14 days of agreeing it.</p>
+
+        <h2>Chargebacks</h2>
+        <p>Please contact us before raising a chargeback. It is nearly always slower than asking.</p>
+      </div>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section class="page" id="page-contact" data-page="contact">
+      <div class="wrap narrow section">
+        <p class="eyebrow dark">Help</p>
+        <h1 class="page-title">Contact</h1>
+        <p class="page-sub">Questions about a letter, a payment, or how the site handles your data. We aim to reply <span data-contact-time>within 2 working days</span>.</p>
+
+        <div class="facts-card" style="margin-bottom:18px">
+          <p style="margin:0"><strong>Email</strong><br><span data-biz-email></span></p>
+          <p style="margin:10px 0 0"><strong>Operator</strong><br><span data-biz-legal></span>, trading as <span data-biz-name></span></p>
+          <p style="margin:10px 0 0"><strong>Address</strong><br><span data-biz-address></span></p>
+        </div>
+
+        <form class="facts-card" id="contactForm" novalidate>
+          <div class="facts-grid">
+            <label>Your name
+              <input id="cName" autocomplete="name" required />
+            </label>
+            <label>Your email
+              <input id="cEmail" type="email" autocomplete="email" required />
+            </label>
+            <label class="span-2">PCN reference (if relevant)
+              <input id="cRef" placeholder="e.g. T128719" />
+            </label>
+            <label class="span-2">Message
+              <textarea id="cMessage" rows="6" style="width:100%;margin-top:6px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font:inherit" required></textarea>
+            </label>
+          </div>
+          <button class="btn btn-primary btn-xl" type="submit" style="margin-top:18px;width:100%">Open email with this message</button>
+          <div class="legal-meta" id="contactResult" hidden></div>
+          <p class="legal-meta" style="margin-top:12px">This form has no server: it opens your own email app with the message filled in.</p>
+        </form>
+
+        <p class="legal-meta" style="margin-top:20px">If you are unhappy with how we have handled your data, you can complain to the ICO at <a href="https://ico.org.uk/" target="_blank" rel="noopener">ico.org.uk</a>.</p>
       </div>
     </section>
   </main>
 
   <footer class="footer">
     <div class="wrap footer-inner">
-      <p class="disclaimer">Not legal advice. For informational purposes only.</p>
-      <p class="footer-meta">TicketKiller UK does not provide reserved legal activity. Parking charges are not criminal fines. Always check dates, codes and operator instructions on your own notice.</p>
-      <p class="footer-meta">© 2026 TicketKiller UK</p>
+      <p class="disclaimer">Not legal advice. For information only.</p>
+      <p class="footer-meta"><span data-biz-name>TicketKiller UK</span> does not provide reserved legal activity. Parking charges are not criminal fines. Always check dates, codes and operator instructions on your own notice.</p>
+      <div class="footer-links">
+        <button data-nav="privacy">Privacy notice</button>
+        <button data-nav="terms">Terms</button>
+        <button data-nav="refunds">Refunds</button>
+        <button data-nav="contact">Contact</button>
+        <button data-nav="stats">The data</button>
+      </div>
+      <p class="footer-meta">© <span id="footerYear">2026</span> <span data-biz-name>TicketKiller UK</span> · <span data-biz-legal></span></p>
     </div>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-(() => {
-  const GROUNDS = [
-    {
-      tag: "POFA 2012 Schedule 4",
-      title: "Keeper liability may not have been established",
-      body: "To pursue the registered keeper, the operator must serve a compliant Notice to Keeper within the statutory window (generally 14 days where no windscreen notice was issued, or 56 days where one was) and include the prescribed wording in Schedule 4. Any defect in timing, “period of parking”, or mandatory statements extinguishes keeper liability. You are not obliged to name the driver."
-    },
-    {
-      tag: "BPA / IPC Code of Practice",
-      title: "Signage is unlikely to have formed a clear contract",
-      body: "Entrance and tariff signs must be prominent, legible and consistent. If key terms (maximum stay, charge amount, ANPR in use) were faded, poorly lit, too high, or missing at the point of entry, no contract was formed. Ask the operator for the signage plan and contemporaneous photographs."
-    },
-    {
-      tag: "Grace period",
-      title: "A consideration / grace period does not appear to have been applied",
-      body: "Industry codes require time to read the terms, find a space, and a further period (typically 10 minutes) after paid-for or free time before a charge is issued. Demand the full in/out timestamps to the second."
-    },
-    {
-      tag: "ANPR evidence",
-      title: "Camera timestamps may not prove a parking event",
-      body: "ANPR records a vehicle crossing a line, not that it was parked. Misreads, clock drift, a brief drop-off, or a second visit the same day are common. Require full-colour entry and exit stills. A period of presence is not automatically a period of parking under POFA."
-    },
-    {
-      tag: "Landowner authority",
-      title: "No proof the operator had authority to issue charges",
-      body: "Only the landowner, or a contractor with written authority, can offer parking terms or pursue a charge. Request a redacted copy of the contract showing the site, dates, and the right to issue PCNs in the operator’s own name."
-    }
-  ];
-
-  const $ = (id) => document.getElementById(id);
-  const pages = [...document.querySelectorAll(".page")];
-  const USERS_KEY = "tk_users_v1";
-  const SESSION_KEY = "tk_session";
-  const PENDING_KEY = "tk_pending_pay";
-  let afterLogin = "details";
-
-  function users() {
-    try { return JSON.parse(localStorage.getItem(USERS_KEY) || "{}"); }
-    catch { return {}; }
-  }
-  function saveUsers(map) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(map));
-  }
-  function sessionEmail() {
-    return localStorage.getItem(SESSION_KEY) || "";
-  }
-  function currentUser() {
-    const email = sessionEmail();
-    return email ? users()[email] || null : null;
-  }
-  function saveUser(user) {
-    const map = users();
-    map[user.email] = user;
-    saveUsers(map);
-  }
-  async function hashPass(pw) {
-    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`tk|${pw}`));
-    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
-  }
-
-  function usedFree(u) {
-    return !!(u.freeUsed || (u.appeals && u.appeals.length));
-  }
-  function canGenerate() {
-    const u = currentUser();
-    if (!u) return false;
-    return !usedFree(u) || (u.credits || 0) > 0;
-  }
-  function consumeGenerate() {
-    const u = currentUser();
-    if (!u) return;
-    if (!usedFree(u)) {
-      u.freeUsed = true;
-    } else {
-      u.credits = Math.max(0, (u.credits || 0) - 1);
-    }
-    saveUser(u);
-  }
-  function grantPaidCredit(email) {
-    const map = users();
-    const u = map[email];
-    if (!u) return;
-    u.credits = (u.credits || 0) + 1;
-    saveUsers(map);
-    localStorage.removeItem(PENDING_KEY);
-  }
-  function syncPaywall() {
-    const pane = $("paywallPane");
-    if (!pane) return;
-    const locked = !!currentUser() && !canGenerate();
-    pane.hidden = !locked;
-    $("generateBtn").disabled = locked;
-    $("generateBtn").textContent = locked ? "Pay £4.99 to generate another" : "Generate appeal letter";
-  }
-  function syncNav() {
-    const u = currentUser();
-    const label = u ? "Log out" : "Log in";
-    $("navAuth").textContent = label;
-    $("navAuthMobile").textContent = label;
-  }
-  function pageUrl() {
-    return location.href.split("#")[0].split("?")[0];
-  }
-
-  function toast(msg) {
-    const el = $("toast");
-    el.textContent = msg;
-    el.hidden = false;
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => { el.hidden = true; }, 2400);
-  }
-
-  function showPage(name) {
-    if ((name === "details" || name === "history") && !currentUser()) {
-      afterLogin = name;
-      name = "auth";
-    }
-    if (name === "auth" && currentUser() && $("navAuth").textContent === "Log out") {
-      // handled by click interceptor
-    }
-    pages.forEach((p) => p.classList.toggle("active", p.dataset.page === name));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    if (name === "details") syncPaywall();
-    if (name === "history") renderHistory();
-  }
-
-  document.getElementById("menuBtn").addEventListener("click", () => {
-    const nav = $("mobileNav");
-    const open = nav.hasAttribute("hidden");
-    nav.toggleAttribute("hidden", !open);
-    document.getElementById("menuBtn").setAttribute("aria-expanded", String(open));
-  });
-
-  document.querySelectorAll("[data-nav]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const dest = btn.getAttribute("data-nav");
-      $("mobileNav").setAttribute("hidden", "");
-      document.getElementById("menuBtn").setAttribute("aria-expanded", "false");
-      if (dest === "auth" && currentUser()) {
-        localStorage.removeItem(SESSION_KEY);
-        syncNav();
-        toast("Logged out");
-        showPage("home");
-        return;
-      }
-      showPage(dest);
-    });
-  });
-
-  $("tabLogin").addEventListener("click", () => {
-    $("tabLogin").classList.add("active");
-    $("tabRegister").classList.remove("active");
-    $("loginForm").hidden = false;
-    $("registerForm").hidden = true;
-    $("authTitle").textContent = "Log in";
-  });
-  $("tabRegister").addEventListener("click", () => {
-    $("tabRegister").classList.add("active");
-    $("tabLogin").classList.remove("active");
-    $("loginForm").hidden = true;
-    $("registerForm").hidden = false;
-    $("authTitle").textContent = "Create account";
-  });
-
-  $("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = $("loginEmail").value.trim().toLowerCase();
-    const pass = $("loginPass").value;
-    const u = users()[email];
-    if (!u || u.pass !== await hashPass(pass)) {
-      toast("Email or password is wrong");
-      return;
-    }
-    localStorage.setItem(SESSION_KEY, email);
-    syncNav();
-    toast(`Welcome back, ${u.name}`);
-    showPage(afterLogin || "history");
-  });
-
-  $("registerForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = $("regEmail").value.trim().toLowerCase();
-    const name = $("regName").value.trim();
-    const pass = $("regPass").value;
-    if (pass.length < 6) {
-      toast("Password must be at least 6 characters");
-      return;
-    }
-    const map = users();
-    if (map[email]) {
-      toast("That email already has an account. Log in.");
-      return;
-    }
-    map[email] = {
-      email,
-      name,
-      pass: await hashPass(pass),
-      freeUsed: false,
-      credits: 0,
-      appeals: []
-    };
-    saveUsers(map);
-    localStorage.setItem(SESSION_KEY, email);
-    if ($("fName") && !$("fName").value) $("fName").value = name;
-    syncNav();
-    toast("Account created");
-    showPage(afterLogin || "details");
-  });
-
-  document.querySelectorAll(".paypal-form").forEach((form) => {
-    form.addEventListener("submit", (e) => {
-      const u = currentUser();
-      if (!u) {
-        e.preventDefault();
-        afterLogin = "details";
-        showPage("auth");
-        toast("Log in first so we can unlock this account after payment");
-        return;
-      }
-      const nonce = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
-      localStorage.setItem(PENDING_KEY, JSON.stringify({ nonce, email: u.email }));
-      form.querySelector('[name="return"]').value = `${pageUrl()}?paypal=success`;
-      form.querySelector('[name="cancel_return"]').value = `${pageUrl()}?paypal=cancel`;
-      form.querySelector('[name="custom"]').value = `${u.email}|${nonce}`;
-    });
-  });
-
-  (function catchPaypalReturn() {
-    const params = new URLSearchParams(location.search);
-    const status = params.get("paypal");
-    if (status === "success") {
-      try {
-        const pending = JSON.parse(localStorage.getItem(PENDING_KEY) || "null");
-        if (pending?.email) {
-          grantPaidCredit(pending.email);
-          localStorage.setItem(SESSION_KEY, pending.email);
-        }
-      } catch { /* ignore */ }
-      history.replaceState({}, "", pageUrl());
-      toast("Payment confirmed. You can generate another letter.");
-      syncNav();
-      showPage("details");
-    } else if (status === "cancel") {
-      localStorage.removeItem(PENDING_KEY);
-      history.replaceState({}, "", pageUrl());
-      toast("Payment cancelled");
-    }
-  })();
-
-  function letterFromForm() {
-    const operator = $("fOperator").value.trim() || "[Operator]";
-    const ref = $("fRef").value.trim() || "[PCN reference]";
-    const date = $("fDate").value || "[date]";
-    const location = $("fLocation").value.trim() || "[location]";
-    const contra = $("fContra").value.trim() || "[alleged contravention]";
-    const amount = $("fAmount").value.trim() || "[amount]";
-    const v = $("fVrm").value.trim().toUpperCase() || "[VRM]";
-    const name = $("fName").value.trim() || currentUser()?.name || "[Your name]";
-    const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-    const niceDate = date.match(/^\d{4}-\d{2}-\d{2}$/)
-      ? new Date(date + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
-      : date;
-    const grounds = GROUNDS.map((g, i) => `${i + 1}. ${g.title}\n${g.body}`).join("\n\n");
-    return `${name}
-[Your address]
-[Your postcode]
-
-${today}
-
-Appeals Team
-${operator}
-
-Without prejudice
-
-Dear Sir or Madam,
-
-Re: Formal appeal — Parking Charge Notice ${ref}
-Vehicle registration: ${v}
-Location: ${location}
-Date of alleged contravention: ${niceDate}
-Alleged contravention: ${contra}
-Amount demanded: ${amount}
-
-I write as the registered keeper of the vehicle above. I dispute this parking charge in full and I do not accept liability. I am not the creditor’s contracting driver for the purpose of this correspondence, and I decline to identify the driver.
-
-Please cancel the charge. If you refuse, issue a valid POPLA code (if you are a BPA Approved Operator) or an IAS code (if you are an IPC operator) with your rejection.
-
-The grounds of appeal are as follows.
-
-${grounds}
-
-Further points
-
-• I require you to comply with the Protection of Freedoms Act 2012, Schedule 4, if you intend to pursue me as keeper. If any statutory condition is unmet, keeper liability does not arise.
-• Please provide: the full ANPR or officer evidence pack; contemporaneous signage photographs and the site plan; proof of landowner authority to issue charges in your name; and the exact entry and exit timestamps to the second.
-• Do not add debt-recovery fees while this appeal (and any subsequent independent appeal) remains outstanding.
-
-I look forward to written confirmation of cancellation within 35 days.
-
-Yours faithfully,
-
-${name}
-Registered keeper
-
-This letter is generated by TicketKiller UK for informational purposes and is not legal advice.`;
-  }
-
-  function renderAppeal() {
-    $("weakCount").textContent = `${GROUNDS.length} grounds`;
-    $("weakList").innerHTML = GROUNDS.map((g) => `
-      <li>
-        <span class="law-tag">${g.tag}</span>
-        <h3>${g.title}</h3>
-        <p>${g.body}</p>
-      </li>
-    `).join("");
-    $("letterText").textContent = letterFromForm();
-  }
-
-  function saveCurrentAppeal() {
-    const u = currentUser();
-    if (!u) return;
-    const item = {
-      id: Date.now().toString(36),
-      created: new Date().toISOString(),
-      operator: $("fOperator").value.trim(),
-      ref: $("fRef").value.trim(),
-      date: $("fDate").value,
-      location: $("fLocation").value.trim(),
-      contra: $("fContra").value.trim(),
-      amount: $("fAmount").value.trim(),
-      vrm: $("fVrm").value.trim().toUpperCase(),
-      letter: letterFromForm()
-    };
-    u.appeals = u.appeals || [];
-    u.appeals.unshift(item);
-    saveUser(u);
-  }
-
-  function renderHistory() {
-    const u = currentUser();
-    const list = $("historyList");
-    if (!u) {
-      list.innerHTML = "";
-      return;
-    }
-    $("historySub").textContent = `${u.name} · ${u.appeals?.length || 0} appeal(s) · first letter ${u.freeUsed ? "used" : "still free"}`;
-    if (!u.appeals?.length) {
-      list.innerHTML = `<p class="page-sub">No letters yet. Generate one from your ticket details.</p>`;
-      return;
-    }
-    list.innerHTML = u.appeals.map((a) => `
-      <button class="history-item" type="button" data-appeal="${a.id}">
-        <strong>${a.operator || "Appeal"} · ${a.ref || ""}</strong>
-        <span>${a.vrm || ""} · ${a.amount || ""} · ${a.created ? new Date(a.created).toLocaleDateString("en-GB") : ""}</span>
-      </button>
-    `).join("");
-    list.querySelectorAll("[data-appeal]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const a = u.appeals.find((x) => x.id === btn.getAttribute("data-appeal"));
-        if (!a) return;
-        $("fOperator").value = a.operator || "";
-        $("fRef").value = a.ref || "";
-        $("fDate").value = a.date || "";
-        $("fLocation").value = a.location || "";
-        $("fContra").value = a.contra || "";
-        $("fAmount").value = a.amount || "";
-        $("fVrm").value = a.vrm || "";
-        $("fName").value = u.name || "";
-        renderAppeal();
-        $("letterText").textContent = a.letter || letterFromForm();
-        showPage("results");
-      });
-    });
-  }
-
-  $("ticketForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (!currentUser()) {
-      afterLogin = "details";
-      showPage("auth");
-      toast("Create an account or log in first");
-      return;
-    }
-    if (!canGenerate()) {
-      syncPaywall();
-      $("paywallPane").scrollIntoView({ behavior: "smooth", block: "center" });
-      toast("Pay £4.99 with PayPal to generate another letter");
-      return;
-    }
-    if (!$("fOperator").value.trim() || !$("fRef").value.trim() || !$("fVrm").value.trim() || !$("fName").value.trim()) {
-      toast("Please fill operator, notice number, registration and your name");
-      return;
-    }
-    consumeGenerate();
-    renderAppeal();
-    saveCurrentAppeal();
-    showPage("results");
-    syncPaywall();
-  });
-
-  ["fOperator","fRef","fDate","fLocation","fContra","fAmount","fVrm","fName"].forEach((id) => {
-    $(id).addEventListener("input", () => {
-      if ($("page-results").classList.contains("active")) renderAppeal();
-    });
-  });
-
-  $("copyBtn").addEventListener("click", async () => {
-    const text = $("letterText").textContent;
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      ta.remove();
-    }
-    toast("Appeal letter copied");
-  });
-
-  $("pdfBtn").addEventListener("click", () => {
-    const text = $("letterText").textContent;
-    const ref = ($("fRef").value || "appeal").replace(/[^\w-]+/g, "");
-    if (window.jspdf?.jsPDF) {
-      const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
-      const margin = 54;
-      const width = 495;
-      doc.setFont("times", "normal");
-      doc.setFontSize(11);
-      const lines = doc.splitTextToSize(text, width);
-      let y = 64;
-      lines.forEach((line) => {
-        if (y > 780) {
-          doc.addPage();
-          y = 64;
-        }
-        doc.text(line, margin, y);
-        y += 15;
-      });
-      doc.save(`TicketKiller-UK-appeal-${ref || "letter"}.pdf`);
-      toast("PDF downloaded");
-      return;
-    }
-    window.print();
-  });
-
-  syncNav();
-  syncPaywall();
-})();
-
-  </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a57ca8f34b691205',t:'MTc5NDIyNTY1Ng=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a57ca8f34b691205',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+  <script src="assets/config.js"></script>
+  <script src="assets/vendor/jspdf.umd.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
 </html>

@@ -1,0 +1,84 @@
+{
+  "_note": "Legal reference content. Each ground is a drafting template, not legal advice. `when` controls optional relevance toggles in the UI.",
+  "_updated": "2026-11-09",
+  "grounds": [
+    {
+      "id": "pofa-timing",
+      "tag": "POFA 2012, Sch 4 para 9",
+      "title": "Keeper liability may not have been established",
+      "when": "no windscreen ticket (ANPR)",
+      "body": "Where no notice was affixed to the vehicle, the operator must give the registered keeper a Notice to Keeper within 14 days beginning with the day after the parking period ended (Schedule 4, paragraph 9). A notice sent by post is treated as delivered on the second working day after posting. If the notice arrived outside that window, keeper liability does not arise and the operator may only pursue a driver it cannot identify."
+    },
+    {
+      "id": "pofa-window",
+      "tag": "POFA 2012, Sch 4 para 8",
+      "title": "The postal notice falls outside the statutory window",
+      "when": "windscreen ticket issued",
+      "body": "Where a notice was affixed to the vehicle, the operator must give the Notice to Keeper no earlier than 28 days and no later than 56 days after that notice (Schedule 4, paragraph 8). A notice given on day 20 is as defective as one given on day 60. If the notice falls outside the window, keeper liability does not arise."
+    },
+    {
+      "id": "pofa-content",
+      "tag": "POFA 2012, Sch 4 para 9(2)",
+      "title": "The notice may not contain the prescribed information",
+      "when": "always",
+      "body": "A Notice to Keeper must contain the prescribed statements, including the period of parking, the amount outstanding, an invitation to pay or identify the driver, and the warning about keeper liability after 28 days. A notice that paraphrases, omits or misstates that wording does not comply, and non-compliance extinguishes keeper liability. Please confirm the exact template used."
+    },
+    {
+      "id": "signage",
+      "tag": "BPA / IPC Code of Practice",
+      "title": "Signage may not have formed a clear contract",
+      "when": "always",
+      "body": "Entrance and tariff signage must be prominent, legible and consistent. Where key terms — the maximum stay, the charge, and the fact that ANPR is in use — were faded, poorly lit, mounted too high, or absent at the point of entry, no contract incorporating those terms was formed. I require the signage plan and contemporaneous photographs of every sign relied upon."
+    },
+    {
+      "id": "grace",
+      "tag": "BPA / IPC Code of Practice",
+      "title": "The consideration and grace periods do not appear to have been applied",
+      "when": "time-limited site",
+      "body": "Industry codes require time to read the terms and find a space before the parking period begins, and a further minimum period — currently ten minutes — after the paid or permitted period ends before any charge is issued. I require the full entry and exit timestamps to the second so that the parking period can be tested against those allowances."
+    },
+    {
+      "id": "anpr",
+      "tag": "POFA 2012 — 'period of parking'",
+      "title": "Camera timestamps do not by themselves prove a parking event",
+      "when": "ANPR evidence",
+      "body": "ANPR records a vehicle crossing a detection line; it does not record that the vehicle was parked for the whole interval. Misreads, clock drift between cameras, a brief drop-off, or two separate visits on the same day all produce an inflated recorded duration. I require full-colour entry and exit stills and confirmation that both cameras share a synchronised clock."
+    },
+    {
+      "id": "authority",
+      "tag": "Landowner authority",
+      "title": "No evidence the operator was authorised to issue this charge",
+      "when": "always",
+      "body": "Only the landowner, or a contractor acting under written authority, can offer parking terms or pursue a charge. I require a redacted copy of the contract demonstrating the site, the dates covered, and the right to issue parking charge notices in the operator's own name for the date in question."
+    },
+    {
+      "id": "beavis",
+      "tag": "ParkingEye Ltd v Beavis [2015] UKSC 67",
+      "title": "The charge is not a genuine attempt to manage the site",
+      "when": "always",
+      "body": "A charge of this size is only enforceable where it serves a legitimate interest and is proportionate. As the Supreme Court set out in Beavis, the analysis depends on the specific site: its tariff structure, its need for turnover, and whether the charge is transparent in the signage. I invite you to explain how a charge of this amount is proportionate to the site's management needs on the day in question."
+    }
+  ],
+  "escalation": [
+    {
+      "tag": "Procedural",
+      "title": "The operator did not engage with the points actually raised",
+      "body": "My representations raised specific, checkable matters — statutory timing, the evidence pack, and the operator's authority to issue the charge. Where a rejection repeats the original demand without addressing those points, it fails to demonstrate that the charge has been reconsidered as the code of practice requires."
+    },
+    {
+      "tag": "Evidence",
+      "title": "The evidence relied upon has not been produced to me",
+      "body": "I have requested the ANPR stills together with synchronised timestamps, the signage schedule and photographs, and the landowner contract. To the extent that evidence was not supplied, or is supplied for the first time at adjudication, I invite the assessor to note that I have had no opportunity to answer it."
+    },
+    {
+      "tag": "POFA 2012",
+      "title": "Keeper liability has not been made out",
+      "body": "The operator has not demonstrated compliance with the statutory conditions in Schedule 4 of the Protection of Freedoms Act 2012, in particular as to the timing and prescribed content of the Notice to Keeper. No obligation to identify the driver arises, and I do not do so."
+    },
+    {
+      "tag": "Proportionality",
+      "title": "The charge is not proportionate on the facts",
+      "body": "Even if a contract is found, the charge must serve a legitimate interest in managing the site and be proportionate. On a site where the signage and tariff structure did not make the term plain, and where the recorded period is not shown to be a genuine parking event, that threshold is not met."
+    }
+  ]
+}
