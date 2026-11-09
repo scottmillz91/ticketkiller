@@ -660,6 +660,10 @@ h1, h2, h3 { text-wrap: balance; }
   text-align: center;
   font-size: 14px;
   animation: toast-in .22s ease;
+  /* A toast sits over the bottom of the page, which is exactly where the
+     pay button is on the details form. Without this it swallowed the taps
+     meant for the button underneath, so the button looked dead. */
+  pointer-events: none;
 }
 @keyframes toast-in {
   from { opacity: 0; transform: translate(-50%, 10px); }
@@ -667,6 +671,7 @@ h1, h2, h3 { text-wrap: balance; }
 }
 /* The undo affordance inside a toast. */
 .toast-action {
+  pointer-events: auto;   /* the Undo button must stay tappable */
   margin-left: 10px;
   background: rgba(255,255,255,0.18);
   border: 0;
