@@ -271,6 +271,24 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(paid ? shown === btns.length : shown === 0,
       `${shown} of ${btns.length} pay buttons visible while selling=${paid ? "on" : "off"}`);
   });
+  check("the money path is never a disabled button", () => {
+    /* Regression: syncPaywall() relabelled the generate button "Pay £4.99 to
+       generate another" and then set disabled = true. A disabled button fires
+       no click at all, so the only payment call-to-action in the flow did
+       nothing — no toast, no scroll, no navigation. It looked broken exactly
+       where money is expected. */
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    const fn = src.slice(src.indexOf("function syncPaywall"), src.indexOf("function renderOperatorIntel"));
+    assert(!/btn\.disabled\s*=\s*locked/.test(fn), "syncPaywall disables the generate button when locked");
+    assert(/btn\.disabled\s*=\s*false/.test(fn), "the generate button is not explicitly left enabled");
+    assert(/dataset\.intent/.test(fn), "the button does not record what a tap should do");
+  });
+  check("a locked account can still reach checkout from the form", () => {
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    const fn = src.slice(src.indexOf("function bindStripe"), src.indexOf("async function catchStripeReturn"));
+    assert(/generateBtn/.test(fn), "the generate button is not wired to checkout");
+    assert(/stopPropagation/.test(fn), "one tap could both pay and submit the form");
+  });
   check("no TODO placeholder is visible in the page", () => {
     assert(!/TODO/.test(document.documentElement.textContent), "a TODO stub is rendered");
   });

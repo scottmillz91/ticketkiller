@@ -335,6 +335,21 @@ h1, h2, h3 { text-wrap: balance; }
   box-shadow: 0 10px 24px rgba(27,107,255,0.35);
 }
 .btn-primary:hover { background: var(--blue-2); }
+/* Momentary highlight on the pay button when a locked attempt sends the
+   visitor to it. A fading toast was easy to miss on a phone. */
+.btn-primary[data-nudge] {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+  animation: pay-nudge 1.6s ease-out;
+}
+@keyframes pay-nudge {
+  0%   { transform: scale(1); }
+  12%  { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+/* A disabled button must never look tappable, and must never be the only
+   route to paying. Both were bugs here. */
+.btn[disabled] { opacity: 0.55; cursor: not-allowed; }
 .btn-secondary {
   background: #fff;
   color: var(--ink);

@@ -468,11 +468,19 @@
     const btn = $("generateBtn");
     if (!pane || !btn) return;
     const locked = !!currentUser() && !canGenerate();
+    const price = `${CFG.pricing ? CFG.pricing.symbol : "£"}${CFG.pricing ? CFG.pricing.extraLetterLabel : "4.99"}`;
     pane.hidden = !locked || !READY.canSell;
-    btn.disabled = locked;
+
+    /* Regression: this used to relabel the button "Pay £4.99 to generate
+       another" and then disable it. A disabled button fires no click at all,
+       so tapping the only payment call-to-action in the flow did precisely
+       nothing — no toast, no scroll, no navigation. The button is the money
+       path; it must never be inert. */
+    btn.disabled = false;
     btn.textContent = locked
-      ? `Pay ${CFG.pricing ? CFG.pricing.symbol : "£"}${CFG.pricing ? CFG.pricing.extraLetterLabel : "4.99"} to generate another`
+      ? `Buy another letter for ${price}`
       : "Generate appeal letter";
+    btn.dataset.intent = locked ? "pay" : "generate";
   }
 
   /* ---------------------------------------------------------
@@ -1424,6 +1432,21 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
         startCheckout();
       });
     });
+
+    /* The generate button doubles as the call to action when the account is
+       locked. It is type=submit inside the ticket form, so a click would
+       otherwise both start checkout and submit the form. One gesture must
+       do one thing. */
+    const gen = $("generateBtn");
+    if (gen) {
+      gen.addEventListener("click", (e) => {
+        if (gen.dataset.intent !== "pay") return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (!READY.canSell) { toast("Payments are switched off"); return; }
+        startCheckout();
+      });
+    }
   }
 
   /* Returning from Stripe. `?stripe=success&session_id=cs_…` — but nothing
@@ -1604,9 +1627,18 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
         return;
       }
       if (!canGenerate()) {
+        /* Locked. The pane is already open at this point, so scrolling to it
+           does nothing on a phone and the toast fades before it is read.
+           Scroll to the actual pay button and say the price. */
         syncPaywall();
-        if ($("paywallPane")) $("paywallPane").scrollIntoView({ behavior: "smooth", block: "center" });
-        toast("Buy an extra letter to generate another one");
+        const payBtn = document.querySelector("#paywallPane [data-stripe-pay]");
+        if (payBtn) {
+          try { payBtn.scrollIntoView({ behavior: "smooth", block: "center" }); } catch { /* jsdom */ }
+          payBtn.setAttribute("data-nudge", "1");
+          setTimeout(() => payBtn.removeAttribute("data-nudge"), 1600);
+          payBtn.focus({ preventScroll: true });
+        }
+        toast("Buy another letter below to generate this one");
         return;
       }
       const required = ["fOperator", "fRef", "fVrm", "fName", "fDate"];
