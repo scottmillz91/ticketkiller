@@ -13,18 +13,30 @@ window.TK_CONFIG = {
      See "Before you take real money" in README.md.
      --------------------------------------------------------------- */
   business: {
+    /* The product brand shown across the site. "SMAI" is the business you
+       trade under; see businessName below. */
     tradingName: "TicketKiller UK",
+    // Optional: the business name you trade under, if it differs from the
+    // product brand. Shown alongside your legal name on the terms page.
+    businessName: "SMAI",
     // Sole trader: your full name. Limited company: the company name.
     // REQUIRED before any money can be taken. Leaving this blank keeps
     // selling switched off, whatever the payments block below says.
-    legalName: "TODO: your full name or company name",
-    // A real postal address, or a service address if you are a sole trader.
-    address: "TODO: your postal or service address",
+    legalName: "Scott Mills",
+    // Sole trader: a postal address where you can be reached. This is
+    // published on the terms, privacy and contact pages, so it is public.
+    address: "20 Heol Cledwyn, Birchgrove, Swansea, SA7 9LE",
     country: "United Kingdom",
     // Published on the legal pages and used by the contact form.
-    email: "TODO: you@yourdomain.co.uk",
+    email: "scottmills1791@gmail.com",
     // Optional: company number if you register a limited company.
-    companyNumber: "",
+    // Limited company only. Both are published on the terms and contact
+    // pages, which the law requires — a company must state where it is
+    // registered and its number.
+    companyNumber: "",                   // e.g. "12345678"
+    jurisdiction: "England and Wales",   // or "Scotland" / "Northern Ireland"
+
+    // Only fill this in if you are genuinely VAT-registered.
     vatNumber: ""
   },
 
@@ -57,7 +69,7 @@ window.TK_CONFIG = {
     // e.g. "https://ticketkiller-payments.netlify.app". Empty means
     // "same origin", which is only correct when the site itself is on
     // Netlify rather than GitHub Pages.
-    apiBase: "",
+    apiBase: "https://rococo-malasada-aa1a7f.netlify.app",
     // Kept in sync with PRICE_PENCE in netlify/functions/checkout.js.
     // The server is authoritative; this is only for display.
     pricePence: 499
@@ -65,7 +77,9 @@ window.TK_CONFIG = {
 
   /* ---------- Contact ---------- */
   contact: {
-    email: "TODO: you@yourdomain.co.uk",
+    /* Read in preference to business.email, and this is the address the
+       public sees. Must be filled, or the site keeps selling switched off. */
+    email: "scottmills1791@gmail.com",
     responseTime: "within 2 working days"
   },
 
