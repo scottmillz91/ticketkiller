@@ -305,6 +305,12 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(/window\.addEventListener\("scroll", pinFormProgress/.test(src), "nothing re-decides on scroll");
     assert(/addEventListener\("scroll", pinFormProgress, \{ passive: true, capture: true \}/.test(src),
       "the scroll listener is not capturing, so it misses any nested scroll container");
+    /* It must be bound inside bindDetails. A listener wired into the contact
+       form instead still parses, still tests green by membership, and does
+       nothing at all on the page it was written for. */
+    const detailsFn = src.slice(src.indexOf("function bindDetails()"), src.indexOf("function bindContact()") > src.indexOf("function bindDetails()") ? src.indexOf("function bindContact()") : src.length);
+    assert(detailsFn.includes('addEventListener("scroll", pinFormProgress'),
+      "the scroll listener is not bound by bindDetails, so the bar never re-decides on the form");
     assert(/page\.classList\.contains\("active"\)/.test(src), "the pin ignores whether its page is on screen");
     assert(/setProgressPinned\(false\)/.test(src), "there is no way to release it");
     const nav = src.slice(src.indexOf("function showPage"), src.indexOf("analytics.track(\"page_view\""));

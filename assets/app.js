@@ -1573,14 +1573,6 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
   function bindContact() {
     const form = $("contactForm");
     if (!form) return;
-    /* Capture phase, deliberately: scroll events do not bubble, so a listener
-       on window alone hears only the document scrolling. If anything between
-       the bar and the root becomes a scroll container — which is one of the
-       reasons sticky failed here — the window listener goes deaf and the bar
-       silently stays put. Capturing catches every scroller in the page. */
-    window.addEventListener("scroll", pinFormProgress, { passive: true, capture: true });
-    window.addEventListener("resize", () => { setProgressPinned(false); pinFormProgress(); }, { passive: true });
-
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const to = (CFG.contact && CFG.contact.email) || (CFG.business && CFG.business.email) || "";
@@ -1777,6 +1769,14 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
   function bindDetails() {
     const form = $("ticketForm");
     if (!form) return;
+    /* Capture phase, deliberately: scroll events do not bubble, so a listener
+       on window alone hears only the document scrolling. If anything between
+       the bar and the root becomes a scroll container — which is one of the
+       reasons sticky failed here — the window listener goes deaf and the bar
+       silently stays put. Capturing catches every scroller in the page. */
+    window.addEventListener("scroll", pinFormProgress, { passive: true, capture: true });
+    window.addEventListener("resize", () => { setProgressPinned(false); pinFormProgress(); }, { passive: true });
+
 
     FIELD_IDS.forEach((id) => {
       const el = $(id);
