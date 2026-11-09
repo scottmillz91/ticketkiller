@@ -1573,7 +1573,12 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
   function bindContact() {
     const form = $("contactForm");
     if (!form) return;
-    window.addEventListener("scroll", pinFormProgress, { passive: true });
+    /* Capture phase, deliberately: scroll events do not bubble, so a listener
+       on window alone hears only the document scrolling. If anything between
+       the bar and the root becomes a scroll container — which is one of the
+       reasons sticky failed here — the window listener goes deaf and the bar
+       silently stays put. Capturing catches every scroller in the page. */
+    window.addEventListener("scroll", pinFormProgress, { passive: true, capture: true });
     window.addEventListener("resize", () => { setProgressPinned(false); pinFormProgress(); }, { passive: true });
 
     form.addEventListener("submit", (e) => {

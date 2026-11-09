@@ -303,6 +303,8 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
 
     const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
     assert(/window\.addEventListener\("scroll", pinFormProgress/.test(src), "nothing re-decides on scroll");
+    assert(/addEventListener\("scroll", pinFormProgress, \{ passive: true, capture: true \}/.test(src),
+      "the scroll listener is not capturing, so it misses any nested scroll container");
     assert(/page\.classList\.contains\("active"\)/.test(src), "the pin ignores whether its page is on screen");
     assert(/setProgressPinned\(false\)/.test(src), "there is no way to release it");
     const nav = src.slice(src.indexOf("function showPage"), src.indexOf("analytics.track(\"page_view\""));
