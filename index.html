@@ -270,6 +270,9 @@
                aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="formProgressBar"><i></i></div>
           <p class="form-progress-hint" id="formProgressHint">Start with the operator and the notice number — both are on the front of the PCN.</p>
         </div>
+        <!-- Reserves the space the bar occupied once it floats, so the form
+             does not jump under the visitor's thumb mid-scroll. -->
+        <div class="form-progress-spacer" id="formProgressSpacer" aria-hidden="true"></div>
 
         <div class="deadline-card" id="deadlineCard" hidden>
           <h2>Deadline tracker</h2>

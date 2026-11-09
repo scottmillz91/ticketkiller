@@ -206,8 +206,9 @@ body.nav-open::before {
 .page.active { display: block; animation: fade .35s ease; }
 /* Opacity only. This animation used to translate the page on the Y axis, and
    a transformed element becomes a containing block — which silently breaks
-   position:sticky for anything inside it. The form progress bar depends on
-   that, and the movement was 8px, so it costs nothing to drop. */
+   position:sticky for anything inside it, and a transform here would also
+   interfere with the fixed-position work below. The movement was 8px, so it
+   costs nothing to keep it gone. */
 @keyframes fade {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -773,16 +774,17 @@ h1, h2, h3 { text-wrap: balance; }
 /* --- Details form progress ---
    Answers "how much more of this is there?" before the visitor starts
    rather than after they abandon. */
-/* The form is taller than a phone screen, so the progress line has to travel
-   with the visitor. Without this it scrolled away exactly when the later
-   fields — the ones people give up on — came into view.
-   Sticks below the fixed topbar (64px + the notch inset), z-index 30 so it
-   slides under the topbar rather than over it, and stops at the end of the
-   form because sticky is bounded by its containing block. */
+/* The form is taller than a phone screen, so the count has to travel with
+   the visitor. This was sticky positioning, which is fragile: it silently
+   stops working for several reasons that are invisible in source — a
+   transformed ancestor, an ancestor that scrolls, a parent only as tall as
+   the element inside it. All of those were checked and cleared, and it still
+   did not hold on a real phone.
+   So the position is explicit instead: script adds .is-floating when the
+   bar's resting place passes under the topbar, and removes it when the
+   visitor scrolls back up. A spacer holds the resting place so the form does
+   not jump. */
 .form-progress {
-  position: sticky;
-  top: calc(64px + var(--safe-t) + 6px);
-  z-index: 30;
   margin: 0 0 20px;
   padding: 12px 14px;
   background: #fff;
@@ -790,6 +792,17 @@ h1, h2, h3 { text-wrap: balance; }
   border-radius: 14px;
   box-shadow: 0 6px 18px rgba(7, 16, 24, 0.10);
 }
+.form-progress.is-floating {
+  position: fixed;
+  /* Fallback only — script writes the measured topbar height inline. */
+  top: calc(64px + var(--safe-t) + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(720px, calc(100% - 32px));
+  margin: 0;
+  z-index: 35;
+}
+.form-progress-spacer { margin: 0; }
 .form-progress-row {
   display: flex;
   align-items: baseline;

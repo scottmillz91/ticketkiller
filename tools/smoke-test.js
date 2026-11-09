@@ -271,33 +271,42 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(paid ? shown === btns.length : shown === 0,
       `${shown} of ${btns.length} pay buttons visible while selling=${paid ? "on" : "off"}`);
   });
-  check("the progress line stays put while the form scrolls", () => {
-    /* The form is taller than a phone screen. The count scrolled away exactly
-       when the later fields came into view, which is where people give up.
-       Two things make sticky work and one silently breaks it:
-         - the element must sit outside the padded card, or it un-sticks at
-           the card's padding edge
-         - no ancestor may be transformed; transform creates a containing
-           block and disables sticky in some browsers. The page-enter
-           animation used to translateY, which did exactly that.
-       jsdom has no layout engine, so this asserts the invariants rather than
-       claiming to have watched it stick. */
+  check("the progress line is pinned by script, not by sticky", () => {
+    /* This was `position: sticky` twice and failed on a real phone both times.
+       Sticky has several silent failure modes — a transformed ancestor, an
+       ancestor that scrolls, a parent only as tall as its child — and none of
+       them say anything when they happen. It is now fixed explicitly by
+       script, so the only way it can fail is if this logic is wrong.
+       jsdom has no layout engine, so the geometry is stubbed below and the
+       decision is tested directly rather than claimed to be observed. */
     const css = cssSource();
-    const rule = css.slice(css.indexOf(".form-progress {"), css.indexOf("}", css.indexOf(".form-progress {")));
-    assert(/position:\s*sticky/.test(rule), "the progress line is not sticky");
-    assert(/top:\s*calc\(64px \+ var\(--safe-t\)/.test(rule), "it does not clear the fixed topbar");
-    assert(/z-index:\s*30/.test(rule), "it would cover the topbar (which is z-index 40)");
-    assert(/background:\s*(#fff|var\(--white\))i*/.test(rule) || /background:\s*#fff/.test(rule),
-      "it is transparent, so content will show through as it scrolls under");
+    const base = css.slice(css.indexOf(".form-progress {"), css.indexOf("}", css.indexOf(".form-progress {")));
+    /* The topbar is deliberately sticky. This bar must not be: that is the
+       thing that failed twice. */
+    const progressRules = css.slice(css.indexOf(".form-progress {"));
+    assert(!/position:\s*sticky/.test(progressRules.slice(0, progressRules.indexOf(".form-progress-row"))),
+      "the progress bar is still sticky, so it can still fail silently");
+    const floating = css.slice(css.indexOf(".form-progress.is-floating"), css.indexOf("}", css.indexOf(".form-progress.is-floating")));
+    assert(/position:\s*fixed/.test(floating), "the pinned state is not fixed");
+    assert(/z-index:\s*3[0-9]/.test(floating), "the bar would slide under the topbar");
+    assert(/background:\s*(#fff|var\(--white\))/.test(base), "it is transparent, so fields show through it");
     const fade = css.slice(css.indexOf("@keyframes fade"), css.indexOf("}", css.indexOf("@keyframes fade")) + 1);
-    assert(!/transform/.test(fade), "the page animation transforms its page, which disables sticky inside it");
-    /* Placement matters as much as the CSS: inside the form it would un-stick
-       at the card's padding edge, which is before the button. */
+    assert(!/transform/.test(fade), "the page animation transforms its page again; keep the page untransformed");
+
+    /* The spacer is what stops the page jumping when the bar detaches. */
     const formStart = html.indexOf('<form id="ticketForm"');
     const formEnd = html.indexOf("</form>", formStart);
     const progressAt = html.indexOf('id="formProgress"');
     assert(progressAt > 0 && !(progressAt > formStart && progressAt < formEnd),
-      "the progress line is inside the form, so it will un-stick early");
+      "the progress line is inside the form, so it will detach too late");
+    assert(html.includes('id="formProgressSpacer"'), "no spacer, so the form will jump when the bar floats");
+
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    assert(/window\.addEventListener\("scroll", pinFormProgress/.test(src), "nothing re-decides on scroll");
+    assert(/page\.classList\.contains\("active"\)/.test(src), "the pin ignores whether its page is on screen");
+    assert(/setProgressPinned\(false\)/.test(src), "there is no way to release it");
+    const nav = src.slice(src.indexOf("function showPage"), src.indexOf("analytics.track(\"page_view\""));
+    assert(/else \{ setProgressPinned\(false\); \}/.test(nav), "the bar would follow the visitor to other pages");
   });
   check("details form reports how much is left to fill", () => {
     /* The form is a dozen fields copied off a paper ticket; the commonest
