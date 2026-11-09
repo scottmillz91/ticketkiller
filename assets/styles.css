@@ -1059,13 +1059,68 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
 /* --- Sample letter preview on landing --- */
 .sample-wrap { display: grid; grid-template-columns: 1fr; gap: 18px; }
 @media (min-width: 900px) { .sample-wrap { grid-template-columns: 1.05fr .95fr; align-items: start; } }
+/* The public sample: shown smaller, watermarked, and not copyable.
+   This deters casual copying. It is NOT a security control — the text
+   is still in the DOM and the letter template ships in app.js. */
+.sample-outer { position: relative; }
+
 .sample-letter {
-  background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px;
-  font-family: "Times New Roman", Georgia, serif; font-size: 12.5px; line-height: 1.55;
-  white-space: pre-wrap; max-height: 380px; overflow: auto; box-shadow: var(--shadow);
-  color: #16232f;
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  height: 320px;
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  cursor: default;
 }
-.sample-letter .ph { background: #eef4ff; border-radius: 3px; padding: 0 2px; color: var(--blue-2); }
+.sample-body {
+  font-family: "Times New Roman", Georgia, serif;
+  font-size: 12.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  color: #16232f;
+  padding: 18px 20px 24px;
+  transform: scale(0.88);
+  transform-origin: top left;
+  width: 113.6%;           /* compensate for the scale so lines still fill the card */
+  pointer-events: none;
+  filter: blur(0.15px);
+}
+/* Tiled watermark sits above the text and must not intercept mouse events,
+   or right-click would land on the watermark rather than the letter. */
+.sample-wm {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 10px;
+  font-family: var(--font);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 2.1;
+  letter-spacing: 0.16em;
+  color: rgba(27,107,255,0.11);
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  transform: rotate(-18deg) scale(1.35);
+  transform-origin: center;
+}
+.sample-letter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0) 72%, #fff 100%);
+  pointer-events: none;
+}
+.sample-note { color: var(--muted); font-size: 12px; }
 
 /* --- Toast anouncement for reminders --- */
 .cd-pill {
