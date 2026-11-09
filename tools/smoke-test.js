@@ -330,6 +330,31 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     ids.forEach((id) => assert(submitCheck.includes(`"${id}"`), `${id} is counted but not validated on submit`));
     assert(/aria-valuenow/.test(src), "the progress bar is not exposed to assistive tech");
   });
+  check("no page repeats the same call to action next to itself", () => {
+    /* The home page carried "Start my free appeal" twice within one thumb
+       reach: once closing the sample-letter block, once in the dark band
+       straight below it. Two identical buttons in one glance read as a bug.
+       The nav and the footer sit outside every page section, so anything
+       counted here is in-page content. */
+    const pages = html.split('<section class="page').slice(1);
+    let checked = 0;
+    pages.forEach((page) => {
+      const name = (/data-page="([^"]+)"/.exec(page) || [])[1];
+      if (!name) return;
+      checked++;
+      const seen = new Set();
+      const re = /<button[^>]*data-nav="([^"]+)"[^>]*>([\s\S]*?)<\/button>/g;
+      let m;
+      while ((m = re.exec(page))) {
+        const label = m[2].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+        if (!label) continue;
+        const key = `${label} -> ${m[1]}`;
+        assert(!seen.has(key), `the ${name} page shows "${label}" twice, both going to ${m[1]}`);
+        seen.add(key);
+      }
+    });
+    assert(checked >= 8, `only ${checked} pages inspected`);
+  });
   check("icons and manifest are real files, not a data URI", () => {
     /* A data-URI favicon cannot be cached, is dropped by older Safari, and is
        ignored by home-screen implementations. */
