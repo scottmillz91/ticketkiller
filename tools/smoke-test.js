@@ -82,6 +82,10 @@ const setInput = (el, v) => {
   el.dispatchEvent(new window.Event("input", { bubbles: true }));
   el.dispatchEvent(new window.Event("change", { bubbles: true }));
 };
+/* jsdom truncates this stylesheet's CSSOM (it cannot parse the range syntax
+   in @font-face), so rules that cannot be checked through the DOM are read
+   from the file itself. */
+const cssSource = () => fs.readFileSync(path.join(__dirname, "..", "assets", "styles.css"), "utf8");
 const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest}"]`) || document.querySelector(`[data-nav="${dest}"]`));
 
 (async () => {
@@ -100,15 +104,32 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(segs.length === 3, `expected 3 segments, got ${segs.length}`);
     assert(!eye.textContent.includes("·"), "separator still hardcoded as text");
   });
+  check("hero proof keeps the space before the bold word", () => {
+    /* regression: the <li> was inline-flex, which lays its children out as
+       anonymous flex items and drops the trailing space in "First letter ",
+       rendering "First letterfree". */
+    const li = [...document.querySelectorAll(".hero-proof li")].find((x) => x.querySelector("b"));
+    assert(li, "no bold 'free' item");
+    const before = li.firstChild && li.firstChild.textContent;
+    assert(/\s$/.test(before || ""), `text node lost its trailing space: ${JSON.stringify(before)}`);
+    const display = window.getComputedStyle(li).display;
+    assert(display !== "inline-flex" && display !== "flex", `li is ${display}, which drops the space`);
+  });
+  check("hero proof separator belongs to the item it follows", () => {
+    /* A ::before on the wrapped item paints at the start of the new line,
+       which stranded a dot there. It must attach to the preceding item, so
+       the selector has to be "li + li". */
+    const css = cssSource();
+    assert(/\.hero-proof li \+ li::before/.test(css), "separator is not on the following sibling");
+    assert(!/\.hero-proof li::before/.test(css), "separator defined on the item itself");
+  });
   check("hero headline keeps its two phrases intact", () => {
     const h1 = document.querySelector(".hero h1").textContent.trim();
     assert(h1 === "Got a Parking Ticket? Fight It in 2 Minutes.", `headline changed: ${h1}`);
   });
   check("eyebrow tracking stays legible for small caps", () => {
     /* 0.12em at 12px was wide; anything above 0.11em is the old value. */
-    const css = [...document.styleSheets].flatMap((sh) => {
-      try { return [...sh.cssRules]; } catch { return []; }
-    }).map((r) => r.cssText).join("\n");
+    const css = cssSource();
     const m = css.match(/\.eyebrow\s*\{([^}]*)\}/);
     assert(m, "no .eyebrow rule");
     const tr = /letter-spacing:\s*([\d.]+)em/.exec(m[1]);
