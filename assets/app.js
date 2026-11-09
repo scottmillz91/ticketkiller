@@ -15,6 +15,7 @@
   const USERS_KEY = "tk_users_v1";
   const SESSION_KEY = "tk_session";
   const PENDING_KEY = "tk_pending_pay";
+  const HELD_KEY = "tk_held_credits";
   const STATE_KEY = "tk_state_v1";
 
   const state = {
@@ -70,7 +71,17 @@
      --------------------------------------------------------- */
   const READY = (() => {
     const b = CFG.business || {};
-    const filled = (v) => typeof v === "string" && v.trim() !== "" && !/^[\[<]/.test(v.trim());
+    /* A value only counts as real if it is present, is not a bracketed
+       placeholder, and is not one of the TODO stubs shipped in config.js.
+       Without the TODO check the stub strings would pass as a real identity
+       and unlock selling on an unconfigured deployment. */
+    const filled = (v) => {
+      const t = typeof v === "string" ? v.trim() : "";
+      if (!t || /^[\[<]/.test(t)) return false;
+      if (/^TODO\b/i.test(t)) return false;
+      if (/^your |^you@|example\.(com|org|net)$/i.test(t)) return false;
+      return true;
+    };
     const contactEmail = (CFG.contact && CFG.contact.email) || b.email || "";
     return {
       hasLegalName: filled(b.legalName),
@@ -80,10 +91,16 @@
       get hasOperator() {
         return this.hasLegalName && this.hasAddress && this.hasEmail;
       },
-      // Money may only move when we can identify the seller and verify the payment.
+      // Money may only move when we can identify the seller AND the payment
+      // state can be confirmed by the server. client-only payment is a bug,
+      // not a shortcut: the return URL proves nothing.
       get canSell() {
-        const pay = CFG.paypal || {};
-        return pay.enabled !== false && this.hasOperator && pay.verifyReturns === true;
+        const pay = CFG.payments || {};
+        return pay.provider === "stripe" && pay.enabled === true && this.hasOperator;
+      },
+      get payEndpoint() {
+        const base = String((CFG.payments && CFG.payments.apiBase) || "").replace(/\/$/, "");
+        return base ? `${base}/api` : "/api";
       }
     };
   })();
@@ -400,12 +417,45 @@
     else u.credits = Math.max(0, (u.credits || 0) - 1);
     saveUser(u);
   }
+  /* Adds one paid letter to an account. Returns true only when a credit was
+     actually stored, so the caller never reports success on a no-op.
+
+     Two cases matter. If the buyer logged out before returning from Stripe,
+     the payment is held and applied the moment that email signs in, rather
+     than being lost. If the email matches nothing at all, the purchase is
+     still recorded so it can be honoured by hand. */
   function grantPaidCredit(email) {
     const map = users();
-    if (!map[email]) return;
+    if (!email) return false;
+    if (!map[email]) {
+      /* Hold it against the address until that account exists. */
+      let held = {};
+      try { held = JSON.parse(store.get(HELD_KEY) || "{}"); } catch { held = {}; }
+      held[email] = (held[email] || 0) + 1;
+      store.set(HELD_KEY, JSON.stringify(held));
+      store.del(PENDING_KEY);
+      return false;
+    }
     map[email].credits = (map[email].credits || 0) + 1;
     saveUsers(map);
     store.del(PENDING_KEY);
+    return true;
+  }
+
+  /* Called after a login or sign-up, so a held payment is not stranded. */
+  function applyHeldCredits(email) {
+    if (!email) return 0;
+    let held = {};
+    try { held = JSON.parse(store.get(HELD_KEY) || "{}"); } catch { return 0; }
+    const n = held[email] || 0;
+    if (!n) return 0;
+    const map = users();
+    if (!map[email]) return 0;
+    map[email].credits = (map[email].credits || 0) + n;
+    saveUsers(map);
+    delete held[email];
+    store.set(HELD_KEY, JSON.stringify(held));
+    return n;
   }
   function syncPaywall() {
     const pane = $("paywallPane");
@@ -1258,7 +1308,13 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
       store.set(SESSION_KEY, email);
       syncNav();
       loadDraft();
-      toast(`Welcome back, ${u.name || ""}`.trim());
+      /* A payment made while logged out is held against the email and
+         released here, so it is not lost by logging out mid-checkout. */
+      const released = applyHeldCredits(email);
+      syncPaywall();
+      toast(released
+        ? `Welcome back, ${u.name || ""}`.trim() + ` — ${released} paid letter${released === 1 ? "" : "s"} unlocked.`
+        : `Welcome back, ${u.name || ""}`.trim());
       analytics.track("login");
       showPage(state.afterLogin || "details");
     });
@@ -1276,62 +1332,153 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
       store.set(SESSION_KEY, email);
       if ($("fName") && !$("fName").value) $("fName").value = name;
       syncNav();
-      toast("Account created");
+      const released = applyHeldCredits(email);
+      syncPaywall();
+      toast(released
+        ? `Account created — ${released} paid letter${released === 1 ? "" : "s"} unlocked.`
+        : "Account created");
       analytics.track("signup");
       showPage(state.afterLogin || "details");
     });
   }
 
   /* ---------------------------------------------------------
-     PayPal
+     Payments — Stripe Checkout
+     ---------------------------------------------------------
+     The browser never sees a secret key and never decides that a payment
+     happened. It asks the server for a Checkout URL, and asks the server
+     again whether the session it returned with was actually paid.
      --------------------------------------------------------- */
+  /* The current page without its query or hash, used to strip the return
+     parameters after a checkout redirect. */
   function pageUrl() { return location.href.split("#")[0].split("?")[0]; }
 
-  function bindPaypal() {
-    $$(".paypal-form").forEach((form) => {
-      form.addEventListener("submit", (e) => {
-        const pay = CFG.paypal || {};
-        if (pay.enabled === false) { e.preventDefault(); toast("Payments are off"); return; }
-        const u = currentUser();
-        if (!u) {
-          e.preventDefault();
-          state.afterLogin = "details";
-          showPage("auth");
-          toast("Log in first so we can unlock this account after payment");
-          return;
-        }
-        const nonce = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
-        store.set(PENDING_KEY, JSON.stringify({ nonce, email: u.email, started: Date.now() }));
-        form.querySelector('[name="return"]').value = `${pageUrl()}?paypal=success`;
-        form.querySelector('[name="cancel_return"]').value = `${pageUrl()}?paypal=cancel`;
-        form.querySelector('[name="custom"]').value = `${u.email}|${nonce}`;
-        analytics.track("pay_clicked", { amount: CFG.pricing && CFG.pricing.extraLetterLabel });
+  function payUrl(path) { return `${READY.payEndpoint}/${path}`; }
+
+  /* A purchase gets one local credit. The Stripe session id is remembered
+     so replaying the same success URL cannot mint a second letter. */
+  const SPENT_KEY = "tk_spent_sessions";
+
+  function spentSessions() {
+    try { return JSON.parse(store.get(SPENT_KEY) || "[]"); } catch { return []; }
+  }
+  function markSessionSpent(id) {
+    const list = spentSessions();
+    if (!list.includes(id)) {
+      list.push(id);
+      /* Only the recent ones matter; keep the list from growing forever. */
+      store.set(SPENT_KEY, JSON.stringify(list.slice(-100)));
+    }
+  }
+
+  async function postJson(url, body) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    let data = {};
+    try { data = await res.json(); } catch { /* non-JSON means something upstream broke */ }
+    return { ok: res.ok, status: res.status, data };
+  }
+
+  async function startCheckout() {
+    const u = currentUser();
+    if (!u) {
+      state.afterLogin = "details";
+      showPage("auth");
+      toast("Log in first so we can unlock this account after payment");
+      return;
+    }
+    const buttons = $$("[data-stripe-pay]");
+    buttons.forEach((b) => { b.disabled = true; });
+    const restore = () => buttons.forEach((b) => { b.disabled = false; });
+    toast("Opening secure checkout…");
+    try {
+      const { ok, data } = await postJson(payUrl("checkout"), { email: u.email });
+      if (ok && data.url) {
+        analytics.track("pay_clicked", { amount: (CFG.payments && CFG.payments.pricePence) || 499 });
+        location.href = data.url;
+        return;
+      }
+      toast(data.error || "Could not start checkout. Please try again.");
+    } catch {
+      /* A static host with no functions deployed lands here. Say so
+         plainly rather than pretending the button did something. */
+      toast("Payments are not reachable from this deployment yet.");
+    }
+    restore();
+  }
+
+  function bindStripe() {
+    $$("[data-stripe-pay]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (!READY.canSell) { toast("Payments are switched off"); return; }
+        startCheckout();
       });
     });
   }
 
-  function catchPaypalReturn() {
+  /* Returning from Stripe. `?stripe=success&session_id=cs_…` — but nothing
+     in that URL is trusted. The id is handed to the server, which asks
+     Stripe directly. */
+  async function catchStripeReturn() {
     const params = new URLSearchParams(location.search);
-    const status = params.get("paypal");
+    const status = params.get("stripe");
     if (!status) return;
-    if (status === "success") {
-      try {
-        const pending = JSON.parse(store.get(PENDING_KEY) || "null");
-        if (pending && pending.email) {
-          grantPaidCredit(pending.email);
-          store.set(SESSION_KEY, pending.email);
-        }
-      } catch { /* ignore */ }
-      history.replaceState({}, "", pageUrl());
-      toast("Payment confirmed. You can generate another letter.");
+
+    const clean = () => history.replaceState({}, "", pageUrl());
+
+    if (status === "cancel") {
+      clean();
+      toast("Payment cancelled — nothing was charged.");
+      analytics.track("stripe_return", { status: "cancel" });
+      return;
+    }
+    if (status !== "success") return;
+
+    const id = params.get("session_id") || "";
+    clean();
+
+    if (!id) { toast("No payment reference came back. Nothing was unlocked."); return; }
+    if (spentSessions().includes(id)) {
+      toast("That payment has already been applied to this browser.");
+      return;
+    }
+
+    toast("Confirming your payment…");
+    let result;
+    try {
+      result = await postJson(payUrl("verify-session"), { session_id: id });
+    } catch {
+      /* Never unlock on a failed check. The alternative is a free letter
+         for anyone who can edit a URL. */
+      toast("Could not reach the payment server. Your payment is safe — try again later.");
+      analytics.track("stripe_return", { status: "unreachable" });
+      return;
+    }
+
+    const data = result.data || {};
+    if (data.paid) {
+      markSessionSpent(id);
+      const credited = grantPaidCredit(data.email || (currentUser() && currentUser().email));
       syncNav();
-      showPage("details");
-      analytics.track("paypal_return", { status });
-    } else if (status === "cancel") {
-      store.del(PENDING_KEY);
-      history.replaceState({}, "", pageUrl());
-      toast("Payment cancelled");
-      analytics.track("paypal_return", { status });
+      syncPaywall();
+      if (credited) {
+        toast(`Payment confirmed${data.amount ? ` — £${(data.amount / 100).toFixed(2)}` : ""}. You can generate another letter.`);
+        showPage("details");
+      } else {
+        /* Paid, but this browser has no matching account — most likely they
+           paid then logged out, or paid with a different address. Say so
+           instead of pretending a letter was unlocked. */
+        toast("Payment received. Log in with the email you paid with to use it.");
+        showPage("auth");
+      }
+      analytics.track("stripe_return", { status: "paid", credited });
+    } else {
+      toast("Stripe has no record of that payment. Nothing was unlocked.");
+      analytics.track("stripe_return", { status: "unverified" });
     }
   }
 
@@ -1590,9 +1737,11 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
   }
 
   function applyReadiness() {
-    // Payments: hide every pay surface unless we can honestly sell.
-    const paySurfaces = $$(".paywall-card, .price-card .paypal-form, [data-pay-surface]");
-    paySurfaces.forEach((el) => { el.hidden = !READY.canSell; });
+    // Payments: hide every pay control unless we can honestly sell. The
+    // button itself is the reliable hook — wrapping cards vary by page,
+    // and the pricing card must stay visible because the free tier is real.
+    const payControls = $$("[data-stripe-pay], .paywall-card, [data-pay-surface]");
+    payControls.forEach((el) => { el.hidden = !READY.canSell; });
 
     // Swap the pricing card copy when selling is off.
     $$("[data-pricing-note]").forEach((el) => {
@@ -1661,7 +1810,7 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     bindCopyProtection();
     bindGlobalNav();
     bindAuth();
-    bindPaypal();
+    bindStripe();
     bindDetails();
     bindResults();
     bindEvidencePage();
@@ -1678,7 +1827,7 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     renderSample();
     renderStats();
 
-    catchPaypalReturn();
+    catchStripeReturn();
     routeFromHash(true);
 
     const yr = $("footerYear");
