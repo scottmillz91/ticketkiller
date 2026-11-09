@@ -93,11 +93,25 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     const n = $("operatorList").querySelectorAll("option").length;
     assert(n > 5, `only ${n} operators`);
   });
-  check("sample letter renders with real content", () => {
+  check("sample preview renders with real content", () => {
     const t = $("sampleLetter").textContent;
     assert(t.includes("ParkingEye"), "no operator in sample");
-    assert(/Protection of Freedoms/.test(t), "no statutory reference");
+    assert(t.includes("T128719"), "no PCN reference");
+    assert(t.includes("registered keeper"), "no keeper declaration");
     assert(!t.includes("Loading"), "still loading");
+  });
+  check("sample is truncated, not the full letter", () => {
+    const t = $("sampleLetter").textContent;
+    // the grounding that would most likely be quoted must not be present
+    assert(!/ParkingEye Ltd v Beavis/.test(t), "Beavis ground leaked into the preview");
+    assert(!/Landowner authority/.test(t), "landowner ground leaked into the preview");
+    assert(!/Yours faithfully/.test(t), "preview runs to the letter's signature");
+    assert(t.length < 1600, `preview too long: ${t.length} chars`);
+  });
+  check("preview advertises what is missing", () => {
+    const t = $("sampleLetter").textContent;
+    assert(/remaining \d+ lines/i.test(t), "no 'remaining lines' line");
+    assert($("sampleLetter").querySelector("[data-nav]"), "no CTA button");
   });
   check("stats grid has sourced entries", () => {
     const cards = $("statGrid").querySelectorAll(".stat-card");
