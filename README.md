@@ -325,10 +325,38 @@ Before going live:
 
 ---
 
+## The public sample letter
+
+The landing page shows a generated example letter. It is deliberately:
+
+- **reduced in size** (`transform: scale(0.88)`), so it reads as a preview rather than a document
+- **watermarked** with a tiled "SAMPLE" overlay
+- **not selectable or copyable** — `user-select: none`, plus handlers that cancel
+  `contextmenu`, `copy`, `cut`, `dragstart` and `selectstart`
+- marked `aria-hidden="true"` so screen readers skip the sample and use the
+  description instead
+
+**Be clear about what this is.** It is deterrence, not protection. The sample
+text is in the DOM and the letter template itself ships in `assets/app.js`,
+which any visitor can read. There is no client-side way to show a letter and
+also keep it secret — anyone determined will get it from view-source in under a
+minute.
+
+The real protection is the paywall, and that is currently enforced only
+client-side (see [Payments](#payments)). If the £4.99 tier matters to you, the
+fix is the server-side verification described there, not more CSS.
+
+The one thing worth keeping: do not put the *full* generated letter on the
+public page. A shortened or truncated preview contains less to lift. If the
+watermark starts to feel heavy-handed, truncating to the first page and
+blurring the rest is the better trade.
+
 ## Known limitations
 
 1. **No backend.** Accounts, sessions and history are per-browser. Same user on a phone and a laptop are two unrelated accounts, and clearing site data destroys everything.
 2. **Payments unverified.** The `?paypal=success` bypass described above.
+   Related: the sample letter on the landing page is watermarked and
+   non-selectable, but its text is still in the DOM, as is the letter template.
 3. **Business email is in the page source** (`config.js` is public), so scrapers will find it.
 4. **Hash routing** limits SEO depth.
 5. **Statistics age.** The POPLA 2025 report and the RAC/DVLA 2024-25 figures will be superseded. `/stats` exists to make staleness obvious — update it when new reports land.

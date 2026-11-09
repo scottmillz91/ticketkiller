@@ -907,6 +907,33 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
   /* ---------------------------------------------------------
      Sample letter on the landing page
      --------------------------------------------------------- */
+  /* ---------------------------------------------------------
+     Watermark for the public sample.
+     Not a security measure — see the note in the README. It
+     exists so a screenshot can't be passed off as a clean
+     template, and so the sample can be shown smaller.
+     --------------------------------------------------------- */
+  const SAMPLE_WATERMARK = "SAMPLE";
+
+  function tileWatermark(text) {
+    const CH = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let seed = 20261109;
+    const rnd = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return seed / 0x7fffffff;
+    };
+    let out = "";
+    for (let row = 0; row < 15; row++) {
+      let line = "";
+      const offset = Math.floor(rnd() * 8);
+      for (let col = 0; col < 11; col++) {
+        line += (col + offset) % 4 === 0 ? ` ${text} ` : Array.from({ length: 4 }, () => CH[Math.floor(rnd() * CH.length)]).join("");
+      }
+      out += line + "\n";
+    }
+    return out;
+  }
+
   function renderSample() {
     const host = $("sampleLetter");
     if (!host) return;
@@ -927,7 +954,8 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
     setVal("fPostcode", "AB1 2CD");
 
     const text = buildLetter();
-    host.textContent = text;
+    const wm = tileWatermark(SAMPLE_WATERMARK);
+    host.innerHTML = `<div class="sample-body">${esc(text)}</div><pre class="sample-wm">${esc(wm)}</pre>`;
 
     Object.entries(saved).forEach(([k, v]) => {
       const map = { op: "fOperator", ref: "fRef", date: "fDate", loc: "fLocation", contra: "fContra", amount: "fAmount", vrm: "fVrm", name: "fName", addr: "fAddress", pc: "fPostcode" };
@@ -1274,6 +1302,39 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
   }
 
   /* ---------------------------------------------------------
+     Sample copy protection (deterrence only)
+     ---------------------------------------------------------
+     Blocks right-click, cut/copy and drag initiation inside the
+     sample, and stops Ctrl/Cmd+A selecting it. Anyone can still
+     read the text in the DOM. This raises the effort of lifting
+     the letter, nothing more.
+     --------------------------------------------------------- */
+  function bindCopyProtection() {
+    const sample = $("sampleLetter");
+    if (!sample) return;
+    const card = sample.closest(".sample-outer") || sample;
+
+    card.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      toast("This is a sample. Generate your own letter — the first one is free.");
+    });
+    card.addEventListener("copy", (e) => { e.preventDefault(); });
+    card.addEventListener("cut", (e) => { e.preventDefault(); });
+    card.addEventListener("dragstart", (e) => { e.preventDefault(); });
+    card.addEventListener("selectstart", (e) => {
+      const sel = window.getSelection && window.getSelection();
+      if (sel) sel.removeAllRanges();
+    });
+    card.addEventListener("mousedown", (e) => {
+      // kill selection on the sample itself; the note below it stays selectable
+      if (sample.contains(e.target)) window.setTimeout(() => {
+        const sel = window.getSelection && window.getSelection();
+        if (sel && String(sel).length) sel.removeAllRanges();
+      }, 0);
+    });
+  }
+
+  /* ---------------------------------------------------------
      Boot
      --------------------------------------------------------- */
   async function boot() {
@@ -1297,6 +1358,7 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
       $$(".paypay-hidden-if-off").forEach((el) => { el.hidden = true; });
     }
 
+    bindCopyProtection();
     bindGlobalNav();
     bindAuth();
     bindPaypal();
