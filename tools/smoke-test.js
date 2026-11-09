@@ -283,6 +283,18 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(/btn\.disabled\s*=\s*false/.test(fn), "the generate button is not explicitly left enabled");
     assert(/dataset\.intent/.test(fn), "the button does not record what a tap should do");
   });
+  check("a toast cannot swallow a tap meant for the button under it", () => {
+    /* The toast is position:fixed over the bottom of the page with z-index
+       80, which is exactly where the pay button sits on the details form.
+       Without pointer-events:none it intercepted the tap, so the button
+       looked dead — and the toast said checkout was opening when it was
+       not. The Undo action inside it must stay clickable. */
+    const css = cssSource();
+    const toastRule = css.slice(css.indexOf(".toast {"), css.indexOf("}", css.indexOf(".toast {")));
+    assert(/pointer-events:\s*none/.test(toastRule), "the toast still intercepts taps");
+    const actionRule = css.slice(css.indexOf(".toast-action {"), css.indexOf("}", css.indexOf(".toast-action {")));
+    assert(/pointer-events:\s*auto/.test(actionRule), "the undo action is now unclickable");
+  });
   check("a locked account can still reach checkout from the form", () => {
     const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
     const fn = src.slice(src.indexOf("function bindStripe"), src.indexOf("async function catchStripeReturn"));

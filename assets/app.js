@@ -1405,9 +1405,12 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
       return;
     }
     const buttons = $$("[data-stripe-pay]");
-    buttons.forEach((b) => { b.disabled = true; });
-    const restore = () => buttons.forEach((b) => { b.disabled = false; });
-    toast("Opening secure checkout…");
+    /* The label carries the progress, not a toast: a toast sat over the
+       button and told the visitor checkout was opening when nothing was. */
+    const labels = buttons.map((b) => b.textContent);
+    buttons.forEach((b, i) => { b.disabled = true; b.textContent = i === 0 ? "Opening Stripe…" : b.textContent; });
+    const restore = () => buttons.forEach((b, i) => { b.disabled = false; b.textContent = labels[i]; });
+
     try {
       const { ok, data } = await postJson(payUrl("checkout"), { email: u.email });
       if (ok && data.url) {
@@ -1416,10 +1419,13 @@ Generated with TicketKiller UK on ${c.today}. This is a drafting aid, not legal 
         return;
       }
       toast(data.error || "Could not start checkout. Please try again.");
-    } catch {
-      /* A static host with no functions deployed lands here. Say so
-         plainly rather than pretending the button did something. */
-      toast("Payments are not reachable from this deployment yet.");
+    } catch (err) {
+      /* Distinguish "the request never left" from "the server said no": the
+         first is almost always a blocked cross-origin call or a dead host,
+         and telling them apart is the difference between a 30-second fix and
+         an afternoon. */
+      toast("Could not reach the payment server. Check your connection and try again.");
+      console.error("checkout request failed:", err && err.message);
     }
     restore();
   }
