@@ -119,10 +119,12 @@
                six fields. Nothing is sent anywhere — the date stays in the
                browser, like the rest of the form. -->
           <div class="quick-check" id="quickCheck">
-            <p class="quick-check-label">Have your notice handy? <span>You'll get an answer straight away.</span></p>
+            <p class="quick-check-label">Have your notice handy?
+              <span class="quick-check-hint">Answer the deadline question before you type anything else.</span>
+            </p>
             <div class="quick-check-row">
-              <label class="qc-field">Date on the notice
-                <input id="qcDate" type="date" />
+              <label class="qc-field" for="qcDate">Date on the notice
+                <input id="qcDate" type="date" autocomplete="off" />
               </label>
               <button class="btn btn-primary" type="button" id="qcBtn">How long have I got?</button>
             </div>

@@ -379,6 +379,16 @@
     if (!btn || !input || !out) return;
 
     const run = () => {
+      /* Browsers render today's date inside an untouched date field — a
+         placeholder, not a value. Reading it meant tapping the button with
+         nothing chosen reported "that date is in the future", which is both
+         wrong and alarming. An empty property means nothing was picked. */
+      if (!input.value) {
+        out.hidden = false;
+        out.dataset.tone = "neutral";
+        out.textContent = "Pick the date printed on your notice — the day they say the parking happened.";
+        return;
+      }
       const day = parseDay(input.value);
       if (!day) {
         out.hidden = false;

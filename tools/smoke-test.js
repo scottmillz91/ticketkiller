@@ -413,6 +413,43 @@ const nav = (dest) => click(document.querySelector(`#mobileNav [data-nav="${dest
     assert(hero.indexOf('id="qcDate"') > 0, "the quick check is not in the hero");
     assert(hero.indexOf('id="qcDate"') < hero.indexOf("Three steps"), "the quick check sits below the fold");
   });
+  check("the quick check is built from the hero's own palette", () => {
+    /* First version put a white input on the dark hero: the only bright block
+       on the screen, reading as a component from a different page. Contrast is
+       checked too — a dark field with dim text would be worse than the white. */
+    const css = cssSource();
+    const block = css.slice(css.indexOf(".quick-check {"), css.indexOf("A payment held with no account"));
+    const field = block.slice(block.indexOf(".qc-field input {"), block.indexOf("}", block.indexOf(".qc-field input {")));
+    assert(!/background:\s*(#fff|#ffffff|var\(--white\))/.test(field),
+      "the quick-check field is still a white block on the dark hero");
+    assert(/background:\s*rgba\(255,255,255,0\.1/.test(field), "the field has no tonal surface");
+    assert(/color:\s*#fff/.test(field), "the typed date would be dark on a dark field");
+    assert(/color-scheme:\s*dark/.test(field), "the native date picker keeps its dark icon on a dark field");
+    assert(/::-webkit-calendar-picker-indicator/.test(block), "the date icon is invisible on a dark field");
+    /* 16px minimum, or iOS zooms the whole page when the field is focused. */
+    assert(/font-size:\s*16px/.test(field), "a font-size under 16px makes iOS zoom the page on focus");
+  });
+  check("the quick check aligns to one left edge", () => {
+    /* The answer hung off a left border with padding, so its text sat further
+       right than the label, the field and the button above it. */
+    const css = cssSource();
+    const block = css.slice(css.indexOf(".quick-check {"), css.indexOf("A payment held with no account"));
+    const out = block.slice(block.indexOf(".quick-check-out {"), block.indexOf("}", block.indexOf(".quick-check-out {")));
+    assert(!/padding-left:\s*12px/.test(out), "the answer still hangs off a border, out of line with the field");
+    assert(/padding:\s*12px 14px/.test(out), "the answer is not an inset panel sharing the left edge");
+    assert(/width:\s*100%/.test(block), "the field and button do not share the card's edges on a phone");
+  });
+  check("an untouched date field is not read as a chosen date", () => {
+    /* Browsers paint today's date into an empty date input. Tapping the button
+       before choosing anything reported "that date is in the future". */
+    const src = fs.readFileSync(path.join(root, "assets", "app.js"), "utf8");
+    const fn = src.slice(src.indexOf("function bindQuickCheck"), src.indexOf("Navigation / routing"));
+    assert(/if \(!input\.value\)/.test(fn),
+      "the quick check reads the browser's placeholder date as if it were chosen");
+    const guardAt = fn.indexOf("if (!input.value)");
+    const parseAt = fn.indexOf("parseDay(input.value)");
+    assert(guardAt > 0 && parseAt > guardAt, "the placeholder is parsed before it is ruled out");
+  });
   check("the PDF library is not downloaded until a PDF is asked for", () => {
     /* 356 KB — four fifths of the page weight — used to be parsed on every
        visit for a button most people never press. */
