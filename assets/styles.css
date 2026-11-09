@@ -85,7 +85,11 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 
   z-index: 100;
   border-radius: 8px;
 }
-.skip-link:focus { top: 12px; }
+.skip-link:focus, .skip-link:focus-visible {
+  top: 12px;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
 
 .wrap {
   width: min(1120px, calc(100% - 32px));
@@ -706,17 +710,6 @@ body.nav-open::before {
    ============================================================ */
 
 /* --- Notice / disclaimer strip --- */
-.notice-strip {
-  background: var(--navy-2);
-  color: #cfe0f5;
-  font-size: 13px;
-  padding: 9px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-.notice-strip .wrap { display: flex; gap: 10px; align-items: flex-start; }
-.notice-strip strong { color: #fff; }
-.notice-strip a { color: var(--sky); }
-
 /* --- Source links on stat badges --- */
 .trust-row a, .stat-src { color: var(--sky); font-size: 11px; text-decoration: underline; }
 .trust-row span .stat-src { display: block; margin-top: 2px; }
