@@ -772,8 +772,9 @@ h1, h2, h3 { text-wrap: balance; }
 .stat-src { color: var(--sky); font-size: 11px; }
 
 /* --- Quick check (home) ---
-   Two fields, one button, an answer in the hero. It sits on the dark hero,
-   so it needs its own surface rather than reusing the white form cards. */
+   Sits on the dark hero, so it is built from the hero's own palette rather
+   than borrowing the white form cards. A white input here was the only bright
+   block on the screen and read as a different component altogether. */
 .quick-check {
   margin: 26px 0 0;
   padding: 16px 18px;
@@ -783,43 +784,100 @@ h1, h2, h3 { text-wrap: balance; }
   max-width: 560px;
 }
 .quick-check-label {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   font-weight: 700;
   font-size: 14px;
+  line-height: 1.45;
   color: #fff;
 }
-.quick-check-label span { font-weight: 400; color: rgba(255,255,255,0.7); }
-.quick-check-row { display: grid; gap: 10px; }
+/* On a phone the strapline drops to its own line instead of trailing the
+   question, where it wrapped mid-sentence and looked like a second heading. */
+.quick-check-hint { display: block; margin-top: 3px; font-weight: 400; font-size: 13px; color: rgba(255,255,255,0.66); }
+@media (min-width: 620px) {
+  .quick-check-hint { display: inline; margin-top: 0; margin-left: 6px; }
+}
+
+.quick-check-row { display: grid; gap: 12px; }
 .quick-check-row .qc-field {
   display: block;
   font-size: 12.5px;
   font-weight: 600;
-  color: rgba(255,255,255,0.78);
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.72);
 }
+/* Tonal, not white: same surface language as the rest of the hero. The value
+   is white on navy so the date stays the most readable thing in the box. */
 .quick-check-row .qc-field input {
   display: block;
   width: 100%;
-  margin-top: 6px;
-  padding: 11px 12px;
+  margin-top: 7px;
+  padding: 0 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: #fff;
-  color: var(--ink);
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  min-height: 48px;
+  font: inherit;
+  font-size: 16px;      /* 16px stops iOS zooming the page on focus */
+  color-scheme: dark;   /* makes the native date picker icon readable */
+  transition: border-color .15s ease, background .15s ease;
+}
+.quick-check-row .qc-field input:hover { background: rgba(255,255,255,0.14); }
+.quick-check-row .qc-field input:focus {
+  outline: none;
+  border-color: var(--sky);
+  background: rgba(255,255,255,0.16);
+  box-shadow: 0 0 0 3px rgba(108,182,255,0.25);
+}
+/* The date icon ships near-black and vanishes on a dark field. */
+.quick-check-row .qc-field input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.75;
+  cursor: pointer;
+}
+.quick-check-row .qc-field input:focus::-webkit-calendar-picker-indicator { opacity: 1; }
+
+/* Full width on a phone, so the button and the field share exactly the same
+   left and right edges. Side by side only when there is room for both. */
+.quick-check-row .btn {
+  width: 100%;
   min-height: 48px;
 }
-@media (min-width: 560px) {
-  .quick-check-row { grid-template-columns: 1fr auto; align-items: end; }
+@media (min-width: 620px) {
+  .quick-check-row { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+  .quick-check-row .btn { width: auto; padding-left: 22px; padding-right: 22px; }
 }
+
+/* The answer reads as part of the card, not as a floating quotation: it used
+   to hang off a left border with 12px of padding, which put its text out of
+   line with everything above it. The inset panel keeps the left edge shared
+   with the label, the field and the button. */
 .quick-check-out {
   margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-left: 3px solid var(--sky);
   font-size: 14px;
   line-height: 1.5;
   color: #fff;
-  border-left: 3px solid var(--sky);
-  padding-left: 12px;
 }
-.quick-check-out[data-tone="warn"] { border-left-color: #f5b942; }
-.quick-check-out[data-tone="ok"] { border-left-color: #34c48f; }
+.quick-check-out[data-tone="neutral"] {
+  border-left-color: rgba(255,255,255,0.35);
+}
+.quick-check-out[data-tone="warn"] {
+  border-left-color: #f5b942;
+  background: rgba(245,185,66,0.12);
+  border-color: rgba(245,185,66,0.25);
+  border-left-color: #f5b942;
+}
+.quick-check-out[data-tone="ok"] {
+  border-left-color: #34c48f;
+  background: rgba(52,196,143,0.10);
+  border-color: rgba(52,196,143,0.25);
+  border-left-color: #34c48f;
+}
 
 /* --- A payment held with no account here --- */
 .held-credit {
